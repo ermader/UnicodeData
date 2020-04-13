@@ -13,7 +13,7 @@ def getCharAttr(attribute, char, group):
 
     return group.get(attribute)
 
-source = pkg_resources.resource_stream("ICUData", "Data/ucd.all.grouped.xml")
+source = pkg_resources.resource_stream("UnicodeData", "Data/ucd.all.grouped.xml")
 tree = ElementTree.parse(source)
 root = tree.getroot()
 nameSpaces = {"ucd": root.tag[1:-4]} # remove initial "{" and final "}ucd"
@@ -21,12 +21,17 @@ nameSpaces = {"ucd": root.tag[1:-4]} # remove initial "{" and final "}ucd"
 for group in root.findall("ucd:repertoire/ucd:group", nameSpaces):
     for char in group.findall("ucd:char", nameSpaces):
         cp = getCharAttr("cp", char, group)
+        if cp is None: # some entries are <char first-cp=xxxx last-cp=yyyy.../>
+            continue
+
+        codePoint = int(cp, 16)
+
         name = getCharAttr("na", char, group)
         script = getCharAttr("sc", char, group)
         block = getCharAttr("blk", char, group)
 
-        if cp is None:
-            continue
+        if name is None or len(name) == 0:
+            name = getCharAttr("na1", char, group)
 
         name = name.replace("#", cp)
 

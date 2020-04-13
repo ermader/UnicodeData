@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ICUData.iml" filepath="$PROJECT_DIR$/.idea/ICUData.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../UnicodeData/.idea/UnicodeData.iml" filepath="$PROJECT_DIR$/../UnicodeData/.idea/UnicodeData.iml" />
     </modules>
   </component>
 </project>
