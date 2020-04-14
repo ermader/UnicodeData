@@ -71,6 +71,12 @@ class UnicodeSet:
         i = self.findCodePoint(cp)
         return (i & 1) != 0
 
+    def containsRange(self, range):
+        start = range.start
+        end = range.stop - 1
+        i = self.findCodePoint(start)
+        return (i & 1) != 0 and end < self.list[i]
+
     def __contains__(self, cp):
         return self.contains(cp)
 
@@ -105,3 +111,4 @@ if __name__ == "__main__":
     us.add(0x0914)
     us.print()
     print (0x915 in us)
+    print(us.containsRange(range(0x0915, 0x0917)))
