@@ -67,6 +67,13 @@ class UnicodeSet:
         else:
             self.list[i:i] = [cp, cp+1]
 
+    def contains(self, cp):
+        i = self.findCodePoint(cp)
+        return (i & 1) != 0
+
+    def __contains__(self, cp):
+        return self.contains(cp)
+
     def __init__(self):
         self.list = [UNICODE_SET_HIGH]
 
@@ -97,3 +104,4 @@ if __name__ == "__main__":
     us.print()
     us.add(0x0914)
     us.print()
+    print (0x915 in us)
