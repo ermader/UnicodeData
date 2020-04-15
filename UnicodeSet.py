@@ -67,18 +67,55 @@ class UnicodeSet:
         else:
             self.list[i:i] = [cp, cp+1]
 
-    def contains(self, cp):
-        i = self.findCodePoint(cp)
-        return (i & 1) != 0
+    def _addList(self, list, priority = 0):
+        pass
 
-    def containsRange(self, range):
-        start = range.start
-        end = range.stop - 1
-        i = self.findCodePoint(start)
-        return (i & 1) != 0 and end < self.list[i]
+    def addRange(self, start, end):
+        if _pinCodePoint(start) < _pinCodePoint(end):
+            length = len(self.list)
+            limit = end + 1
 
-    def __contains__(self, cp):
-        return self.contains(cp)
+            # Fast path for adding range after the last one
+            if (length & 1) != 0:
+                lastLimit = -2 if length == 1 else self.list[length - 2]
+                if lastLimit <= start:
+                    if lastLimit == start:
+                        self.list[length -2] = limit
+                        if limit == UNICODE_SET_HIGH:
+                            self.list.pop()
+                    else:
+                        self.list[length - 1] = start
+                        if limit < UNICODE_SET_HIGH:
+                            self.list.extend([limit, UNICODE_SET_HIGH])
+                        else:
+                            self.list.append(UNICODE_SET_HIGH)
+                return
+
+            self._addList([start, limit, UNICODE_SET_HIGH])
+        else:
+            if start == end:
+                self.add(start)
+
+    def contains(self, arg):
+        if type(arg) == type(0): # i.e. int
+            i = self.findCodePoint(arg)
+            return (i & 1) != 0
+        elif type(arg) == type(range(0)):
+            start = arg.start
+            end = arg.stop - 1
+            i = self.findCodePoint(start)
+            return (i & 1) != 0 and end < self.list[i]
+        else:
+            raise(TypeError("Argument type must be int or range."))
+
+    # def containsRange(self, range):
+    #     start = range.start
+    #     end = range.stop - 1
+    #     i = self.findCodePoint(start)
+    #     return (i & 1) != 0 and end < self.list[i]
+
+    def __contains__(self, arg):
+        return self.contains(arg)
 
     def __init__(self):
         self.list = [UNICODE_SET_HIGH]
@@ -91,7 +128,7 @@ class UnicodeSet:
         self.list = [UNICODE_SET_HIGH]
         self.add(range)
 
-    def print(self):
+    def dump(self):
         s = "["
         for cp in self.list:
             s += f"0x{cp:04X}, "
@@ -99,16 +136,23 @@ class UnicodeSet:
 
         print(f"{s[:-2]}]")
 
+    def getRanges(self):
+        ranges = []
+        for i in range(0, len(self.list) - 1, 2):
+            ranges.append(range(self.list[i], self.list[i+1]))
+
+        return ranges
+
 if __name__ == "__main__":
     us = UnicodeSet(0x0915)
-    us.print()
+    us.dump()
     us.add(0x0916)
-    us.print()
+    us.dump()
     us.add(0x0918)
-    us.print()
+    us.dump()
     us.add(0x0917)
-    us.print()
+    us.dump()
     us.add(0x0914)
-    us.print()
+    us.dump()
     print (0x915 in us)
-    print(us.containsRange(range(0x0915, 0x0917)))
+    print (range(0x0915, 0x0817) in us)

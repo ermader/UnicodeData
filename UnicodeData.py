@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ElementTree
 import pkg_resources
 
 import CharacterData
+import UnicodeSet
 
 _characterData = {}
 _scriptList = {}
@@ -58,13 +59,21 @@ def _populateCharacterData():
                 _decompositions[codePoint] = decomp
 
             if script in _scriptList:
-                _scriptList[script].append(codePoint)
+                _scriptList[script].add(codePoint)
             else:
-                _scriptList[script] = [codePoint]
+                _scriptList[script] = UnicodeSet.UnicodeSet(codePoint)
 
 def main():
     _populateCharacterData()
 
 if __name__ == "__main__":
     main()
-    print(_decompositions)
+    for (script, unicodeSet) in _scriptList.items():
+        ranges = unicodeSet.getRanges()
+        s = "["
+
+        for r in ranges:
+            s += f"0x{r.start:04X}-0x{r.stop-1:04X}, "
+
+        print(f"    '{script}': {s[:-2]}]")
+    # print(_decompositions)
