@@ -46,5 +46,8 @@ class CharacterData:
     def getScript(self):
         return self.script
 
+    def getBlock(self):
+        return self.block
+
     def getDecomposition(self):
         return self.decomp

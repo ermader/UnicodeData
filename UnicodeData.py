@@ -12,6 +12,7 @@ import UnicodeSet
 
 _characterData = {}
 _scriptList = {}
+_blockList = {}
 _decompositions = {}
 
 def getCharAttr(attribute, char, group):
@@ -52,6 +53,7 @@ def _populateCharacterData():
             codePoint = characterData.getCodePoint()
             decomp = characterData.getDecomposition()
             script = characterData.getScript()
+            block = characterData.getBlock()
 
             _characterData[codePoint] = characterData
 
@@ -63,11 +65,14 @@ def _populateCharacterData():
             else:
                 _scriptList[script] = UnicodeSet.UnicodeSet(codePoint)
 
+            if block in _blockList:
+                _blockList[block].add(codePoint)
+            else:
+                _blockList[block] = UnicodeSet.UnicodeSet(codePoint)
+
 def main():
     _populateCharacterData()
 
-if __name__ == "__main__":
-    main()
     for (script, unicodeSet) in _scriptList.items():
         ranges = unicodeSet.getRanges()
         s = "["
@@ -77,3 +82,6 @@ if __name__ == "__main__":
 
         print(f"    '{script}': {s[:-2]}]")
     # print(_decompositions)
+
+if __name__ == "__main__":
+    main()
