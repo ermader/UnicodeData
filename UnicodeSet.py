@@ -394,6 +394,12 @@ def getPairs(set):
 
     return pairs
 
+def expectPairs(set, expectedPairs):
+    pairs = getPairs(set)
+
+    if pairs != expectedPairs:
+        print(f'ERROR: expected pairs "{expectedPairs}", got "{pairs}".')
+
 if __name__ == "__main__":
     us = UnicodeSet(0x0915)
     us.dump()
@@ -414,25 +420,34 @@ if __name__ == "__main__":
 
     # These tests from ICU's usettest::testAddRemove()
     tt = UnicodeSet(range(ord('a'), ord('z') + 1))
-    print(getPairs(tt))
+    expectPairs(tt, "az")
+
     tt.removeRange(ord('m'), ord('p'))
-    print(getPairs(tt))
+    expectPairs(tt, "alqz")
+
     tt.removeRange(ord('e'), ord('g'))
-    print(getPairs(tt))
+    expectPairs(tt, "adhlqz")
+
     tt.removeRange(ord('d'), ord('i'))
-    print(getPairs(tt))
+    expectPairs(tt, "acjlqz")
+
     tt.removeRange(ord('c'), ord('r'))
-    print(getPairs(tt))
+    expectPairs(tt, "absz")
+
     tt.addRange(ord('f'), ord('q'))
-    print(getPairs(tt))
+    expectPairs(tt, "abfqsz")
+
     tt.removeRange(ord('a'), ord('g'))
-    print(getPairs(tt))
+    expectPairs(tt, "hqsz")
+
     tt.removeRange(ord('a'), ord('z'))
-    print(f"'{getPairs(tt)}'")
+    expectPairs(tt, "")
+
     tt.add(ord('a'))
     tt.add(ord('b'))
     tt.add(ord('c'))
-    print(getPairs(tt))
+    expectPairs(tt, "ac")
+
     tt.add(ord('p'))
     tt.add(ord('q'))
-    print(getPairs(tt))
+    expectPairs(tt, "acpq")
