@@ -196,7 +196,7 @@ class UnicodeSet:
                     if a == UNICODE_SET_HIGH:
                         break
                     if len(buffer) > 0 and a < buffer[-1]:
-                        b = max(self.list[i], buffer.pop())
+                        a = max(self.list[i], buffer.pop())
                     else:
                         buffer.append(a)
                         a = self.list[i]
@@ -236,7 +236,7 @@ class UnicodeSet:
                 else: # a == b, drop both!
                     if a == UNICODE_SET_HIGH:
                         break
-                    a = list[i]
+                    a = self.list[i]
                     i += 1
                     polarity ^= 1
                     b = other[j]
@@ -249,19 +249,68 @@ class UnicodeSet:
                     b = other[j]
                     j += 1
                     polarity ^= 2
-                elif b < a: # overlap, drop a
+                elif a < b: # overlap, drop a
                     a = self.list[i]
                     i += 1
                     polarity ^= 1
                 else: # a == b, drop both!
+                    if a == UNICODE_SET_HIGH:
+                        break
+
                     a = self.list[i]
                     i += 1
                     polarity ^= 1
                     b = other[j]
                     j += 1
-                    polarity ^= 1
+                    polarity ^= 2
 
         buffer.append(UNICODE_SET_HIGH)
+        self.list = buffer
+
+    # polarity = 0, 3 is normal: x xor y
+    # polarity = 1, 2: x xor ~y == x === y
+
+    def _exclusiveOrList(self, other, polarity = 0):
+        if other is None or len(other) == 0:
+            return
+
+        buffer = []
+
+        # C++ code has:
+        # int32_t i = 0, j = 0, k = 0
+        # UChar32 a = list[i++]
+        # UChar32 b
+        i = 1
+        j = 1
+        a = self.list[0]
+        b = other[0]
+
+        if polarity == 1 or polarity == 2:
+            b = UNICODE_SET_LOW
+            if other[0] == UNICODE_SET_LOW: # skip base if already LOW
+                b = other[1]
+        else:
+            b = other[0]
+
+        # simple: sort values, discarding identicals!
+        while True:
+            if a < b:
+                buffer.append(a)
+                a = self.list[i]
+                i += 1
+            elif b < a:
+                buffer.append(b)
+                b = other[j]
+                j += 1
+            elif a != UNICODE_SET_HIGH: # a == b, discard both
+                a = self.list[i]
+                i += 1
+                b = other[j]
+                j += 1
+            else: # done!
+                buffer.append(UNICODE_SET_HIGH)
+                break
+
         self.list = buffer
 
     def add(self, cp):
@@ -310,6 +359,9 @@ class UnicodeSet:
             if start == end:
                 self.add(start)
 
+    def addAll(self, other):
+        self._addList(other.list)
+
     def removeRange(self, start, end):
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
@@ -317,6 +369,44 @@ class UnicodeSet:
 
     def remove(self, cp):
         self.removeRange(cp, cp)
+
+    def removeAll(self, other):
+        self._retainList(other.list, 2) # polarity == 2 means set minus
+
+    def retainRange(self, start, end):
+        if _pinCodePoint(start) < _pinCodePoint(end):
+            other = [start, end + 1, UNICODE_SET_HIGH]
+            self._retainList(other, 0) # polarity == 0 means intersect
+
+    def retain(self, cp):
+        self.retainRange(cp, cp)
+
+    def retainAll(self, other):
+        self._retainList(other.list, 0) # polarity == 0 means intersect
+
+    def complimentRange(self, start, end):
+        if _pinCodePoint(start) < _pinCodePoint(end):
+            other = [start, end + 1, UNICODE_SET_HIGH]
+            self._exclusiveOrList(other)
+
+    def compliment(self, arg = None):
+        if arg is None:
+            if self.list[0] == UNICODE_SET_LOW:
+                self.list = self.list[1:]
+            else:
+                self.list[0:0] = [UNICODE_SET_LOW]
+        elif type(arg) == type(0):
+            self.complimentRange(arg, arg)
+        elif type(arg) == type(range(0)):
+            self.complimentRange(arg.start, arg.stop - 1)
+        else:
+            raise(TypeError("Argument type must be int or range."))
+
+    def complimentAll(self, other):
+        self._exclusiveOrList(other.list)
+
+    def clear(self):
+        self.list = [UNICODE_SET_HIGH]
 
     def contains(self, arg):
         if type(arg) == type(0): # i.e. int
@@ -330,21 +420,14 @@ class UnicodeSet:
         else:
             raise(TypeError("Argument type must be int or range."))
 
-    # def containsRange(self, range):
-    #     start = range.start
-    #     end = range.stop - 1
-    #     i = self.findCodePoint(start)
-    #     return (i & 1) != 0 and end < self.list[i]
-
     def __contains__(self, arg):
         return self.contains(arg)
 
-    def __init__(self):
-        self.list = [UNICODE_SET_HIGH]
-
-    def __init__(self, arg):
-        if type(arg) == type(0):
-            self.list = [arg, arg+1, UNICODE_SET_HIGH]
+    def __init__(self, arg = None):
+        if arg is None:
+            self.list = [UNICODE_SET_HIGH]
+        elif type(arg) == type(0):
+            self.list = [arg, arg + 1, UNICODE_SET_HIGH]
         elif type(arg) == type(range(0)):
             self.list = [arg.start, arg.stop, UNICODE_SET_HIGH]
         else:
@@ -384,6 +467,24 @@ class UnicodeSet:
 
         return ranges
 
+def setFromBits(bits):
+    s = UnicodeSet()
+
+    for i in range(32):
+        if bits & (1 << i) != 0:
+            s.add(i)
+
+    return s
+
+def bitsFromSet(s):
+    bits = 0
+
+    for i in range(32):
+        if i in s:
+            bits |= (1 << i)
+
+    return bits
+
 def getPairs(set):
     pairs = ""
 
@@ -394,11 +495,44 @@ def getPairs(set):
 
     return pairs
 
-def expectPairs(set, expectedPairs):
-    pairs = getPairs(set)
+def testCompliment(bits, s):
+    s = setFromBits(bits)
+    s.compliment()
+    c = bitsFromSet(s)
 
+    if (c & 0xFFFFFFFF) != (~bits & 0xFFFFFFFF):
+        print(f"  FAIL - {c:08X} != ~{bits:08X}")
+
+def testAdd(bits1, bits2):
+    s1 = setFromBits(bits1)
+    s2 = setFromBits(bits2)
+
+    s1.addAll(s2)
+    totalBits = bitsFromSet(s1)
+
+    if totalBits != (bits1 | bits2):
+        print(f"  FAIL - {totalBits:08X} != {bits1|bbits2:08X}")
+
+def testXor(bits1, bits2):
+    s1 = setFromBits(bits1)
+    s2 = setFromBits(bits2)
+
+    s1.complimentAll(s2)
+    complimentBits = bitsFromSet(s1)
+
+    if complimentBits != (bits1 ^ bits2):
+        print(f"  FAIL - {complimentBits:08X} != {bits1 ^ bits2:08X}")
+
+def expectPairs(set, expectedPairs, expectedSize):
+    pairs = getPairs(set)
+    count = set.size()
+    msg = f'  expect pairs "{expectedPairs}", size {expectedSize}: '
     if pairs != expectedPairs:
-        print(f'ERROR: expected pairs "{expectedPairs}", got "{pairs}".')
+        msg += f'FAIL - got "{pairs}", size {count}.'
+    else:
+        msg += "PASS."
+
+    print(msg)
 
 if __name__ == "__main__":
     us = UnicodeSet(0x0915)
@@ -419,35 +553,47 @@ if __name__ == "__main__":
     print (range(0x0915, 0x0817) in us)
 
     # These tests from ICU's usettest::testAddRemove()
+    print("TestAddRemove:")
     tt = UnicodeSet(range(ord('a'), ord('z') + 1))
-    expectPairs(tt, "az")
+    expectPairs(tt, "az", 26)
 
     tt.removeRange(ord('m'), ord('p'))
-    expectPairs(tt, "alqz")
+    expectPairs(tt, "alqz", 22)
 
     tt.removeRange(ord('e'), ord('g'))
-    expectPairs(tt, "adhlqz")
+    expectPairs(tt, "adhlqz", 19)
 
     tt.removeRange(ord('d'), ord('i'))
-    expectPairs(tt, "acjlqz")
+    expectPairs(tt, "acjlqz", 16)
 
     tt.removeRange(ord('c'), ord('r'))
-    expectPairs(tt, "absz")
+    expectPairs(tt, "absz", 10)
 
     tt.addRange(ord('f'), ord('q'))
-    expectPairs(tt, "abfqsz")
+    expectPairs(tt, "abfqsz", 22)
 
     tt.removeRange(ord('a'), ord('g'))
-    expectPairs(tt, "hqsz")
+    expectPairs(tt, "hqsz", 18)
 
     tt.removeRange(ord('a'), ord('z'))
-    expectPairs(tt, "")
+    expectPairs(tt, "", 0)
 
     tt.add(ord('a'))
     tt.add(ord('b'))
     tt.add(ord('c'))
-    expectPairs(tt, "ac")
+    expectPairs(tt, "ac", 3)
 
     tt.add(ord('p'))
     tt.add(ord('q'))
-    expectPairs(tt, "acpq")
+    expectPairs(tt, "acpq", 5)
+
+    print("\nTestExhaustive:")
+    LIMIT = 128
+
+    for i in range(LIMIT):
+        tt = setFromBits(i)
+        testCompliment(i, tt)
+
+        for j in range(LIMIT):
+            testAdd(i, j)
+            testCompliment(i, j)
