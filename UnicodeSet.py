@@ -48,7 +48,7 @@ class UnicodeSet:
         return hi
 
     # polarity = 0 is normal: x intersect y
-    # polarity = 2: x intersect ~y == set - minus
+    # polarity = 2: x intersect ~y == set-minus
     # polarity = 1: ~x intersect y
     # polarity = 3: ~x intersect ~y
     def _retainList(self, other, polarity = 0):
@@ -98,9 +98,10 @@ class UnicodeSet:
                     b = other[j]
                     j += 1
                     polarity ^= 2
-                else: # a == b, drop both!
+                else: # a == b, take one, drop other
                     if a == UNICODE_SET_HIGH:
                         break
+                    buffer.append(a)
                     a = self.list[i]
                     i += 1
                     polarity ^= 1
@@ -108,7 +109,7 @@ class UnicodeSet:
                     j += 1
                     polarity ^= 2
 
-            elif polarity == 1: # a second, b first; if b < a, overlap
+            elif polarity == 1: # a second, b first
                 if a < b: # no overlap, drop a
                     a = self.list[i]
                     i += 1
@@ -499,8 +500,9 @@ def testCompliment(bits, s):
     s = setFromBits(bits)
     s.compliment()
     c = bitsFromSet(s)
+    e = ~bits & 0xFFFFFFFF
 
-    if (c & 0xFFFFFFFF) != (~bits & 0xFFFFFFFF):
+    if c != e:
         print(f"  FAIL - {c:08X} != ~{bits:08X}")
 
 def testAdd(bits1, bits2):
@@ -511,7 +513,28 @@ def testAdd(bits1, bits2):
     totalBits = bitsFromSet(s1)
 
     if totalBits != (bits1 | bits2):
-        print(f"  FAIL - {totalBits:08X} != {bits1|bbits2:08X}")
+        print(f"  FAIL - {totalBits:08X} != {bits1|bits2:08X}")
+
+def testRetain(bits1, bits2):
+    s1 = setFromBits(bits1)
+    s2 = setFromBits(bits2)
+
+    s1.retainAll(s2)
+    retainBits = bitsFromSet(s1)
+
+    if retainBits != (bits1 & bits2):
+        print(f"  FAIL - {retainBits:08X} != {bits1:08X} & {bits2:08X}")
+    pass
+
+def testRemove(bits1, bits2):
+    s1 = setFromBits(bits1)
+    s2 = setFromBits(bits2)
+
+    s1.removeAll(s2)
+    removeBits = bitsFromSet(s1)
+
+    if removeBits != (bits1 & (~bits2 & 0xFFFFFFFF)):
+        print(f"  FAIL = {removeBits:08X} != {bits1:08X} & ~{bits2:08X}")
 
 def testXor(bits1, bits2):
     s1 = setFromBits(bits1)
@@ -597,3 +620,5 @@ if __name__ == "__main__":
         for j in range(LIMIT):
             testAdd(i, j)
             testCompliment(i, j)
+            testRetain(i, j)
+            testRemove(i, j)
