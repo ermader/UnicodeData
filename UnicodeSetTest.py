@@ -151,23 +151,29 @@ def testExhaustive():
 
 if __name__ == "__main__":
     us = UnicodeSet(0x0915)
-    us.dump()
-    us.add(0x0916)
-    us.dump()
-    us.add(0x0918)
-    us.dump()
-    us.add(0x0917)
-    us.dump()
-    us.add(0x0914)
-    us.dump()
-    us.addRange(0x0920, 0x0925)
-    us.dump()
-    us.addRange(0x0916, 0x0926)
-    us.dump()
-    print (0x915 in us)
-    print (range(0x0915, 0x0817) in us)
+    print(f"us = UnicodeSet(0x0915): {us}")
 
-    # These tests from ICU's usettest::testAddRemove()
+    us.add(0x0916)
+    print(f"us.add(0x0916): {us}")
+
+    us.add(0x0918)
+    print(f"us.add(0x0918): {us}")
+
+    us.add(0x0917)
+    print(f"us.add(0x0917): {us}")
+
+    us.add(0x0914)
+    print(f"us.add(0x0914): {us}")
+
+    us.addRange(0x0920, 0x0925)
+    print(f"us.addRange(0x0920, 0x0925): {us}")
+
+    us.addRange(0x0916, 0x0926)
+    print(f"us.addRange(0x0916, 0x0926): {us}")
+
+    print (f"0x0915 in us: {0x915 in us}")
+    print (f"range(0x0915, 0x0917) in us: {range(0x0915, 0x0917) in us}")
+
     print("\nTestAddRemove:")
     testAddRemove()
 

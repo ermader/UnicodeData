@@ -453,13 +453,16 @@ class UnicodeSet:
     def getRangeEnd(self, index):
         return self.list[index * 2 + 1] - 1
 
-    def dump(self):
+    def __str__(self):
         s = "["
         for cp in self.list:
             s += f"0x{cp:04X}, "
 
 
-        print(f"{s[:-2]}]")
+        return s[:-2] # remove final ", "
+
+    def dump(self):
+        print(self)
 
     def getRanges(self):
         ranges = []
