@@ -459,7 +459,7 @@ class UnicodeSet:
             s += f"0x{cp:04X}, "
 
 
-        return s[:-2] # remove final ", "
+        return s[:-2] + "]" # remove final ", "
 
     def dump(self):
         print(self)

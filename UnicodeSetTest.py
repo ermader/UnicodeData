@@ -140,7 +140,7 @@ def testExhaustive():
 
         for j in range(LIMIT):
             _testAdd(i, j)
-            _testCompliment(i, j)
+            _testXor(i, j)
             _testRetain(i, j)
             _testRemove(i, j)
 
