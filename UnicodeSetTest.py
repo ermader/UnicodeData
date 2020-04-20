@@ -38,7 +38,7 @@ def _getPairs(set):
 
 def _testCompliment(bits, s):
     s = _setFromBits(bits)
-    s.compliment()
+    s.complement()
     c = _bitsFromSet(s)
     e = ~bits & 0xFFFFFFFF
 
@@ -80,7 +80,7 @@ def _testXor(bits1, bits2):
     s1 = _setFromBits(bits1)
     s2 = _setFromBits(bits2)
 
-    s1.complimentAll(s2)
+    s1.complementAll(s2)
     complimentBits = _bitsFromSet(s1)
 
     if complimentBits != (bits1 ^ bits2):

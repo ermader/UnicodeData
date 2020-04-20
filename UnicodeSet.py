@@ -90,11 +90,19 @@ class UnicodeSet:
 
         return hi
 
-    # polarity = 0 is normal: x intersect y
-    # polarity = 2: x intersect ~y == set-minus
-    # polarity = 1: ~x intersect y
-    # polarity = 3: ~x intersect ~y
     def _retainList(self, other, polarity = 0):
+        """\
+        Intersect with the list other, as controlled by polarity.
+
+        polarity = 0: x intersect y\n
+        polarity = 2: x intersect ~y (set-minus)\n
+        polarity = 1: ~x intersect y\n
+        polarity = 3: ~x intersect ~y\n
+
+        :param other: the list with which to intersect
+        :param polarity: the type of intersection, as described above. (default is 0)
+        :return: None.
+        """
         if other is None or len(other) == 0:
             return
 
@@ -195,11 +203,19 @@ class UnicodeSet:
         buffer.append(UNICODE_SET_HIGH)
         self.list = buffer
 
-    # polarity = 0 is normal: x union y
-    # polarity = 2: x union ~y
-    # polarity = 1: ~x union y
-    # polarity = 3: ~x union ~y
     def _addList(self, other, polarity = 0):
+        """\n
+        Union the set with the list other, as controlled by polarity.
+
+        polarity = 0: x union y\n
+        polarity = 2: x union ~y\n
+        polarity = 1: ~x union y\n
+        polarity = 3: ~x union ~y\n
+
+        :param other: the list with which to union.
+        :param polarity: the type of union, as described above. (default is 0)
+        :return: None.
+        """
         if other is None or len(other) == 0:
             return
 
@@ -315,6 +331,16 @@ class UnicodeSet:
     # polarity = 1, 2: x xor ~y == x === y
 
     def _exclusiveOrList(self, other, polarity = 0):
+        """\
+        Xor the set with the list other, as controlled by polarity.
+
+        polarity = 0, 3: x xor y\n
+        polarity = 1, 2: x xor ~y (x === y)\n
+
+        :param other: the list with which to xor
+        :param polarity: the type of xor, as described above. (default is 0)
+        :return: None.
+        """
         if other is None or len(other) == 0:
             return
 
@@ -358,6 +384,12 @@ class UnicodeSet:
         self.list = buffer
 
     def add(self, cp):
+        """\n
+        Add the given code point to this set.
+
+        :param cp: the code point to add.
+        :return: None.
+        """
         i = self._findCodePoint(_pinCodePoint(cp))
 
         if (i & 1) != 0:
@@ -378,6 +410,13 @@ class UnicodeSet:
             self.list[i:i] = [cp, cp+1]
 
     def addRange(self, start, end):
+        """\
+        Add the code points in the range start - end inclusive to this set.
+
+        :param start: the first code point in the range to add.
+        :param end: the last code point in the range to add.
+        :return: None.
+        """
         if _pinCodePoint(start) < _pinCodePoint(end):
             length = len(self.list)
             limit = end + 1
@@ -406,55 +445,135 @@ class UnicodeSet:
                 self.add(start)
 
     def addAll(self, other):
+        """\n
+        Add the code points in the set other to this set.
+
+        :param other: the set from which to add.
+        :return: None.
+        """
         self._addList(other.list)
 
     def removeRange(self, start, end):
+        """\n
+        Remove the code points in the range start - end inclusive from this set.
+
+        :param start: the first code point in the range to remove.
+        :param end: the last code point in the range to remove.
+        :return: None.
+        """
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
             self._retainList(other, 2) # polarity == 2 means set minus
 
     def remove(self, cp):
+        """\n
+        Remove the given code point from this set.
+
+        :param cp: the code point to remove.
+        :return: None.
+        """
         self.removeRange(cp, cp)
 
     def removeAll(self, other):
+        """\n
+        Remove all the code points in the set other from this set.
+
+        :param other: the set whose code points should be removed.
+        :return: None.
+        """
         self._retainList(other.list, 2) # polarity == 2 means set minus
 
     def retainRange(self, start, end):
+        """\n
+        Interset the code points in the range start - end inclusive with this set.
+
+        :param start: the first code point in the range to intersect.
+        :param end: the last code point in the range to intersect.
+        :return: None.
+        """
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
-            self._retainList(other, 0) # polarity == 0 means intersect
+            self._retainList(other, 0) # polarity == 0: intersect
 
     def retain(self, cp):
+        """\n
+        Intersect the given code point with this set.
+
+        :param cp: the code point to intersect with this set.
+        :return: None.
+        """
         self.retainRange(cp, cp)
 
     def retainAll(self, other):
+        """\n
+        Interset the given set with this set.
+
+        :param other: the set with which to intersect.
+        :return: None.
+        """
         self._retainList(other.list, 0) # polarity == 0 means intersect
 
-    def complimentRange(self, start, end):
+    def complementRange(self, start, end):
+        """\n
+        Complements the specified range of code points in this set. Any
+        code point in the range will be removed if it is in the set, or will
+        be added if it not in the set. If end < start, then the range is empty
+        and the set will not be changed.
+
+        :param start: the first code point in the range.
+        :param end: the last code point in the range.
+        :return: None.
+        """
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
             self._exclusiveOrList(other)
 
-    def compliment(self, arg = None):
+    def complement(self, arg = None):
+        """\n
+        Complement this set, based on the type of arg.
+
+        arg is None: complement the whole set.\n
+        arg is an int: complement the given code point.\n
+        arg is a range: complement the code points in the range.
+
+        :param arg: the arguement, as described above. (default is None)
+        :return: None.
+        """
         if arg is None:
             if self.list[0] == UNICODE_SET_LOW:
                 self.list = self.list[1:]
             else:
                 self.list[0:0] = [UNICODE_SET_LOW]
         elif type(arg) == type(0):
-            self.complimentRange(arg, arg)
+            self.complementRange(arg, arg)
         elif type(arg) == type(range(0)):
-            self.complimentRange(arg.start, arg.stop - 1)
+            self.complementRange(arg.start, arg.stop - 1)
         else:
             raise(TypeError("Argument type must be int or range."))
 
-    def complimentAll(self, other):
+    def complementAll(self, other):
+        """\n
+        Complement all the code points in the set other in this set.
+
+        :param other: the other set.
+        :return: None.
+        """
         self._exclusiveOrList(other.list)
 
     def clear(self):
+        """Remove all code points from this set."""
         self.list = [UNICODE_SET_HIGH]
 
     def contains(self, arg):
+        """\n
+        Check if this set contains the code points specified by arg.
+
+        arg is an int: see if this set contains the given code pointn
+        arg is a range: see if this set contains all the code points in the given range.\n
+
+        :param arg: the code point, or range of code points, as described above.
+        :return: True if the set contans the code point(s), False otherwise.
+        """
         if type(arg) == type(0): # i.e. int
             i = self._findCodePoint(arg)
             return (i & 1) != 0
@@ -468,38 +587,67 @@ class UnicodeSet:
 
     # these match operations for Python's set type.
     def union(self, other):
+        """\n
+        Return the union of this set and other.
+
+        :param other: the set with which to union this set.
+        :return: the union of the two sets.
+        """
         result = UnicodeSet(self)
         result.addAll(other)
         return result
 
     def intersection(self, other):
+        """\n
+        Return the intersection of this set and other.
+
+        :param other: the set with which to intersect this set.
+        :return: the intersection of the two sets.
+        """
         result = UnicodeSet(self)
         result.retainAll(other)
         return result
 
     def difference(self, other):
+        """\n
+        Return the difference of this set and other.
+
+        :param other: the set to remove from this set.
+        :return: the difference of the two sets.
+        """
         result = UnicodeSet(self)
         result.removeAll(other)
         return result
 
     def symmetric_difference(self, other):
+        """\n
+        Return the xor of this set and other.
+
+        :param other: the set with which to xor this set.
+        :return: the xor of the two sets.
+        """
         result = UnicodeSet(self)
-        result.complimentAll(other)
+        result.complementAll(other)
         return result
 
     def __or__(self, other):
+        """Operator overload: | is union."""
         return self.union(other)
 
     def __and__(self, other):
+        """Operator overload: & is intersection."""
         return self.intersection(other)
 
     def __sub__(self, other):
+        """Operator overload: - is set difference."""
         return self.difference(other)
 
     def __xor__(self, other):
+        """Operator overload: ^ is set xor."""
         return self.symmetric_difference(other)
 
     def __contains__(self, arg):
+        """Operator overload: in is contains."""
         return self.contains(arg)
 
     def __init__(self, arg = None):
@@ -524,6 +672,7 @@ class UnicodeSet:
             raise(TypeError("Argument type must be UnicodeSet, int or range."))
 
     def size(self):
+        """Return the number of code points in this set."""
         s = 0
 
         for index in range(self.getRangeCount()):
@@ -534,27 +683,45 @@ class UnicodeSet:
         return s
 
     def getRangeCount(self):
+        """Return the number of code point ranges in this set."""
         return len(self.list) // 2
 
     def getRangeStart(self, index):
+        """\n
+        Get the starting code point of the given range.
+
+        :param index: the index of the range. Must be less than getRangeCount().
+        :return: the starting code point of the range.
+        """
         return self.list[index * 2]
 
     def getRangeEnd(self, index):
+        """\n
+        Get the ending code point of the given range.
+
+        :param index: the index of the range. Must be less than getRangeCount().
+        :return: the ending code point of the range.
+        """
         return self.list[index * 2 + 1] - 1
 
     def __str__(self):
+        """Return the code point list as a string."""
+
         pieces = []
 
         for cp in self.list:
             pieces.append(f"0x{cp:04X}")
 
         s = ", ".join(pieces)
+
         return f"[{s}]"
 
     def dump(self):
+        """Print the code point range list."""
         print(self)
 
     def getRanges(self):
+        """Return the list of code point ranges in the set."""
         ranges = []
         for i in range(0, len(self.list) - 1, 2):
             ranges.append(range(self.list[i], self.list[i+1]))
@@ -563,17 +730,26 @@ class UnicodeSet:
 
 if __name__ == "__main__":
     s1 = UnicodeSet(0x0915)
+    print(f"s1 = UnicodeSet(0x0915): {s1}")
+
     s2 = UnicodeSet(0x0917)
+    print(f"s2 = UnicodeSet(0x0917): {s2}")
+
     s3 = s1 | s2
-    s3.dump()
+    print(f"s1 | s2: {s3}")
+    print()
 
     s1 = UnicodeSet(range(0x0915, 0x0940))
+    print(f"s1 = UnicodeSet(range(0x0915, 0x0940)): {s1}")
+
     s2 = UnicodeSet(range(0x0920, 0x0950))
+    print(f"s2 = UnicodeSet(range(0x0920, 0x0950)): {s2}")
+
     s3 = s1 & s2
-    s3.dump()
+    print(f"s1 & s2: {s3}")
 
     s3 = s1 - s2
-    s3.dump()
+    print(f"s1 - s2: {s3}")
 
     s3 = s1 ^ s2
-    s3.dump()
+    print(f"s1 ^ s2: {s3}")
