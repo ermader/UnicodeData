@@ -454,9 +454,22 @@ class UnicodeSet:
     def clear(self):
         self.list = [UNICODE_SET_HIGH]
 
+    def contains(self, arg):
+        if type(arg) == type(0): # i.e. int
+            i = self._findCodePoint(arg)
+            return (i & 1) != 0
+        elif type(arg) == type(range(0)):
+            start = arg.start
+            end = arg.stop - 1
+            i = self._findCodePoint(start)
+            return (i & 1) != 0 and end < self.list[i]
+        else:
+            raise(TypeError("Argument type must be int or range."))
+
+    # these match operations for Python's set type.
     def union(self, other):
         result = UnicodeSet(self)
-        result.removeAll(other)
+        result.addAll(other)
         return result
 
     def intersection(self, other):
@@ -473,18 +486,6 @@ class UnicodeSet:
         result = UnicodeSet(self)
         result.complimentAll(other)
         return result
-
-    def contains(self, arg):
-        if type(arg) == type(0): # i.e. int
-            i = self._findCodePoint(arg)
-            return (i & 1) != 0
-        elif type(arg) == type(range(0)):
-            start = arg.start
-            end = arg.stop - 1
-            i = self._findCodePoint(start)
-            return (i & 1) != 0 and end < self.list[i]
-        else:
-            raise(TypeError("Argument type must be int or range."))
 
     def __or__(self, other):
         return self.union(other)
@@ -503,11 +504,11 @@ class UnicodeSet:
 
     def __init__(self, arg = None):
         """/
-        Initialize a set, based on the type of arg:
-        arg == None: make an empty set
-        arg is a UnicodeSet: make a set containg the same elements as arg
-        arg is an int: make a set containing the single code point
-        arg is a range: make a set containing the code points in arg
+        Initialize a set, based on the type of arg:\n
+        arg == None: make an empty set\n
+        arg is a UnicodeSet: make a set containg the same elements as arg\n
+        arg is an int: make a set containing the single code point\n
+        arg is a range: make a set containing the code points in arg\n
 
         :param arg: the argument (default = None)
         """
