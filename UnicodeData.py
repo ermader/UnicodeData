@@ -75,12 +75,13 @@ def main():
 
     for (script, unicodeSet) in _scriptList.items():
         ranges = unicodeSet.getRanges()
-        s = "["
 
+        pieces = []
         for r in ranges:
-            s += f"0x{r.start:04X}-0x{r.stop-1:04X}, "
+            pieces.append(f"0x{r.start:04X}-0x{r.stop-1:04X}")
 
-        print(f"    '{script}': {s[:-2]}]")
+        s = ", ".join(pieces)
+        print(f"    '{script}': [{s}]")
     # print(_decompositions)
 
 if __name__ == "__main__":
