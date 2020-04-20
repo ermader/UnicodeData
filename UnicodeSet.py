@@ -398,6 +398,8 @@ class UnicodeSet:
                             self.list.append(UNICODE_SET_HIGH)
                     return
 
+            # This is slow. Could be much faster using findCodePoint(start)
+            # and modifying the list, dealing with adjacent & overlapping ranges.
             self._addList([start, limit, UNICODE_SET_HIGH])
         else:
             if start == end:
@@ -452,6 +454,26 @@ class UnicodeSet:
     def clear(self):
         self.list = [UNICODE_SET_HIGH]
 
+    def union(self, other):
+        result = UnicodeSet(self)
+        result.removeAll(other)
+        return result
+
+    def intersection(self, other):
+        result = UnicodeSet(self)
+        result.retainAll(other)
+        return result
+
+    def difference(self, other):
+        result = UnicodeSet(self)
+        result.removeAll(other)
+        return result
+
+    def symmetric_difference(self, other):
+        result = UnicodeSet(self)
+        result.complimentAll(other)
+        return result
+
     def contains(self, arg):
         if type(arg) == type(0): # i.e. int
             i = self._findCodePoint(arg)
@@ -464,18 +486,41 @@ class UnicodeSet:
         else:
             raise(TypeError("Argument type must be int or range."))
 
+    def __or__(self, other):
+        return self.union(other)
+
+    def __and__(self, other):
+        return self.intersection(other)
+
+    def __sub__(self, other):
+        return self.difference(other)
+
+    def __xor__(self, other):
+        return self.symmetric_difference(other)
+
     def __contains__(self, arg):
         return self.contains(arg)
 
     def __init__(self, arg = None):
+        """/
+        Initialize a set, based on the type of arg:
+        arg == None: make an empty set
+        arg is a UnicodeSet: make a set containg the same elements as arg
+        arg is an int: make a set containing the single code point
+        arg is a range: make a set containing the code points in arg
+
+        :param arg: the argument (default = None)
+        """
         if arg is None:
             self.list = [UNICODE_SET_HIGH]
+        elif type(arg) == type(self):
+            self.list = arg.list.copy()
         elif type(arg) == type(0):
             self.list = [arg, arg + 1, UNICODE_SET_HIGH]
         elif type(arg) == type(range(0)):
             self.list = [arg.start, arg.stop, UNICODE_SET_HIGH]
         else:
-            raise(TypeError("Argument type must be int or range."))
+            raise(TypeError("Argument type must be UnicodeSet, int or range."))
 
     def size(self):
         s = 0
@@ -497,12 +542,13 @@ class UnicodeSet:
         return self.list[index * 2 + 1] - 1
 
     def __str__(self):
-        s = ""
+        pieces = []
 
         for cp in self.list:
-            s += f"0x{cp:04X}, "
+            pieces.append(f"0x{cp:04X}")
 
-        return f"[{s[:-2]}]" # [:-2] removes final ", "
+        s = ", ".join(pieces)
+        return f"[{s}]"
 
     def dump(self):
         print(self)
@@ -513,3 +559,20 @@ class UnicodeSet:
             ranges.append(range(self.list[i], self.list[i+1]))
 
         return ranges
+
+if __name__ == "__main__":
+    s1 = UnicodeSet(0x0915)
+    s2 = UnicodeSet(0x0917)
+    s3 = s1 | s2
+    s3.dump()
+
+    s1 = UnicodeSet(range(0x0915, 0x0940))
+    s2 = UnicodeSet(range(0x0920, 0x0950))
+    s3 = s1 & s2
+    s3.dump()
+
+    s3 = s1 - s2
+    s3.dump()
+
+    s3 = s1 ^ s2
+    s3.dump()
