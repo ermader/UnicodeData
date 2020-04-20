@@ -1,4 +1,4 @@
-'''
+'''\
 Created on Apr 14, 2020
 
 A simplified version of the UnicodeSet class from ICU.
@@ -7,9 +7,21 @@ A simplified version of the UnicodeSet class from ICU.
 '''
 
 UNICODE_SET_HIGH = 0x0110000
+"""A value greater than all Unicode code points."""
+
 UNICODE_SET_LOW = 0x0000000
+"""The lowest valid Unicode code point."""
+
 
 def _pinCodePoint(cp):
+    """\
+    Modify the given code point so that it is in the range [UNICODE_SET_LOW - UNICODE_SET_HIGH].
+    Values less that UNICODE_SET_LOW will be set to UNICODE_SET_LOW and values greater than
+    to UNICODE_SET_HIGH - 1 will be set to UNICODE_SET_HIGH - 1
+
+    :param cp: the code point
+    :return: the pinned value
+    """
     if (cp < UNICODE_SET_LOW):
         cp = UNICODE_SET_LOW
     elif (cp > (UNICODE_SET_HIGH - 1)):
@@ -17,8 +29,39 @@ def _pinCodePoint(cp):
 
     return cp
 
+
 class UnicodeSet:
+    """\
+    A mutable set of Unicode characters.
+
+    Legal code points are U+0000 to U+10FFFF inclusive.
+
+    The iterface is similar to Python's set class. All
+    operations of set are supported, except that they take
+    a code point range, or a single code point instead of an
+    arbitrary object.
+
+    the API may be thought of in terms of boolean logic. An OR
+    operation is implemented by add(), an AND operation is implemented
+    by retain(), an XOR operation is implemented by complement() taking
+    an argument, and a NOT operation is implemented by complement() with
+    no argument.
+
+    In terms of traditional set theory function names, add() is union,
+    retain() is intersection,d remove() is asymmetric difference and
+    compliment() with no arguments is set compliment with respect to the
+    range [UNICODE_SET_LOW - UNICODE_SET_HIGH].
+    """
+
     def _findCodePoint(self, cp):
+        """\
+        Returns the smallest value i such that cp < self.list[i]. Caller
+        must insure that cp is a legal value or this function will enter
+        an infinite loop.
+
+        :param cp: a character in the range [UNICODE_SET_LOW - UNICODE_SET_HIGH]
+        :return: the smallest integer i in the range [0 - len(self.list) - 1, inclusive such that cp less than self.list[i]
+        """
         if cp < self.list[0]:
             return 0
 
@@ -454,11 +497,12 @@ class UnicodeSet:
         return self.list[index * 2 + 1] - 1
 
     def __str__(self):
-        s = "["
+        s = ""
+
         for cp in self.list:
             s += f"0x{cp:04X}, "
 
-        return s[:-2] + "]" # remove final ", "
+        return f"[{s[:-2]}]" # [:-2] removes final ", "
 
     def dump(self):
         print(self)
