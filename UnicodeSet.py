@@ -101,7 +101,7 @@ class UnicodeSet:
 
         :param other: the list with which to intersect
         :param polarity: the type of intersection, as described above. (default is 0)
-        :return: None.
+        :return: self, to support chaining.
         """
         if other is None or len(other) == 0:
             return
@@ -202,6 +202,7 @@ class UnicodeSet:
 
         buffer.append(UNICODE_SET_HIGH)
         self.list = buffer
+        return self
 
     def _addList(self, other, polarity = 0):
         """\n
@@ -214,7 +215,7 @@ class UnicodeSet:
 
         :param other: the list with which to union.
         :param polarity: the type of union, as described above. (default is 0)
-        :return: None.
+        :return: self, to support chaining.
         """
         if other is None or len(other) == 0:
             return
@@ -326,9 +327,7 @@ class UnicodeSet:
 
         buffer.append(UNICODE_SET_HIGH)
         self.list = buffer
-
-    # polarity = 0, 3 is normal: x xor y
-    # polarity = 1, 2: x xor ~y == x === y
+        return self
 
     def _exclusiveOrList(self, other, polarity = 0):
         """\
@@ -339,7 +338,7 @@ class UnicodeSet:
 
         :param other: the list with which to xor
         :param polarity: the type of xor, as described above. (default is 0)
-        :return: None.
+        :return: self, to support chaining.
         """
         if other is None or len(other) == 0:
             return
@@ -382,18 +381,19 @@ class UnicodeSet:
                 break
 
         self.list = buffer
+        return self
 
     def add(self, cp):
         """\n
         Add the given code point to this set.
 
         :param cp: the code point to add.
-        :return: None.
+        :return: self, to support chaining.
         """
         i = self._findCodePoint(_pinCodePoint(cp))
 
         if (i & 1) != 0:
-            return
+            return self
 
         if cp == self.list[i] - 1:
             self.list[i] = cp
@@ -409,13 +409,15 @@ class UnicodeSet:
         else:
             self.list[i:i] = [cp, cp+1]
 
+        return self
+
     def addRange(self, start, end):
         """\
         Add the code points in the range start - end inclusive to this set.
 
         :param start: the first code point in the range to add.
         :param end: the last code point in the range to add.
-        :return: None.
+        :return: self, to support chaining.
         """
         if _pinCodePoint(start) < _pinCodePoint(end):
             length = len(self.list)
@@ -444,14 +446,16 @@ class UnicodeSet:
             if start == end:
                 self.add(start)
 
+        return self
+
     def addAll(self, other):
         """\n
         Add the code points in the set other to this set.
 
         :param other: the set from which to add.
-        :return: None.
+        :return: self, to support chaining.
         """
-        self._addList(other.list)
+        return self._addList(other.list)
 
     def removeRange(self, start, end):
         """\n
@@ -459,29 +463,31 @@ class UnicodeSet:
 
         :param start: the first code point in the range to remove.
         :param end: the last code point in the range to remove.
-        :return: None.
+        :return: self, to support chaining.
         """
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
             self._retainList(other, 2) # polarity == 2 means set minus
+
+        return self
 
     def remove(self, cp):
         """\n
         Remove the given code point from this set.
 
         :param cp: the code point to remove.
-        :return: None.
+        :return: self, to support chaining.
         """
-        self.removeRange(cp, cp)
+        return self.removeRange(cp, cp)
 
     def removeAll(self, other):
         """\n
         Remove all the code points in the set other from this set.
 
         :param other: the set whose code points should be removed.
-        :return: None.
+        :return: self, to support chaining.
         """
-        self._retainList(other.list, 2) # polarity == 2 means set minus
+        return self._retainList(other.list, 2) # polarity == 2 means set minus
 
     def retainRange(self, start, end):
         """\n
@@ -489,29 +495,31 @@ class UnicodeSet:
 
         :param start: the first code point in the range to intersect.
         :param end: the last code point in the range to intersect.
-        :return: None.
+        :return: self, to support chaining.
         """
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
             self._retainList(other, 0) # polarity == 0: intersect
+
+        return self
 
     def retain(self, cp):
         """\n
         Intersect the given code point with this set.
 
         :param cp: the code point to intersect with this set.
-        :return: None.
+        :return: self, to support chaining.
         """
-        self.retainRange(cp, cp)
+        return self.retainRange(cp, cp)
 
     def retainAll(self, other):
         """\n
         Interset the given set with this set.
 
         :param other: the set with which to intersect.
-        :return: None.
+        :return: self, to support chaining.
         """
-        self._retainList(other.list, 0) # polarity == 0 means intersect
+        return self._retainList(other.list, 0) # polarity == 0 means intersect
 
     def complementRange(self, start, end):
         """\n
@@ -522,11 +530,13 @@ class UnicodeSet:
 
         :param start: the first code point in the range.
         :param end: the last code point in the range.
-        :return: None.
+        :return: self, to support chaining.
         """
         if _pinCodePoint(start) < _pinCodePoint(end):
             other = [start, end + 1, UNICODE_SET_HIGH]
             self._exclusiveOrList(other)
+
+        return self
 
     def complement(self, arg = None):
         """\n
@@ -537,7 +547,7 @@ class UnicodeSet:
         arg is a range: complement the code points in the range.
 
         :param arg: the arguement, as described above. (default is None)
-        :return: None.
+        :return: self, to support chaining.
         """
         if arg is None:
             if self.list[0] == UNICODE_SET_LOW:
@@ -551,18 +561,21 @@ class UnicodeSet:
         else:
             raise(TypeError("Argument type must be int or range."))
 
+        return self
+
     def complementAll(self, other):
         """\n
         Complement all the code points in the set other in this set.
 
         :param other: the other set.
-        :return: None.
+        :return: self, to support chaining.
         """
-        self._exclusiveOrList(other.list)
+        return self._exclusiveOrList(other.list)
 
     def clear(self):
         """Remove all code points from this set."""
         self.list = [UNICODE_SET_HIGH]
+        return self
 
     def contains(self, arg):
         """\n
@@ -594,8 +607,7 @@ class UnicodeSet:
         :return: the union of the two sets.
         """
         result = UnicodeSet(self)
-        result.addAll(other)
-        return result
+        return result.addAll(other)
 
     def intersection(self, other):
         """\n
@@ -605,8 +617,7 @@ class UnicodeSet:
         :return: the intersection of the two sets.
         """
         result = UnicodeSet(self)
-        result.retainAll(other)
-        return result
+        return result.retainAll(other)
 
     def difference(self, other):
         """\n
@@ -616,8 +627,7 @@ class UnicodeSet:
         :return: the difference of the two sets.
         """
         result = UnicodeSet(self)
-        result.removeAll(other)
-        return result
+        return result.removeAll(other)
 
     def symmetric_difference(self, other):
         """\n
@@ -627,8 +637,7 @@ class UnicodeSet:
         :return: the xor of the two sets.
         """
         result = UnicodeSet(self)
-        result.complementAll(other)
-        return result
+        return result.complementAll(other)
 
     def __or__(self, other):
         """Operator overload: | is union."""
