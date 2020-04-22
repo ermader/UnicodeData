@@ -11,6 +11,9 @@ from CharacterData import CharacterData
 from UnicodeSet import UnicodeSet
 
 _characterData = {}
+_generalCategories = {}
+_bidiClasses = {}
+_bidiPairedBracketTypes = {}
 _scriptList = {}
 _blockList = {}
 _decompositions = {}
@@ -70,11 +73,26 @@ def _populateCharacterData():
 
             characterData = CharacterData(char, group)
             codePoint = characterData.getCodePoint()
+            generalCategory = characterData.getGeneralCategory()
+            bidiClass = characterData.getBidiClass()
+            bidiPairedBracketType = characterData.getBidiPairedBracketType()
             decomp = characterData.getDecomposition()
             script = characterData.getScript()
             block = characterData.getBlock()
 
             _characterData[codePoint] = characterData
+
+            if generalCategory not in _generalCategories:
+                _generalCategories[generalCategory] = UnicodeSet()
+            _generalCategories[generalCategory].add(codePoint)
+
+            if bidiClass not in _bidiClasses:
+                _bidiClasses[bidiClass] = UnicodeSet()
+            _bidiClasses[bidiClass].add(codePoint)
+
+            if bidiPairedBracketType not in _bidiPairedBracketTypes:
+                _bidiPairedBracketTypes[bidiPairedBracketType] = UnicodeSet()
+            _bidiPairedBracketTypes[bidiPairedBracketType].add(codePoint)
 
             if decomp is not None:
                 _decompositions[codePoint] = decomp
