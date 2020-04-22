@@ -51,18 +51,8 @@ def charsInSet(unicodeSet):
         start = unicodeSet.list[i]
         stop = unicodeSet.list[i+1]
 
-        chars.extend([ch  for ch in range(start, stop)])
+        chars.extend([ch for ch in range(start, stop)])
     return chars
-
-def charAt(unicodeSet, index):
-    len2 = len(unicodeSet.list) & ~1
-    for i in range(0, len2, 2):
-        start = unicodeSet.list[i]
-        count = unicodeSet.list[i+1] - start
-        if index < count:
-            return chr(start + index)
-
-    return None
 
 def _populateCharacterData():
     if len(_characterData) > 0:
@@ -105,15 +95,12 @@ def main():
         print(f"    '{script}': {stringFromRanges(ranges)}")
     # print(_decompositions)
 
-    # devaChars = charsInSet(_scriptList['Deva'])
-    # pieces = []
-    # for ch in devaChars:
-    #     pieces.append(f"{ch:04X}")
-    #
-    # s = ", ".join(pieces)
-    # print(f"    [{s}]")
-    # print(charAt(_scriptList['Deva'], 0x15))
-    # print(charAt(_scriptList['Deva'], 1000))
+    devaSet = _scriptList['Deva']
+    print(f"    devaSet.charAt(0x15) = {devaSet.charAt(0x15):04X}")
+    print(f"    devaSet.charAt(106) = {devaSet.charAt(106):04X}")
+    print(f"    devaSet.charAt(1000) = {devaSet.charAt(1000)}")
+    print(f"    devaSet.indexOf(0x0970) = {devaSet.indexOf(0x0970)}")
+    print(f"    devaSet.indexOf(0x0980) = {devaSet.indexOf(0x0980)}")
 
 if __name__ == "__main__":
     main()

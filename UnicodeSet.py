@@ -713,6 +713,58 @@ class UnicodeSet:
         """
         return self.list[index * 2 + 1] - 1
 
+    def indexOf(self, cp):
+        """\
+        Return the index of the given code point within the set,
+        where the set is ordered by ascending code point.
+
+        :param cp: the code point.
+        :return: the index or None if the code point is not in the set.
+        """
+
+        if cp < UNICODE_SET_LOW or cp > UNICODE_SET_HIGH:
+            return None
+
+        # the largest even integer <= the length of the list
+        len2 = len(self.list) & ~1
+        n = 0
+
+        for i in range(0, len2, 2):
+            start = self.list[i]
+
+            if cp < start:
+                break
+
+            limit = self.list[i+1]
+
+            if cp < limit:
+                return n + cp - start
+
+            n += limit - start
+
+        return None
+
+    def charAt(self, index):
+        """\
+        Return the code point at the given index within the set,
+        where the set is ordered by ascending code point.
+
+        :param index: the index.
+        :return: the code point at the given index or None.
+        """
+
+        if index >= 0:
+            # the largest even integer <= the length of the list
+            len2 = len(self.list) & ~1
+            for i in range(0, len2, 2):
+                start = self.list[i]
+                count = self.list[i+1] - start
+                if index < count:
+                    return start + index
+                index -= count
+
+        return None
+
     def __str__(self):
         """Return the code point list as a string."""
 
@@ -762,3 +814,6 @@ if __name__ == "__main__":
 
     s3 = s1 ^ s2
     print(f"s1 ^ s2: {s3}")
+
+    print(f"s1.charAt(5) = {s1.charAt(5):04X}")
+    print(f"s3.indexOf(0x0940) = {s3.indexOf(0x0940)}")
