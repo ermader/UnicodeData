@@ -7,8 +7,8 @@ Created on Apr 13, 2020
 import xml.etree.ElementTree as ElementTree
 import pkg_resources
 
-import CharacterData
-import UnicodeSet
+from CharacterData import CharacterData
+from UnicodeSet import UnicodeSet
 
 _characterData = {}
 _scriptList = {}
@@ -35,6 +35,35 @@ def dmToString(dm):
 
     return str
 
+def stringFromRanges(ranges):
+    pieces = []
+
+    for range in ranges:
+        pieces.append(f"{range.start:04X}-{range.stop-1:04X}")
+
+    s = ", ".join(pieces)
+    return f"[{s}]"
+
+def charsInSet(unicodeSet):
+    chars = []
+    len2 = len(unicodeSet.list) & ~1
+    for i in range(0, len2, 2):
+        start = unicodeSet.list[i]
+        stop = unicodeSet.list[i+1]
+
+        chars.extend([ch  for ch in range(start, stop)])
+    return chars
+
+def charAt(unicodeSet, index):
+    len2 = len(unicodeSet.list) & ~1
+    for i in range(0, len2, 2):
+        start = unicodeSet.list[i]
+        count = unicodeSet.list[i+1] - start
+        if index < count:
+            return chr(start + index)
+
+    return None
+
 def _populateCharacterData():
     if len(_characterData) > 0:
         return
@@ -49,7 +78,7 @@ def _populateCharacterData():
             if "cp" not in char.attrib: # some entries are <char first-cp=xxxx last-cp=yyyy.../>
                 continue
 
-            characterData = CharacterData.CharacterData(char, group)
+            characterData = CharacterData(char, group)
             codePoint = characterData.getCodePoint()
             decomp = characterData.getDecomposition()
             script = characterData.getScript()
@@ -60,29 +89,31 @@ def _populateCharacterData():
             if decomp is not None:
                 _decompositions[codePoint] = decomp
 
-            if script in _scriptList:
-                _scriptList[script].add(codePoint)
-            else:
-                _scriptList[script] = UnicodeSet.UnicodeSet(codePoint)
+            if script not in _scriptList:
+                _scriptList[script] = UnicodeSet()
+            _scriptList[script].add(codePoint)
 
-            if block in _blockList:
-                _blockList[block].add(codePoint)
-            else:
-                _blockList[block] = UnicodeSet.UnicodeSet(codePoint)
+            if block not in _blockList:
+                _blockList[block] = UnicodeSet()
+            _blockList[block].add(codePoint)
 
 def main():
     _populateCharacterData()
 
     for (script, unicodeSet) in _scriptList.items():
         ranges = unicodeSet.getRanges()
-
-        pieces = []
-        for r in ranges:
-            pieces.append(f"0x{r.start:04X}-0x{r.stop-1:04X}")
-
-        s = ", ".join(pieces)
-        print(f"    '{script}': [{s}]")
+        print(f"    '{script}': {stringFromRanges(ranges)}")
     # print(_decompositions)
+
+    # devaChars = charsInSet(_scriptList['Deva'])
+    # pieces = []
+    # for ch in devaChars:
+    #     pieces.append(f"{ch:04X}")
+    #
+    # s = ", ".join(pieces)
+    # print(f"    [{s}]")
+    # print(charAt(_scriptList['Deva'], 0x15))
+    # print(charAt(_scriptList['Deva'], 1000))
 
 if __name__ == "__main__":
     main()
