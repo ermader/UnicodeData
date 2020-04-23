@@ -18,26 +18,6 @@ _scriptList = {}
 _blockList = {}
 _decompositions = {}
 
-def getCharAttr(attribute, char, group):
-    if attribute in char.attrib:
-        return char.attrib[attribute]
-
-    return group.get(attribute)
-
-def dmToString(dm):
-    # We don't care about characters that decompose to a single character -
-    # they either decompose to themselves or are for compatibility.
-    # We also don't care about decompositions that start w/ a space
-    if " " not in dm or dm.startswith("0020 "):
-        return None
-
-    codePoints = dm.split(" ")
-    str = ""
-    for codePoint in codePoints:
-        str += f"{int(codePoint, 16):c}"
-
-    return str
-
 def stringFromRanges(ranges):
     pieces = []
 
@@ -72,13 +52,15 @@ def _populateCharacterData():
                 continue
 
             characterData = CharacterData(char, group)
-            codePoint = characterData.getCodePoint()
-            generalCategory = characterData.getGeneralCategory()
-            bidiClass = characterData.getBidiClass()
-            bidiPairedBracketType = characterData.getBidiPairedBracketType()
-            decomp = characterData.getDecomposition()
-            script = characterData.getScript()
-            block = characterData.getBlock()
+            codePoint = characterData.codePoint
+            generalCategory = characterData.generalCategory
+            bidiProps = characterData.bidiProperties
+            bidiClass = bidiProps.bidiClass
+            bidiPairedBracketType = bidiProps.bidiPairedBracketType
+            decompProps = characterData.decompProperties
+            decomposition = decompProps.decomposition
+            script = characterData.script
+            block = characterData.block
 
             _characterData[codePoint] = characterData
 
@@ -94,8 +76,8 @@ def _populateCharacterData():
                 _bidiPairedBracketTypes[bidiPairedBracketType] = UnicodeSet()
             _bidiPairedBracketTypes[bidiPairedBracketType].add(codePoint)
 
-            if decomp is not None:
-                _decompositions[codePoint] = decomp
+            if decomposition is not None:
+                _decompositions[codePoint] = decomposition
 
             if script not in _scriptList:
                 _scriptList[script] = UnicodeSet()
