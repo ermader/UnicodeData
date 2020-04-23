@@ -26,3 +26,7 @@ class BidiProperties(UCDProperties):
         self.bidiPairedBracketType = self.getCharProperty("bpt")
         bpb = self.getCharProperty("bpb")
         self.bidiPairedBracket = None if bpb == "#" else int(bpb, 16)  # maybe self.codePoint instead of None?
+
+        # Don't need these any more
+        self._char = None
+        self._group = None

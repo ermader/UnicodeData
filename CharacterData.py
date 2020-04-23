@@ -23,6 +23,10 @@ class CharacterData(UCDProperties):
 
         self.bidiProperties = BidiProperties(char, group)
 
+        self.numericType = self.getCharProperty("nt")
+        nv = self.getCharProperty("nv")
+        self.numericValue = None if nv == "NaN" else eval(nv)
+
         self.script = self.getCharProperty("sc")
         self.block = self.getCharProperty("blk")
 
@@ -32,3 +36,7 @@ class CharacterData(UCDProperties):
             self.name = self.getCharProperty("na1")
 
         self.name = self.name.replace("#", cp)
+
+        # Don't need these any more
+        self._char = None
+        self._group = None

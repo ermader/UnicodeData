@@ -46,3 +46,7 @@ class DecompProperties(UCDProperties):
         self.expandOnNFKD = self.getCharProperty("XO_NFKD") == "Y"
 
         self.nfkcFullClosure = self.dmToString(self.getCharProperty("FC_NFKC"))
+
+        # Don't need these any more
+        self._char = None
+        self._group = None

@@ -17,6 +17,7 @@ _bidiPairedBracketTypes = {}
 _scriptList = {}
 _blockList = {}
 _decompositions = {}
+_numericTypes = {}
 
 def stringFromRanges(ranges):
     pieces = []
@@ -59,6 +60,7 @@ def _populateCharacterData():
             bidiPairedBracketType = bidiProps.bidiPairedBracketType
             decompProps = characterData.decompProperties
             decomposition = decompProps.decomposition
+            numericType = characterData.numericType
             script = characterData.script
             block = characterData.block
 
@@ -78,6 +80,11 @@ def _populateCharacterData():
 
             if decomposition is not None:
                 _decompositions[codePoint] = decomposition
+
+            if numericType != "None":
+                if numericType not in _numericTypes:
+                    _numericTypes[numericType] = UnicodeSet()
+                _numericTypes[numericType].add(codePoint)
 
             if script not in _scriptList:
                 _scriptList[script] = UnicodeSet()
