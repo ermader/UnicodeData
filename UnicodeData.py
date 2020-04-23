@@ -5,7 +5,7 @@ Created on Apr 13, 2020
 '''
 
 import xml.etree.ElementTree as ElementTree
-import pkg_resources
+from pathlib import Path
 
 from CharacterData import CharacterData
 from UnicodeSet import UnicodeSet
@@ -42,7 +42,7 @@ def _populateCharacterData():
     if len(_characterData) > 0:
         return
 
-    source = pkg_resources.resource_stream("UnicodeData", "Data/ucd.all.grouped.xml")
+    source = Path("Data/ucd.all.grouped.xml")
     tree = ElementTree.parse(source)
     root = tree.getroot()
     nameSpaces = {"ucd": root.tag[1:-4]} # remove initial "{" and final "}ucd"
