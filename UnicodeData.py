@@ -6,6 +6,7 @@ Created on Apr 13, 2020
 
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
+from timeit import default_timer as timer
 
 from CharacterData import CharacterData
 from UnicodeSet import UnicodeSet
@@ -95,7 +96,10 @@ def _populateCharacterData():
             _blockList[block].add(codePoint)
 
 def main():
+    start = timer()
     _populateCharacterData()
+    end = timer()
+    print(f"Reading the Unicode Character Data File took {end - start} seconds.")
 
     for (script, unicodeSet) in _scriptList.items():
         ranges = unicodeSet.getRanges()
@@ -108,6 +112,7 @@ def main():
     print(f"    devaSet.charAt(1000) = {devaSet.charAt(1000)}")
     print(f"    devaSet.indexOf(0x0970) = {devaSet.indexOf(0x0970)}")
     print(f"    devaSet.indexOf(0x0980) = {devaSet.indexOf(0x0980)}")
+
 
 if __name__ == "__main__":
     main()

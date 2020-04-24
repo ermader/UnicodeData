@@ -22,6 +22,25 @@ class UCDProperties(object):
 
         return self._group.get(property)
 
+    def getBooleanProperty(self, property):
+        prop = self.getCharProperty(property);
+        return prop == "Y"
+
+    def getCodePointsProperty(self, property):
+        codePointString = self.getCharProperty(property)
+
+        if len(codePointString) == 0 or codePointString == "#":
+            return None  # or maybe self.codePoint?
+
+        codePoints = codePointString.split(" ")
+        chars = []
+
+        for codePoint in codePoints:
+            chars.append(f"{int(codePoint, 16):c}")
+
+        return "".join(chars)
+
+
     def __init__(self, char, group):
         """\
         Initialize with the char and group.
@@ -31,3 +50,7 @@ class UCDProperties(object):
         """
         self._char = char
         self._group = group
+
+        self.cp = self.getCharProperty("cp")
+        self.codePoint = int(self.cp, 16)
+

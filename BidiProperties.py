@@ -16,16 +16,15 @@ class BidiProperties(UCDProperties):
 
         self.bidiClass = self.getCharProperty("bc")
 
-        self.bidiMirrored = self.getCharProperty("Bidi_M") == "Y"  # works assuming that file is well-formed
+        self.bidiMirrored = self.getBooleanProperty("Bidi_M")
 
         bmg = self.getCharProperty("bmg")
         self.bidiMirroredGlyph = bmg if bmg == "" else int(bmg, 16)
 
-        self.bidiControl = self.getCharProperty("Bidi_C") == "Y"  # works assuming that file is well-formed
+        self.bidiControl = self.getBooleanProperty("Bidi_C")
 
         self.bidiPairedBracketType = self.getCharProperty("bpt")
-        bpb = self.getCharProperty("bpb")
-        self.bidiPairedBracket = None if bpb == "#" else int(bpb, 16)  # maybe self.codePoint instead of None?
+        self.bidiPairedBracket = self.getBooleanProperty("bpb")
 
         # Don't need these any more
         self._char = None

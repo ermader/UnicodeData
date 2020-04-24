@@ -31,8 +31,8 @@ class DecompProperties(UCDProperties):
         dm = self.getCharProperty("dm")
         self.decomposition = self.dmToString(dm)
 
-        self.compositionExclusion = self.getCharProperty("CE") == "Y"
-        self.fullCompositionExclusion = self.getCharProperty("Comp_Ex") == "Y"
+        self.compositionExclusion = self.getBooleanProperty("CE")
+        self.fullCompositionExclusion = self.getBooleanProperty("Comp_Ex")
 
         # these are "Y", "N" or "M"
         self.nfcQuickCheck = self.getCharProperty("NFC_QC")
@@ -40,10 +40,10 @@ class DecompProperties(UCDProperties):
         self.nfkcQuickCheck = self.getCharProperty("NFKC_QC")
         self.nfkdQuickCheck = self.getCharProperty("NFKD_QC")
 
-        self.expandOnNFC = self.getCharProperty("XO_NFC") == "Y"
-        self.expandOnNFD = self.getCharProperty("XO_NFD") == "Y"
-        self.expandOnNFKC = self.getCharProperty("XO_NFKC") == "Y"
-        self.expandOnNFKD = self.getCharProperty("XO_NFKD") == "Y"
+        self.expandOnNFC = self.getBooleanProperty("XO_NFC")
+        self.expandOnNFD = self.getBooleanProperty("XO_NFD")
+        self.expandOnNFKC = self.getBooleanProperty("XO_NFKC")
+        self.expandOnNFKD = self.getBooleanProperty("XO_NFKD")
 
         self.nfkcFullClosure = self.dmToString(self.getCharProperty("FC_NFKC"))
 
