@@ -29,7 +29,7 @@ class CharacterData(UCDProperties):
         self.numericValue = None if nv == "NaN" else eval(nv)
 
         self.script = self.getCharProperty("sc")
-        self.scriptExtension = self.getCharProperty("scx")
+        self.scriptExtensions = self.getCharProperty("scx").split(" ")
         self.block = self.getCharProperty("blk")
 
         self.decompProperties = DecompProperties(char, group)
