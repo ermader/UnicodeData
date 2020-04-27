@@ -8,6 +8,7 @@ from UCDProperties import UCDProperties
 from BidiProperties import BidiProperties
 from DecompProperties import DecompProperties
 from CaseProperties import CaseProperties
+from IndicProperties import IndicProperties
 
 class CharacterData(UCDProperties):
     def __init__(self, char, group):
@@ -44,6 +45,9 @@ class CharacterData(UCDProperties):
         self.caseProperties = CaseProperties(char, group)
 
         self.hangulSyllableType = self.getCharProperty("hst")
+        self.jamoShortName = self.getCharProperty("JSN")  # maybe empty string => None?
+
+        self.indicProperties = IndicProperties(char, group)
 
         if self.name is None or len(self.name) == 0:
             self.name = self.getCharProperty("na1")
