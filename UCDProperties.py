@@ -46,7 +46,7 @@ class UCDProperties(object):
         Initialize with the char and group.
 
         :param char: the char element.
-        :param group: the enclosing grouup element.
+        :param group: the enclosing group element.
         """
         self._char = char
         self._group = group
