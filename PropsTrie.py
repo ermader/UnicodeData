@@ -17,13 +17,13 @@ class UTrie2(object):
     LSCP_INDEX_2_LENGTH = 0x400 >> SHIFT_2,
     BAD_UTF8_DATA_OFFSET = 0x80
 
-    def __init__(self, index, data, highStart, highValueIndex):
+    def __init__(self, index, indexLength, highStart, highValueIndex):
         self.index = index
-        self.data = data
+        self.indexLength = indexLength
+        # self.data = data
         self.highStart = highStart
         self.highValueIndex = highValueIndex
-        self.indexLength = len(index)
-        self.dataLength = len(data)
+        self.dataLength = len(index) - indexLength
 
     def indexRaw(self, offset, c):
         return ((self.index[(offset)+((c)>>self.SHIFT_2)]) << self.INDEX_SHIFT) + ((c)&self.DATA_MASK)
@@ -65,10 +65,10 @@ class UTrie2(object):
         return self.highValueIndex if c >= self.highStart else self.IndexFromSupp(c)
 
     def get(self, c):
-        return self.data[self.indexFromCodePoint(self.indexLength, c) - self.indexLength]
+        return self.index[self.indexFromCodePoint(self.indexLength, c)]
 
-propsTrie = UTrie2(propsTrie_index[:4532], propsTrie_index[4532:], 0x110000, 0x5700)
-propsVectorTrie = UTrie2(propsVectorsTrie_index[:5024], propsVectorsTrie_index[5024:], 0x110000, 0x79F8)
+propsTrie = UTrie2(propsTrie_index, 4532, 0x110000, 0x5700)
+propsVectorTrie = UTrie2(propsVectorsTrie_index, 5024, 0x110000, 0x79F8)
 
 
 def getUnicodeProperties(c, column):
