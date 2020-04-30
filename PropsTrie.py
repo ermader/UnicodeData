@@ -143,7 +143,7 @@ def getNumericValue(c):
 # Probably want to move these to a uprops class...
 # derived age: one nibble each for major and minor version numbers
 UPROPS_AGE_MASK = 0xff000000
-UPROPS_AGE_SHIFT = 4
+UPROPS_AGE_SHIFT = 24
 
 # Script_Extensions: mask includes Script
 UPROPS_SCRIPT_X_MASK = 0x00f000ff
@@ -168,6 +168,10 @@ UPROPS_SCRIPT_LOW_MASK = 0x000000ff
 UPROPS_SCRIPT_X_WITH_COMMON = 0x400000
 UPROPS_SCRIPT_X_WITH_INHERITED = 0x800000
 UPROPS_SCRIPT_X_WITH_OTHER = 0xc00000
+
+def getAge(c):
+    age = getUnicodeProperties(c, 0) >> UPROPS_AGE_SHIFT
+    return [age >> 4, age & 0xF, 0, 0]
 
 def mergeScriptCodeOrIndex(scriptX):
     return \
@@ -199,3 +203,4 @@ print(f"kaScript = '{scriptCodes[getScript(0x0915)]}'")
 print(f"getScript(0x1E900) = '{scriptCodes[getScript(0x1E900)]}'")
 print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")
 print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")
+print(f"getAge(0x0220) = {getAge(0x0220)}")
