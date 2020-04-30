@@ -95,6 +95,51 @@ def getUnicodeProperties(c, column):
     vecIndex = propsVectorTrie.get(c)
     return propsVectors[vecIndex+column]
 
+UPROPS_CATEGORY_MASK = 0x1F
+UPROPS_NUMERIC_TYPE_VALUE_SHIFT = 6
+
+UPROPS_NTV_NONE = 0  # no numeric value
+UPROPS_NTV_DECIMAL_START = 1  # Decimal digits 0 - 9
+UPROPS_NTV_DIGIT_START = 11  # Other digits
+UPROPS_NTV_NUMERIC_START = 21  # Small integers nv = 0..154
+UPROPS_NTV_FRACTION_START = 0xb0  # Fractions: ((ntv>>4)-12) / ((ntv&0xf)+1) = -1..17 / 1..16
+UPROPS_NTV_LARGE_START = 0x1e0  # Large integers: ((ntv>>5)-14) * 10^((ntv&0x1f)+2) = (1..9)*(10^2..10^33)
+UPROPS_NTV_BASE60_START = 0x300  # Sexagesimal numbers: ((ntv>>2)-0xbf) * 60^((ntv&3)+1) = (1..9)*(60^1..60^4)
+UPROPS_NTV_FRACTION20_START = UPROPS_NTV_BASE60_START + 36  #
+UPROPS_NTV_FRACTION32_START = UPROPS_NTV_FRACTION20_START + 24
+UPROPS_NTV_RESERVED_START = UPROPS_NTV_FRACTION32_START + 16
+
+def getNumericType(c):
+    props = propsTrie.get(c)
+    return props & UPROPS_CATEGORY_MASK
+
+def getNumericTypeValue(c):
+    props = propsTrie.get(c)
+    return props >> UPROPS_NUMERIC_TYPE_VALUE_SHIFT
+
+def getNumericValue(c):
+    ntv = getNumericTypeValue(c)
+
+    if ntv == UPROPS_NTV_NONE:
+        return None
+
+    if ntv < UPROPS_NTV_DIGIT_START:
+        return ntv - UPROPS_NTV_DECIMAL_START
+
+    if ntv < UPROPS_NTV_NUMERIC_START:
+        return ntv - UPROPS_NTV_DIGIT_START
+
+    if ntv < UPROPS_NTV_FRACTION_START:
+        return ntv - UPROPS_NTV_NUMERIC_START
+
+    if ntv < UPROPS_NTV_LARGE_START:
+        numerator = (ntv >> 4) - 12
+        denominator = (ntv & 0xf) + 1
+        return numerator / denominator
+
+    # need to finish this...
+    return None
+
 # Probably want to move these to a uprops class...
 # derived age: one nibble each for major and minor version numbers
 UPROPS_AGE_MASK = 0xff000000
@@ -152,3 +197,5 @@ print(f"kaIndex = 0x{kaIndex:04X}")
 print(f"kaValue = 0x{propsTrie.get(0x0915):04X}")
 print(f"kaScript = '{scriptCodes[getScript(0x0915)]}'")
 print(f"getScript(0x1E900) = '{scriptCodes[getScript(0x1E900)]}'")
+print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")
+print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")
