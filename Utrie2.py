@@ -1,7 +1,7 @@
 """\
 Based on utrie2.h, utrie2.cpp from ICU
 
-Created Apr 28, 2020
+Created on Apr 28, 2020
 
 @author Eric Mader
 """
