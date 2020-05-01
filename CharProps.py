@@ -50,20 +50,75 @@ def getNumericValue(c):
         return None
 
     if ntv < UPROPS_NTV_DIGIT_START:
+        # decimal digit
         return ntv - UPROPS_NTV_DECIMAL_START
 
     if ntv < UPROPS_NTV_NUMERIC_START:
+        # other digit
         return ntv - UPROPS_NTV_DIGIT_START
 
     if ntv < UPROPS_NTV_FRACTION_START:
+        # small integet
         return ntv - UPROPS_NTV_NUMERIC_START
 
     if ntv < UPROPS_NTV_LARGE_START:
+        # fraction
         numerator = (ntv >> 4) - 12
         denominator = (ntv & 0xf) + 1
         return numerator / denominator
 
-    # need to finish this...
+    if ntv < UPROPS_NTV_BASE60_START:
+        # large, single-significant-digit integer
+        mant = (ntv >> 5) - 14
+        exp = (ntv & 0x1f) + 2
+        numValue = mant
+
+        # multiply by 10^exp without math.h
+        while exp >= 4:
+            numValue *= 10000.0
+            exp -= 4
+
+        if exp == 3:
+            numValue *= 1000.0
+        elif exp == 2:
+            numValue *= 100.0
+        elif exp == 1:
+            numValue *= 10.0
+
+        return numValue
+
+    if ntv < UPROPS_NTV_FRACTION20_START:
+        # sexagesimal (base 60) integer
+        numValue = (ntv >> 2) - 0xbf
+        exp = (ntv & 3) + 1
+
+        if exp == 4:
+            numValue *= 60*60*60*60
+        elif exp == 3:
+            numValue *= 60*60*60
+        elif exp == 2:
+            numValue *= 60*60
+        elif exp == 1:
+            numValue *= 60
+
+        return numValue
+
+    if ntv < UPROPS_NTV_FRACTION32_START:
+        # fraction-20 e.g. 3/80
+        frac20 = ntv-UPROPS_NTV_FRACTION20_START  # 0..0x17
+        numerator = 2 * (frac20 & 3) + 1
+        denominator = 20 << (frac20 >> 2)
+
+        return numerator/denominator
+
+    if ntv < UPROPS_NTV_RESERVED_START:
+        # fraction-32 e.g. 3/64
+        frac32 = ntv-UPROPS_NTV_FRACTION32_START  # 0..15
+        numerator = 2 * (frac32 & 3) + 1
+        denominator = 32 << (frac32 >> 2)
+
+        return numerator/denominator
+
     return None
 
 # Probably want to move these to a uprops class...
@@ -124,7 +179,9 @@ def getScript(c):
 
 print(f"getScript(0x0915) = '{scriptCodes[getScript(0x0915)]}'")
 print(f"getScript(0x1E900) = '{scriptCodes[getScript(0x1E900)]}'")
-print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")
-print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")
-print(f"getNumericValue(0x0969) = {getNumericValue(0x0969)}")
+print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")  # digit 7
+print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")  # 3/4
+print(f"getNumericValue(0x09F6) = {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
+print(f"getNumericValue(0x0BF1) = {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
+print(f"getNumericValue(0x1ED2D) = {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
 print(f"getAge(0x0220) = {getAge(0x0220)}")

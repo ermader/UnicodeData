@@ -59,7 +59,7 @@ class UTrie2(object):
         index1 = (self.INDEX_1_OFFSET - self.OMITTED_BMP_INDEX_1_LENGTH) + (c >> self.SHIFT_1)
         index2 = self.index[index1] + ((c >> self.SHIFT_2) & self.INDEX_2_MASK)
 
-        return self.index[index2] << self.INDEX_SHIFT + (c & self.DATA_MASK)
+        return (self.index[index2] << self.INDEX_SHIFT) + (c & self.DATA_MASK)
 
     # #define _UTRIE2_INDEX_FROM_CP(trie, asciiOffset, c) \
     # ((uint32_t)(c)<0xd800 ? \
