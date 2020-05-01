@@ -58,7 +58,7 @@ def getNumericValue(c):
         return ntv - UPROPS_NTV_DIGIT_START
 
     if ntv < UPROPS_NTV_FRACTION_START:
-        # small integet
+        # small integer
         return ntv - UPROPS_NTV_NUMERIC_START
 
     if ntv < UPROPS_NTV_LARGE_START:
@@ -179,8 +179,8 @@ def getScript(c):
 
 print(f"getScript(0x0915) = '{scriptCodes[getScript(0x0915)]}'")
 print(f"getScript(0x1E900) = '{scriptCodes[getScript(0x1E900)]}'")
-print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")  # digit 7
-print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")  # 3/4
+print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")  # DIGIT SEVEN
+print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")  # VULGAR FRACTION THREE QUARTERS
 print(f"getNumericValue(0x09F6) = {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
 print(f"getNumericValue(0x0BF1) = {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
 print(f"getNumericValue(0x1ED2D) = {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
