@@ -1402,6 +1402,10 @@ propsTrie_index = [
     0,0,0,0
     ]
 propsTrie_index_length = 4532
+propsTrie_index_2_null_offset = 0xA40
+propsTrie_data_null_offset = 0x1234
+propsTrie_high_start = 0x110000
+propsTrie_high_value_index = 0x5700
 
 propsVectorsTrie_index = [
     0x4e8,0x4f0,0x4f8,0x500,0x518,0x520,0x528,0x530,0x538,0x540,0x548,0x550,0x558,0x560,0x568,0x570,
@@ -3359,6 +3363,10 @@ propsVectorsTrie_index = [
     ]
 
 propsVectorsTrie_index_length = 5024
+propsVectorsTrie_index_2_null_offset = 0xA40
+propsVectorsTrie_data_null_offset = 0x1420
+propsVectorsTrie_high_start = 0x110000
+propsVectorTrie_high_value_index = 0x79F8
 
 propsVectors = [
     0x67,0,0,0x67,0,0x4e00000,0x67,0x80000,0x20,0x867,0,0,0xa67,0,0,0xb67,
