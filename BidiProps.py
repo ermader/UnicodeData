@@ -72,7 +72,7 @@ def getMirrorCodePointFromProps(m):
 def getMirrorIndexFromProps(m):
     return m >> UBIDI_MIRROR_INDEX_SHIFT
 
-def getClass(c):
+def getCharDirection(c):
     props = bidiPropsTrie.get(c)
     return getClassFromProps(props)
 
@@ -102,16 +102,56 @@ def getMirror(c):
     props = bidiPropsTrie.get(c)
     return getMirrorFromProps(c, props)
 
-print(f"getClass(0x002B) = {bidiClassNames[getClass(0x002B)]}")
-print(f"getClass(0x002C) = {bidiClassNames[getClass(0x002C)]}")
-print(f"getClass(0x0031) = {bidiClassNames[getClass(0x0031)]}")
-print(f"getClass(0x0061) = {bidiClassNames[getClass(0x0061)]}")
-print(f"getClass(0x0644) = {bidiClassNames[getClass(0x0644)]}")  # ARABIC LETTER LAM
-print(f"getClass(0x0667) = {bidiClassNames[getClass(0x0667)]}")
+def isBidiControl(c):
+    props = bidiPropsTrie.get(c)
+    return getFlagFromProps(props, UBIDI_BIDI_CONTROL_SHIFT)
+
+def isJoinControl(c):
+    props = bidiPropsTrie.get(c)
+    return getFlagFromProps(props, UBIDI_JOIN_CONTROL_SHIFT)
+
+def getJoiningType(c):
+    props = bidiPropsTrie.get(c)
+    return (props & UBIDI_JT_MASK) >> UBIDI_JT_SHIFT
+
+def getJoiningGroup(c):
+    start = bidi_props_indexes[UBIDI_IX_JG_START]
+    limit = bidi_props_indexes[UBIDI_IX_JG_LIMIT]
+
+    if c in range(start, limit):
+        return ubidi_props_jgArray[c - start]
+
+    start = bidi_props_indexes[UBIDI_IX_JG_START2]
+    limit = bidi_props_indexes[UBIDI_IX_JG_LIMIT2]
+
+    if c in range(start, limit):
+        return ubidi_props_jgArray2[c - start]
+
+    return None
+
+def getPairedBracketType(c):
+    props = bidiPropsTrie.get(c)
+    return (props & UBIDI_BPT_MASK) >> UBIDI_BPT_SHIFT
+
+def getPairedBracket(c):
+    props = bidiPropsTrie.get(c)
+    if (props & UBIDI_BPT_MASK) == 0:
+        return c
+
+    return getMirrorFromProps(c, props)
+
+print(f"getCharDirection(0x002B) = {bidiClassNames[getCharDirection(0x002B)]}")
+print(f"getCharDirection(0x002C) = {bidiClassNames[getCharDirection(0x002C)]}")
+print(f"getCharDirection(0x0031) = {bidiClassNames[getCharDirection(0x0031)]}")
+print(f"getCharDirection(0x0061) = {bidiClassNames[getCharDirection(0x0061)]}")
+print(f"getCharDirection(0x0644) = {bidiClassNames[getCharDirection(0x0644)]}")  # ARABIC LETTER LAM
+print(f"getCharDirection(0x0667) = {bidiClassNames[getCharDirection(0x0667)]}")
 
 
 print(f"Mirror of '(' is '{chr(getMirror(ord('(')))}'")
 print(f"Mirror of '{chr(0x3011)}' is '{chr(getMirror(0x3011))}'")
+
+print(f"Paired bracket of '{chr(0x007D)}' is '{chr(getPairedBracket(0x007D))}'")
 
 
 
