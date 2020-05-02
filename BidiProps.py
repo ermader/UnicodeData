@@ -145,22 +145,27 @@ print(f"Char Direction of '{chr(0x002B)}' is {bidiClassNames[getCharDirection(0x
 print(f"Char Direction of '{chr(0x002C)}' is {bidiClassNames[getCharDirection(0x002C)]}")
 print(f"Char Direction of '{chr(0x0031)}' is {bidiClassNames[getCharDirection(0x0031)]}")
 print(f"Char Direction of '{chr(0x0061)}' is {bidiClassNames[getCharDirection(0x0061)]}")
+print(f"Char Direction of '{chr(0x05DC)}' is {bidiClassNames[getCharDirection(0x05DC)]}")  # HEBREW LETTER LAMED
 print(f"Char Direction of '{chr(0x0644)}' is {bidiClassNames[getCharDirection(0x0644)]}")  # ARABIC LETTER LAM
 print(f"Char Direction of '{chr(0x0667)}' is {bidiClassNames[getCharDirection(0x0667)]}")
-
+print()
 
 print(f"Mirror of '(' is '{chr(getMirror(ord('(')))}'")
 print(f"Mirror of '{chr(0x3011)}' is '{chr(getMirror(0x3011))}'")
+print()
 
 print(f"Paired bracket of '{chr(0x007D)}' is '{chr(getPairedBracket(0x007D))}'")
 print(f"Paired bracket of '{chr(0x3014)}' is '{chr(getPairedBracket(0x3014))}'")
+print()
 
+print(f"Joining type of '{chr(0x0627)}' is {joiningTypes[getJoiningType(0x0627)]}")
+print(f"Joining type of '{chr(0x0640)}' is {joiningTypes[getJoiningType(0x0640)]}")
 print(f"Joining type of '{chr(0x0644)}' is {joiningTypes[getJoiningType(0x0644)]}")
-print(f"Joining group of U+10AD3 is {joiningTypes[getJoiningType(0x10AD3)]}")
+print(f"Joining type of U+064B is {joiningTypes[getJoiningType(0x064B)]}")
+print(f"Joining type of U+10ACD is {joiningTypes[getJoiningType(0x10ACD)]}")
+print(f"Joining type of U+10AD3 is {joiningTypes[getJoiningType(0x10AD3)]}")
+print()
 
 print(f"Joining group of '{chr(0x0644)}' is {joiningGroups[getJoiningGroup(0x0644)]}")
 print(f"Joining group of U+10AD3 is {joiningGroups[getJoiningGroup(0x10AD3)]}")
-
-
-
-
+print()
