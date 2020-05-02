@@ -9,6 +9,7 @@ Created on May 1, 2020
 from BidiPropsData import *
 from Utrie2 import UTrie2
 from CharDirection import *
+from JoiningTypesAndGroups import *
 
 #indices into the indexes array
 UBIDI_IX_INDEX_TOP = 0
@@ -140,18 +141,26 @@ def getPairedBracket(c):
 
     return getMirrorFromProps(c, props)
 
-print(f"getCharDirection(0x002B) = {bidiClassNames[getCharDirection(0x002B)]}")
-print(f"getCharDirection(0x002C) = {bidiClassNames[getCharDirection(0x002C)]}")
-print(f"getCharDirection(0x0031) = {bidiClassNames[getCharDirection(0x0031)]}")
-print(f"getCharDirection(0x0061) = {bidiClassNames[getCharDirection(0x0061)]}")
-print(f"getCharDirection(0x0644) = {bidiClassNames[getCharDirection(0x0644)]}")  # ARABIC LETTER LAM
-print(f"getCharDirection(0x0667) = {bidiClassNames[getCharDirection(0x0667)]}")
+print(f"Char Direction of '{chr(0x002B)}' is {bidiClassNames[getCharDirection(0x002B)]}")
+print(f"Char Direction of '{chr(0x002C)}' is {bidiClassNames[getCharDirection(0x002C)]}")
+print(f"Char Direction of '{chr(0x0031)}' is {bidiClassNames[getCharDirection(0x0031)]}")
+print(f"Char Direction of '{chr(0x0061)}' is {bidiClassNames[getCharDirection(0x0061)]}")
+print(f"Char Direction of '{chr(0x0644)}' is {bidiClassNames[getCharDirection(0x0644)]}")  # ARABIC LETTER LAM
+print(f"Char Direction of '{chr(0x0667)}' is {bidiClassNames[getCharDirection(0x0667)]}")
 
 
 print(f"Mirror of '(' is '{chr(getMirror(ord('(')))}'")
 print(f"Mirror of '{chr(0x3011)}' is '{chr(getMirror(0x3011))}'")
 
 print(f"Paired bracket of '{chr(0x007D)}' is '{chr(getPairedBracket(0x007D))}'")
+print(f"Paired bracket of '{chr(0x3014)}' is '{chr(getPairedBracket(0x3014))}'")
+
+print(f"Joining type of '{chr(0x0644)}' is {joiningTypes[getJoiningType(0x0644)]}")
+print(f"Joining group of U+10AD3 is {joiningTypes[getJoiningType(0x10AD3)]}")
+
+print(f"Joining group of '{chr(0x0644)}' is {joiningGroups[getJoiningGroup(0x0644)]}")
+print(f"Joining group of U+10AD3 is {joiningGroups[getJoiningGroup(0x10AD3)]}")
+
 
 
 
