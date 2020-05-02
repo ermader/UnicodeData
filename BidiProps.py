@@ -158,6 +158,7 @@ print(f"Paired bracket of '{chr(0x007D)}' is '{chr(getPairedBracket(0x007D))}'")
 print(f"Paired bracket of '{chr(0x3014)}' is '{chr(getPairedBracket(0x3014))}'")
 print()
 
+print(f"Joining type of '{chr(0x0061)}' is {joiningTypes[getJoiningType(0x0061)]}")
 print(f"Joining type of '{chr(0x0627)}' is {joiningTypes[getJoiningType(0x0627)]}")
 print(f"Joining type of '{chr(0x0640)}' is {joiningTypes[getJoiningType(0x0640)]}")
 print(f"Joining type of '{chr(0x0644)}' is {joiningTypes[getJoiningType(0x0644)]}")
