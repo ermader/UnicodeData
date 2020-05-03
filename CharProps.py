@@ -179,27 +179,27 @@ def getScript(c):
 
     return scriptExtensions[codeOrIndex]
 
-print(f"getGeneralCategory(U+0012) = {generalCategories[getGeneralCategory(0x0012)]}")
-print(f"getGeneralCategory('3') = {generalCategories[getGeneralCategory(ord('3'))]}")
-print(f"getGeneralCategory('(') = {generalCategories[getGeneralCategory(ord('('))]}")
-print(f"getGeneralCategory(')') = {generalCategories[getGeneralCategory(ord(')'))]}")
-print(f"getGeneralCategory('A') = {generalCategories[getGeneralCategory(ord('A'))]}")
-print(f"getGeneralCategory('a') = {generalCategories[getGeneralCategory(ord('a'))]}")
-print(f"getGeneralCategory('{chr(0x0644)}') = {generalCategories[getGeneralCategory(0x0644)]}")
-print(f"getGeneralCategory('{chr(0x0915)}') = {generalCategories[getGeneralCategory(0x0915)]}")
-print(f"getGeneralCategory('{chr(0x3010)}') = {generalCategories[getGeneralCategory(0x3010)]}")
-print(f"getGeneralCategory('{chr(0x3011)}') = {generalCategories[getGeneralCategory(0x3011)]}")
+print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
+print(f"General Category of '3' is {generalCategories[getGeneralCategory(ord('3'))]}")
+print(f"General Category of '(' is {generalCategories[getGeneralCategory(ord('('))]}")
+print(f"General Category of ')' is {generalCategories[getGeneralCategory(ord(')'))]}")
+print(f"General Category of 'A' is {generalCategories[getGeneralCategory(ord('A'))]}")
+print(f"General Category of 'a' is {generalCategories[getGeneralCategory(ord('a'))]}")
+print(f"General Category of '{chr(0x0644)}' is {generalCategories[getGeneralCategory(0x0644)]}")
+print(f"General Category of '{chr(0x0915)}' is {generalCategories[getGeneralCategory(0x0915)]}")
+print(f"General Category of '{chr(0x3010)}' is {generalCategories[getGeneralCategory(0x3010)]}")
+print(f"General Category of '{chr(0x3011)}' is {generalCategories[getGeneralCategory(0x3011)]}")
 print()
 
-print(f"getScript(0x0915) = '{scriptCodes[getScript(0x0915)]}'")
-print(f"getScript(0x1E900) = '{scriptCodes[getScript(0x1E900)]}'")
+print(f"Script of '{chr(0x0915)}' is '{scriptCodes[getScript(0x0915)]}'")
+print(f"Script of U+1E900 is '{scriptCodes[getScript(0x1E900)]}'")
 print()
 
-print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")  # DIGIT SEVEN
-print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")  # VULGAR FRACTION THREE QUARTERS
-print(f"getNumericValue(0x09F6) = {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
-print(f"getNumericValue(0x0BF1) = {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
-print(f"getNumericValue(0x1ED2D) = {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
+print(f"Numeric value of '7' is {getNumericValue(ord('7'))}")  # DIGIT SEVEN
+print(f"Numeric value of '{chr(0x00BE)}' is {getNumericValue(0x00BE)}")  # VULGAR FRACTION THREE QUARTERS
+print(f"Numeric value of '{chr(0x09F6)}' is {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
+print(f"Numeric value of '{chr(0x0BF1)}' is {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
+print(f"Numeric value of U+0x1ED2D is {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
 print()
 
-print(f"getAge(0x0220) = {getAge(0x0220)}")
+print(f"Age of '{chr(0x0220)}' is {getAge(0x0220)}")
