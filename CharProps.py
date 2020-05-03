@@ -1,10 +1,8 @@
 
 from Utrie2 import UTrie2
-from CharPropsData import propsTrie_index, propsTrie_index_length, propsTrie_index_2_null_offset, propsTrie_data_null_offset, \
-    propsTrie_high_start, propsTrie_high_value_index, \
-    propsVectorsTrie_index, propsVectorsTrie_index_length, propsVectorsTrie_index_2_null_offset, propsVectorsTrie_data_null_offset, \
-    propsVectorsTrie_high_start, propsVectorTrie_high_value_index, propsVectors, propsVectorColumns, scriptExtensions
+from CharPropsData import *
 from Scripts import *
+from GeneralCategories import *
 
 
 propsTrie = UTrie2(propsTrie_index, propsTrie_index_length, propsTrie_index_2_null_offset, propsTrie_data_null_offset, \
@@ -34,6 +32,10 @@ UPROPS_NTV_BASE60_START = 0x300  # Sexagesimal numbers: ((ntv>>2)-0xbf) * 60^((n
 UPROPS_NTV_FRACTION20_START = UPROPS_NTV_BASE60_START + 36  #
 UPROPS_NTV_FRACTION32_START = UPROPS_NTV_FRACTION20_START + 24
 UPROPS_NTV_RESERVED_START = UPROPS_NTV_FRACTION32_START + 16
+
+def getGeneralCategory(c):
+    props = propsTrie.get(c)
+    return props & 0x1F
 
 def getNumericType(c):
     props = propsTrie.get(c)
@@ -177,11 +179,27 @@ def getScript(c):
 
     return scriptExtensions[codeOrIndex]
 
+print(f"getGeneralCategory(U+0012) = {generalCategories[getGeneralCategory(0x0012)]}")
+print(f"getGeneralCategory('3') = {generalCategories[getGeneralCategory(ord('3'))]}")
+print(f"getGeneralCategory('(') = {generalCategories[getGeneralCategory(ord('('))]}")
+print(f"getGeneralCategory(')') = {generalCategories[getGeneralCategory(ord(')'))]}")
+print(f"getGeneralCategory('A') = {generalCategories[getGeneralCategory(ord('A'))]}")
+print(f"getGeneralCategory('a') = {generalCategories[getGeneralCategory(ord('a'))]}")
+print(f"getGeneralCategory('{chr(0x0644)}') = {generalCategories[getGeneralCategory(0x0644)]}")
+print(f"getGeneralCategory('{chr(0x0915)}') = {generalCategories[getGeneralCategory(0x0915)]}")
+print(f"getGeneralCategory('{chr(0x3010)}') = {generalCategories[getGeneralCategory(0x3010)]}")
+print(f"getGeneralCategory('{chr(0x3011)}') = {generalCategories[getGeneralCategory(0x3011)]}")
+print()
+
 print(f"getScript(0x0915) = '{scriptCodes[getScript(0x0915)]}'")
 print(f"getScript(0x1E900) = '{scriptCodes[getScript(0x1E900)]}'")
+print()
+
 print(f"getNumericValue(0x0037) = {getNumericValue(0x37)}")  # DIGIT SEVEN
 print(f"getNumericValue(0x00BE) = {getNumericValue(0x00BE)}")  # VULGAR FRACTION THREE QUARTERS
 print(f"getNumericValue(0x09F6) = {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
 print(f"getNumericValue(0x0BF1) = {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
 print(f"getNumericValue(0x1ED2D) = {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
+print()
+
 print(f"getAge(0x0220) = {getAge(0x0220)}")
