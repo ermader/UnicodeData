@@ -197,6 +197,7 @@ print()
 
 print(f"Numeric value of '7' is {getNumericValue(ord('7'))}")  # DIGIT SEVEN
 print(f"Numeric value of '{chr(0x00BE)}' is {getNumericValue(0x00BE)}")  # VULGAR FRACTION THREE QUARTERS
+print(f"Numeric value of '{chr(0x0667)}' is {getNumericValue(0x0667)}")  # ARABIC-INDIC DIGIT SEVEN
 print(f"Numeric value of '{chr(0x09F6)}' is {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
 print(f"Numeric value of '{chr(0x0BF1)}' is {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
 print(f"Numeric value of U+0x1ED2D is {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
