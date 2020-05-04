@@ -140,7 +140,7 @@ UPROPS_SCRIPT_HIGH_SHIFT = 12
 UPROPS_MAX_SCRIPT = 0x3ff
 
 UPROPS_EA_MASK = 0x000e0000
-UPROPS_EA_SHIFT = 7
+UPROPS_EA_SHIFT = 17
 
 UPROPS_BLOCK_MASK = 0x0001ff00
 UPROPS_BLOCK_SHIFT = 8
@@ -182,6 +182,10 @@ def getScript(c):
 def getBlock(c):
     props = getUnicodeProperties(c, 0)
     return (props & UPROPS_BLOCK_MASK) >> UPROPS_BLOCK_SHIFT
+
+def getEastAsianWidth(c):
+    props = getUnicodeProperties(c, 0)
+    return (props & UPROPS_EA_MASK) >> UPROPS_EA_SHIFT
 
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")

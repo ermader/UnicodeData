@@ -5,6 +5,7 @@ import CharProps
 import BidiProps
 import Scripts
 import Blocks
+import EastAsianWidth
 import GeneralCategories
 import JoiningTypesAndGroups
 import CharDirection
@@ -26,6 +27,7 @@ def test():
         jt = JoiningTypesAndGroups.joiningTypes[BidiProps.getJoiningType(cp)]
         jg = JoiningTypesAndGroups.joiningGroups[BidiProps.getJoiningGroup(cp)]
         bc = Blocks.blockNames[CharProps.getBlock(cp)]
+        aw = EastAsianWidth.eastAsianWidthNames[CharProps.getEastAsianWidth(cp)]
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -33,6 +35,7 @@ def test():
         doTest(cp, jt, characterData.joiningType, "joining type")
         doTest(cp, jg, characterData.joiningGroup, "joining group")
         doTest(cp, bc, characterData.block, "block code")
+        doTest(cp, aw, characterData.eastAsianWidth, "East Asian width")
 
     end = timer()
     print(f"  Test took {end - start} seconds.")
