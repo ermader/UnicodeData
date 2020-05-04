@@ -128,7 +128,7 @@ def getJoiningGroup(c):
     if c in range(start, limit):
         return ubidi_props_jgArray2[c - start]
 
-    return None
+    return U_JG_NO_JOINING_GROUP
 
 def getPairedBracketType(c):
     props = bidiPropsTrie.get(c)
@@ -141,55 +141,59 @@ def getPairedBracket(c):
 
     return getMirrorFromProps(c, props)
 
-print(f"Char Direction of '{chr(0x002B)}' is {bidiClassNames[getCharDirection(0x002B)]}")
-print(f"Char Direction of '{chr(0x002C)}' is {bidiClassNames[getCharDirection(0x002C)]}")
-print(f"Char Direction of '{chr(0x0031)}' is {bidiClassNames[getCharDirection(0x0031)]}")
-print(f"Char Direction of '{chr(0x0061)}' is {bidiClassNames[getCharDirection(0x0061)]}")
-print(f"Char Direction of '{chr(0x05DC)}' is {bidiClassNames[getCharDirection(0x05DC)]}")  # HEBREW LETTER LAMED
-print(f"Char Direction of '{chr(0x0644)}' is {bidiClassNames[getCharDirection(0x0644)]}")  # ARABIC LETTER LAM
-print(f"Char Direction of '{chr(0x0667)}' is {bidiClassNames[getCharDirection(0x0667)]}")
+def test():
+    print(f"Char Direction of '{chr(0x002B)}' is {bidiClassNames[getCharDirection(0x002B)]}")
+    print(f"Char Direction of '{chr(0x002C)}' is {bidiClassNames[getCharDirection(0x002C)]}")
+    print(f"Char Direction of '{chr(0x0031)}' is {bidiClassNames[getCharDirection(0x0031)]}")
+    print(f"Char Direction of '{chr(0x0061)}' is {bidiClassNames[getCharDirection(0x0061)]}")
+    print(f"Char Direction of '{chr(0x05DC)}' is {bidiClassNames[getCharDirection(0x05DC)]}")  # HEBREW LETTER LAMED
+    print(f"Char Direction of '{chr(0x0644)}' is {bidiClassNames[getCharDirection(0x0644)]}")  # ARABIC LETTER LAM
+    print(f"Char Direction of '{chr(0x0667)}' is {bidiClassNames[getCharDirection(0x0667)]}")
 
-for ch in range(0x200C, 0x2010):
-    print(f"Char Direction of U+{ch:04X} is {bidiClassNames[getCharDirection(ch)]}")
+    for ch in range(0x200C, 0x2010):
+        print(f"Char Direction of U+{ch:04X} is {bidiClassNames[getCharDirection(ch)]}")
 
-for ch in range(0x2028, 0x2030):
-    print(f"Char Direction of U+{ch:04X} is {bidiClassNames[getCharDirection(ch)]}")
+    for ch in range(0x2028, 0x2030):
+        print(f"Char Direction of U+{ch:04X} is {bidiClassNames[getCharDirection(ch)]}")
 
-for ch in range(0x2066, 0x206A):
-    print(f"Char Direction of U+{ch:04X} is {bidiClassNames[getCharDirection(ch)]}")
+    for ch in range(0x2066, 0x206A):
+        print(f"Char Direction of U+{ch:04X} is {bidiClassNames[getCharDirection(ch)]}")
 
-print()
+    print()
 
-print(f"U+200D is bidi control: {isBidiControl(0x200D)}")
-print(f"U+200E is bidi control: {isBidiControl(0x200E)}")
-print()
+    print(f"U+200D is bidi control: {isBidiControl(0x200D)}")
+    print(f"U+200E is bidi control: {isBidiControl(0x200E)}")
+    print()
 
-print(f"'a' is mirrored: {isMirrored(ord('a'))}")
-print(f"'[' is mirrored: {isMirrored(ord('['))}")
-print(f"'{chr(0x3010)}' is mirrored: {isMirrored(0x3010)}")
-print(f"'{chr(0x3042)}' is mirrored: {isMirrored(0x3042)}")
-print(f"Mirror of '(' is '{chr(getMirror(ord('(')))}'")
-print(f"Mirror of '{chr(0x3011)}' is '{chr(getMirror(0x3011))}'")
+    print(f"'a' is mirrored: {isMirrored(ord('a'))}")
+    print(f"'[' is mirrored: {isMirrored(ord('['))}")
+    print(f"'{chr(0x3010)}' is mirrored: {isMirrored(0x3010)}")
+    print(f"'{chr(0x3042)}' is mirrored: {isMirrored(0x3042)}")
+    print(f"Mirror of '(' is '{chr(getMirror(ord('(')))}'")
+    print(f"Mirror of '{chr(0x3011)}' is '{chr(getMirror(0x3011))}'")
 
-print()
+    print()
 
-print(f"Paired bracket of '{chr(0x007D)}' is '{chr(getPairedBracket(0x007D))}'")
-print(f"Paired bracket of '{chr(0x3014)}' is '{chr(getPairedBracket(0x3014))}'")
-print()
+    print(f"Paired bracket of '{chr(0x007D)}' is '{chr(getPairedBracket(0x007D))}'")
+    print(f"Paired bracket of '{chr(0x3014)}' is '{chr(getPairedBracket(0x3014))}'")
+    print()
 
-print(f"U+200D is join control: {isJoinControl(0x200D)}")
-print(f"U+200E is join control: {isJoinControl(0x200E)}")
-print()
+    print(f"U+200D is join control: {isJoinControl(0x200D)}")
+    print(f"U+200E is join control: {isJoinControl(0x200E)}")
+    print()
 
-print(f"Joining type of '{chr(0x0061)}' is {joiningTypes[getJoiningType(0x0061)]}")
-print(f"Joining type of '{chr(0x0627)}' is {joiningTypes[getJoiningType(0x0627)]}")
-print(f"Joining type of '{chr(0x0640)}' is {joiningTypes[getJoiningType(0x0640)]}")
-print(f"Joining type of '{chr(0x0644)}' is {joiningTypes[getJoiningType(0x0644)]}")
-print(f"Joining type of U+064B is {joiningTypes[getJoiningType(0x064B)]}")
-print(f"Joining type of U+10ACD is {joiningTypes[getJoiningType(0x10ACD)]}")
-print(f"Joining type of U+10AD3 is {joiningTypes[getJoiningType(0x10AD3)]}")
-print()
+    print(f"Joining type of '{chr(0x0061)}' is {joiningTypes[getJoiningType(0x0061)]}")
+    print(f"Joining type of '{chr(0x0627)}' is {joiningTypes[getJoiningType(0x0627)]}")
+    print(f"Joining type of '{chr(0x0640)}' is {joiningTypes[getJoiningType(0x0640)]}")
+    print(f"Joining type of '{chr(0x0644)}' is {joiningTypes[getJoiningType(0x0644)]}")
+    print(f"Joining type of U+064B is {joiningTypes[getJoiningType(0x064B)]}")
+    print(f"Joining type of U+10ACD is {joiningTypes[getJoiningType(0x10ACD)]}")
+    print(f"Joining type of U+10AD3 is {joiningTypes[getJoiningType(0x10AD3)]}")
+    print()
 
-print(f"Joining group of '{chr(0x0644)}' is {joiningGroups[getJoiningGroup(0x0644)]}")
-print(f"Joining group of U+10AD3 is {joiningGroups[getJoiningGroup(0x10AD3)]}")
-print()
+    print(f"Joining group of '{chr(0x0644)}' is {joiningGroups[getJoiningGroup(0x0644)]}")
+    print(f"Joining group of U+10AD3 is {joiningGroups[getJoiningGroup(0x10AD3)]}")
+    print()
+
+if __name__ == "__main__":
+    test()
