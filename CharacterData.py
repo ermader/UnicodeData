@@ -31,12 +31,12 @@ class CharacterData(UCDProperties):
 
         self.script = self.getCharProperty("sc")
         self.scriptExtensions = self.getCharProperty("scx").split(" ")
-        self.block = self.getCharProperty("blk")
+        self.block = self.getCharProperty("blk").replace("_", " ")
 
         self.decompProperties = DecompProperties(char, group)
 
         self.joiningType = self.getCharProperty("jt")
-        self.joiningGroup = self.getCharProperty("jg")
+        self.joiningGroup = self.getCharProperty("jg").replace("_", " ")
 
         self.lineBreak = self.getCharProperty("lb")
 

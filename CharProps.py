@@ -179,6 +179,10 @@ def getScript(c):
 
     return scriptExtensions[codeOrIndex]
 
+def getBlock(c):
+    props = getUnicodeProperties(c, 0)
+    return (props & UPROPS_BLOCK_MASK) >> UPROPS_BLOCK_SHIFT
+
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
     print(f"General Category of '3' is {generalCategories[getGeneralCategory(ord('3'))]}")

@@ -4,6 +4,7 @@ from UnicodeData import UnicodeCharacterData, CharacterData
 import CharProps
 import BidiProps
 import Scripts
+import Blocks
 import GeneralCategories
 import JoiningTypesAndGroups
 import CharDirection
@@ -24,13 +25,14 @@ def test():
         cd = CharDirection.bidiClassNames[BidiProps.getCharDirection(cp)]
         jt = JoiningTypesAndGroups.joiningTypes[BidiProps.getJoiningType(cp)]
         jg = JoiningTypesAndGroups.joiningGroups[BidiProps.getJoiningGroup(cp)]
-        cd_jg = f"JG_{characterData.joiningGroup.upper()}"  # Might want to change the strings in joiningGroups...
+        bc = Blocks.blockNames[CharProps.getBlock(cp)]
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
         doTest(cp, cd, characterData.bidiProperties.bidiClass, "bidi class")
         doTest(cp, jt, characterData.joiningType, "joining type")
-        doTest(cp, jg, cd_jg, "joining group")
+        doTest(cp, jg, characterData.joiningGroup, "joining group")
+        doTest(cp, bc, characterData.block, "block code")
 
     end = timer()
     print(f"  Test took {end - start} seconds.")
