@@ -3,6 +3,7 @@ from Utrie2 import UTrie2
 from CharPropsData import *
 from Scripts import *
 from GeneralCategories import *
+from Characters import *
 
 
 propsTrie = UTrie2(propsTrie_index, propsTrie_index_length, propsTrie_index_2_null_offset, propsTrie_data_null_offset, \
@@ -36,6 +37,98 @@ UPROPS_NTV_RESERVED_START = UPROPS_NTV_FRACTION32_START + 16
 def getGeneralCategory(c):
     props = propsTrie.get(c)
     return props & 0x1F
+
+def gcMask(gc):
+    return 1 << gc
+
+def isLower(c):
+    return getGeneralCategory(c) == GC_LOWERCASE_LETTER
+
+def isUpper(c):
+    return getGeneralCategory(c) == GC_UPPERCASE_LETTER
+
+def isTitle(c):
+    return getGeneralCategory(c) == GC_TITLECASE_LETTER
+
+def isDigit(c):
+    return getGeneralCategory(c) == GC_DECIMAL_DIGIT_NUMBER
+
+def isHexDigit(c):
+    if c in range(CH_U_A, CH_U_F + 1) or c in range(CH_U_a, CH_U_f + 1):
+        return True
+
+    if c in range(CH_U_FW_A, CH_U_FW_F + 1) or c in range(CH_U_FW_a, CH_U_FW_f + 1):
+        return True
+
+    return isDigit(c)
+
+def isalpha(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & GC_L_MASK) != 0
+
+def isAlphabetic(c):
+    props = getUnicodeProperties(c, 1)
+    return (props & (1 << UPROPS_ALPHABETIC)) != 0
+
+def isalnum(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & (GC_L_MASK | GC_ND_MASK)) != 0
+
+def isalnumPOSIX(c):
+    return isAlphabetic(c) or isDigit(c)
+
+def isDefined(c):
+    return getGeneralCategory(c) != GC_UNASSIGNED
+
+def isbase(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & (GC_L_MASK | GC_N_MASK | GC_MC_MASK | GC_ME_MASK)) != 0
+
+def iscntrl(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & (GC_CC_MASK | GC_CF_MASK | GC_ZL_MASK | GC_ZP_MASK)) != 0
+
+def isISOControl(c):
+    return c <= 0x001F or c in range(0x007F, 0x009F+1)
+
+def isThatControlSpace(c):
+    # Some control characters that are used as space.
+    return c <= 0x9f and ((c >= CH_TAB and c <= CH_CR) or (c >= 0x1c and c <= 0x1f) or c == CH_NL)
+
+def isThatASCIIControlSpace(c):
+    # Java has decided  that U+0085 New Line is not whitespace any more.
+    return c <= 0x1f and c >= CH_TAB and (c <= CH_CR or c>=0x1c)
+
+def isspace(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & GC_Z_MASK) != 0 or isThatControlSpace(c)
+
+def isJavaSpaceChar(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & GC_Z_MASK) != 0
+
+def isWhiteSpace(c):
+    if c == CH_NBSP or c == CH_FIGURESP or c == CH_NNBSP:
+        return False
+
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & GC_Z_MASK) != 0 or isThatASCIIControlSpace(c)
+
+def isBlank(c):
+    if c <= 0x009F:
+        return c == CH_TAB or c == CH_SPACE
+
+    gc = getGeneralCategory(c)
+    return gc == GC_SPACE_SEPARATOR
+
+def isUWhiteSpace(c):
+    props = getUnicodeProperties(c, 1)
+    return (props & (1 << UPROPS_WHITE_SPACE)) != 0
+
+def isPrint(c):
+    gc = getGeneralCategory(c)
+    # comparing == 0 returns False for the categories mentioned
+    return (gcMask(gc) & GC_C_MASK) == 0
 
 def getNumericType(c):
     props = propsTrie.get(c)
@@ -124,6 +217,7 @@ def getNumericValue(c):
     return None
 
 # Probably want to move these to a uprops class...
+# Values in vector word 0
 # derived age: one nibble each for major and minor version numbers
 UPROPS_AGE_MASK = 0xff000000
 UPROPS_AGE_SHIFT = 24
@@ -151,6 +245,41 @@ UPROPS_SCRIPT_LOW_MASK = 0x000000ff
 UPROPS_SCRIPT_X_WITH_COMMON = 0x400000
 UPROPS_SCRIPT_X_WITH_INHERITED = 0x800000
 UPROPS_SCRIPT_X_WITH_OTHER = 0xc00000
+
+# Flags in vector word 1
+UPROPS_WHITE_SPACE = 0
+UPROPS_DASH = 1
+UPROPS_HYPHEN = 2
+UPROPS_QUOTATION_MARK = 3
+UPROPS_TERMINAL_PUNCTUATION = 4
+UPROPS_MATH = 5
+UPROPS_HEX_DIGIT = 6
+UPROPS_ASCII_HEX_DIGIT = 7
+UPROPS_ALPHABETIC = 8
+UPROPS_IDEOGRAPHIC = 9
+UPROPS_DIACRITIC = 10
+UPROPS_EXTENDER = 11
+UPROPS_NONCHARACTER_CODE_POINT = 12
+UPROPS_GRAPHEME_EXTEND = 13
+UPROPS_GRAPHEME_LINK = 14
+UPROPS_IDS_BINARY_OPERATOR = 15
+UPROPS_IDS_TRINARY_OPERATOR = 16
+UPROPS_RADICAL = 17
+UPROPS_UNIFIED_IDEOGRAPH = 18
+UPROPS_DEFAULT_IGNORABLE_CODE_POINT = 19
+UPROPS_DEPRECATED = 20
+UPROPS_LOGICAL_ORDER_EXCEPTION = 21
+UPROPS_XID_START = 22
+UPROPS_XID_CONTINUE = 23
+UPROPS_ID_START = 24                            #  ICU 2.6, uprops format version 3.2
+UPROPS_ID_CONTINUE = 25
+UPROPS_GRAPHEME_BASE = 26
+UPROPS_S_TERM = 27                              #  new in ICU 3.0 and Unicode 4.0.1
+UPROPS_VARIATION_SELECTOR = 28
+UPROPS_PATTERN_SYNTAX = 29                      #  new in ICU 3.4 and Unicode 4.1
+UPROPS_PATTERN_WHITE_SPACE = 30
+UPROPS_PREPENDED_CONCATENATION_MARK = 31            # new in ICU 60 and Unicode 10
+UPROPS_BINARY_1_TOP = 32                        #  ==32 - full!
 
 def getAge(c):
     age = getUnicodeProperties(c, 0) >> UPROPS_AGE_SHIFT
@@ -213,6 +342,7 @@ def test():
     print()
 
     print(f"Age of '{chr(0x0220)}' is {getAge(0x0220)}")
+    print(f"'a' is alphabetic: {isAlphabetic(ord('a'))}")
 
 if __name__ == "__main__":
     test()

@@ -13,7 +13,6 @@ class IndicProperties(UCDProperties):
         UCDProperties.__init__(self, char, group)
 
         self.syllabicCategory = self.getCharProperty("InSC")
-        self.matraCategory = self.getCharProperty("InMC")  # data file doesn't seem to have this property...
         self.positionalCategory = self.getCharProperty("InPC")
 
         # Don't need these any more

@@ -69,6 +69,107 @@ GC_INITIAL_PUNCTUATION = 28
 # Pf @stable ICU 2.0
 GC_FINAL_PUNCTUATION = 29
 
+# GC_XX_MASK constants are bit flags corresponding to Unicode
+# general category values.
+# For each category, the nth bit is set if the numeric value of the
+# corresponding UCharCategory constant is n.
+#
+# There are also some GC_Y_MASK constants for groups of general categories
+# like L for all letter categories.
+
+GC_CN_MASK = 1 << GC_GENERAL_OTHER_TYPES
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_LU_MASK = 1 << GC_UPPERCASE_LETTER
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_LL_MASK = 1 << GC_LOWERCASE_LETTER
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_LT_MASK = 1 << GC_TITLECASE_LETTER
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_LM_MASK = 1 << GC_MODIFIER_LETTER
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_LO_MASK = 1 << GC_OTHER_LETTER
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_MN_MASK = 1 << GC_NON_SPACING_MARK
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_ME_MASK = 1 << GC_ENCLOSING_MARK
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_MC_MASK = 1 << GC_COMBINING_SPACING_MARK
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_ND_MASK = 1 << GC_DECIMAL_DIGIT_NUMBER
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_NL_MASK = 1 << GC_LETTER_NUMBER
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_NO_MASK = 1 << GC_OTHER_NUMBER
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_ZS_MASK = 1 << GC_SPACE_SEPARATOR
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_ZL_MASK = 1 << GC_LINE_SEPARATOR
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_ZP_MASK = 1 << GC_PARAGRAPH_SEPARATOR
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_CC_MASK = 1 << GC_CONTROL_CHAR
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_CF_MASK = 1 << GC_FORMAT_CHAR
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_CO_MASK = 1 << GC_PRIVATE_USE_CHAR
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_CS_MASK = 1 << GC_SURROGATE
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PD_MASK = 1 << GC_DASH_PUNCTUATION
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PS_MASK = 1 << GC_START_PUNCTUATION
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PE_MASK = 1 << GC_END_PUNCTUATION
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PC_MASK = 1 << GC_CONNECTOR_PUNCTUATION
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PO_MASK = 1 << GC_OTHER_PUNCTUATION
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_SM_MASK = 1 << GC_MATH_SYMBOL
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_SC_MASK = 1 << GC_CURRENCY_SYMBOL
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_SK_MASK = 1 << GC_MODIFIER_SYMBOL
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_SO_MASK = 1 << GC_OTHER_SYMBOL
+
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PI_MASK = 1 << GC_INITIAL_PUNCTUATION
+#  Mask constant for a UCharCategory. @stable ICU 2.1
+GC_PF_MASK = 1 << GC_FINAL_PUNCTUATION
+
+
+#  Mask constant for multiple UCharCategory bits (L Letters). @stable ICU 2.1
+GC_L_MASK = (GC_LU_MASK|GC_LL_MASK|GC_LT_MASK|GC_LM_MASK|GC_LO_MASK)
+
+#  Mask constant for multiple UCharCategory bits (LC Cased Letters). @stable ICU 2.1
+GC_LC_MASK = (GC_LU_MASK|GC_LL_MASK|GC_LT_MASK)
+
+#  Mask constant for multiple UCharCategory bits (M Marks). @stable ICU 2.1
+GC_M_MASK = (GC_MN_MASK|GC_ME_MASK|GC_MC_MASK)
+
+#  Mask constant for multiple UCharCategory bits (N Numbers). @stable ICU 2.1
+GC_N_MASK = (GC_ND_MASK|GC_NL_MASK|GC_NO_MASK)
+
+#  Mask constant for multiple UCharCategory bits (Z Separators). @stable ICU 2.1
+GC_Z_MASK = (GC_ZS_MASK|GC_ZL_MASK|GC_ZP_MASK)
+
+#  Mask constant for multiple UCharCategory bits (C Others). @stable ICU 2.1
+GC_C_MASK = (GC_CN_MASK|GC_CC_MASK|GC_CF_MASK|GC_CO_MASK|GC_CS_MASK)
+
+#  Mask constant for multiple UCharCategory bits (P Punctuation). @stable ICU 2.1
+GC_P_MASK = (GC_PD_MASK|GC_PS_MASK|GC_PE_MASK|GC_PC_MASK|GC_PO_MASK|GC_PI_MASK|GC_PF_MASK)
+
+#  Mask constant for multiple UCharCategory bits (S Symbols). @stable ICU 2.1
+GC_S_MASK = (GC_SM_MASK|GC_SC_MASK|GC_SK_MASK|GC_SO_MASK)
+
 generalCategories = {
     GC_GENERAL_OTHER_TYPES: 'Cn',
     GC_UPPERCASE_LETTER: 'Lu',
