@@ -9,6 +9,7 @@ import EastAsianWidth
 import GeneralCategories
 import JoiningTypesAndGroups
 import CharDirection
+import Boundaries
 
 def doTest(cp, got, expected, name):
     if got != expected:
@@ -28,6 +29,9 @@ def test():
         jg = JoiningTypesAndGroups.joiningGroups[BidiProps.getJoiningGroup(cp)]
         bc = Blocks.blockNames[CharProps.getBlock(cp)]
         aw = EastAsianWidth.eastAsianWidthNames[CharProps.getEastAsianWidth(cp)]
+        lb = Boundaries.lineBreakNames[CharProps.getLineBreak(cp)]
+        sb = Boundaries.sentenceBreakNames[CharProps.getSentenceBreak(cp)]
+        gcb = Boundaries.graphemeClusterBreakNames[CharProps.getGraphemeClusterBreak(cp)]
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -36,6 +40,9 @@ def test():
         doTest(cp, jg, characterData.joiningGroup, "joining group")
         doTest(cp, bc, characterData.block, "block code")
         doTest(cp, aw, characterData.eastAsianWidth, "East Asian width")
+        doTest(cp, lb, characterData.lineBreak, "Line break")
+        doTest(cp, sb, characterData.sentenceBreak, "Sentence break")
+        doTest(cp, gcb, characterData.graphemeClusterBreak, "Grapheme cluster break")
 
     end = timer()
     print(f"  Test took {end - start} seconds.")

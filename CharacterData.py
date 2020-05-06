@@ -39,6 +39,9 @@ class CharacterData(UCDProperties):
         self.joiningGroup = self.getCharProperty("jg").replace("_", " ")
 
         self.lineBreak = self.getCharProperty("lb")
+        self.sentenceBreak = self.getCharProperty("SB")
+        self.wordBreak = self.getCharProperty("WB")
+        self.graphemeClusterBreak = self.getCharProperty("GCB")
 
         self.eastAsianWidth = self.getCharProperty("ea")
 

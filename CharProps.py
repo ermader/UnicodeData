@@ -130,6 +130,52 @@ def isPrint(c):
     # comparing == 0 returns False for the categories mentioned
     return (gcMask(gc) & GC_C_MASK) == 0
 
+def isPrintPOSIX(c):
+    gc = getGeneralCategory(c)
+    return gc == GC_SPACE_SEPARATOR or isGraphPosix(c)
+
+def isgraph(c):
+    gc = getGeneralCategory(c)
+    # comparing == 0 returns False for the categories mentioned
+    return (gcMask(gc) & (GC_CC_MASK | GC_CF_MASK | GC_CS_MASK | GC_CN_MASK | GC_Z_MASK)) == 0
+
+def isGraphPosix(c):
+    gc = getGeneralCategory(c)
+    # comparing == 0 returns False for the categories mentioned
+    return (gcMask(gc) & (GC_CC_MASK | GC_CS_MASK | GC_CN_MASK | GC_Z_MASK)) == 0
+
+def ispunct(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & GC_P_MASK) != 0
+
+def isIDStart(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & ( GC_L_MASK | GC_NL_MASK)) != 0
+
+def isIDPart(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & ( GC_ND_MASK | GC_NL_MASK | GC_L_MASK | GC_PC_MASK | GC_MC_MASK | GC_MN_MASK)) != 0 or isIDIgnorable(c)
+
+def isIDIgnorable(c):
+    if c < 0x009F:
+        isISOControl(c) and not isThatASCIIControlSpace(c)
+
+    gc = getGeneralCategory(c)
+    return gc == GC_FORMAT_CHAR
+
+def isJavaIDStart(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & (GC_L_MASK | GC_SC_MASK | GC_PC_MASK)) != 0
+
+def isJavaIDPart(c):
+    gc = getGeneralCategory(c)
+    return (gcMask(gc) & (GC_ND_MASK | GC_NL_MASK | GC_L_MASK | GC_SC_MASK | GC_PC_MASK |GC_MC_MASK | GC_MN_MASK)) != 0 or isIDIgnorable(c)
+
+def digitValue(c):
+    props = propsTrie.get(c)
+    value = getNumericTypeValue(c) - UPROPS_NTV_DECIMAL_START
+    return value if value <=9 else -1
+
 def getNumericType(c):
     props = propsTrie.get(c)
     return props & UPROPS_CATEGORY_MASK
@@ -281,6 +327,36 @@ UPROPS_PATTERN_WHITE_SPACE = 30
 UPROPS_PREPENDED_CONCATENATION_MARK = 31            # new in ICU 60 and Unicode 10
 UPROPS_BINARY_1_TOP = 32                        #  ==32 - full!
 
+# Properties in vector word 2
+# Bits
+# 31..26   http://www.unicode.org/reports/tr51/#Emoji_Properties
+# 25..20   Line Break
+# 19..15   Sentence Break
+# 14..10   Word Break
+#  9.. 5   Grapheme Cluster Break
+#  4.. 0   Decomposition Type
+
+UPROPS_2_EXTENDED_PICTOGRAPHIC = 26
+UPROPS_2_EMOJI_COMPONENT = 27
+UPROPS_2_EMOJI = 28
+UPROPS_2_EMOJI_PRESENTATION = 29
+UPROPS_2_EMOJI_MODIFIER = 30
+UPROPS_2_EMOJI_MODIFIER_BASE = 31
+
+UPROPS_LB_MASK = 0x03f00000
+UPROPS_LB_SHIFT = 20
+
+UPROPS_SB_MASK = 0x000f8000
+UPROPS_SB_SHIFT = 15
+
+UPROPS_WB_MASK = 0x00007c00
+UPROPS_WB_SHIFT = 10
+
+UPROPS_GCB_MASK = 0x000003e0
+UPROPS_GCB_SHIFT = 5
+
+UPROPS_DT_MASK = 0x0000001f
+
 def getAge(c):
     age = getUnicodeProperties(c, 0) >> UPROPS_AGE_SHIFT
     return [age >> 4, age & 0xF, 0, 0]
@@ -316,6 +392,26 @@ def getEastAsianWidth(c):
     props = getUnicodeProperties(c, 0)
     return (props & UPROPS_EA_MASK) >> UPROPS_EA_SHIFT
 
+def getLineBreak(c):
+    props = getUnicodeProperties(c, 2)
+    return (props & UPROPS_LB_MASK) >> UPROPS_LB_SHIFT
+
+def getSentenceBreak(c):
+    props = getUnicodeProperties(c, 2)
+    return (props & UPROPS_SB_MASK) >> UPROPS_SB_SHIFT
+
+def getWordBreak(c):
+    props = getUnicodeProperties(c, 2)
+    return (props & UPROPS_WB_MASK) >> UPROPS_WB_SHIFT
+
+def getGraphemeClusterBreak(c):
+    props = getUnicodeProperties(c, 2)
+    return (props & UPROPS_GCB_MASK) >> UPROPS_GCB_SHIFT
+
+def getDecompType(c):
+    props = getUnicodeProperties(c, 2)
+    return props & UPROPS_DT_MASK
+
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
     print(f"General Category of '3' is {generalCategories[getGeneralCategory(ord('3'))]}")
@@ -338,10 +434,17 @@ def test():
     print(f"Numeric value of '{chr(0x0667)}' is {getNumericValue(0x0667)}")  # ARABIC-INDIC DIGIT SEVEN
     print(f"Numeric value of '{chr(0x09F6)}' is {getNumericValue(0x09F6)}")  # BENGALI CURRENCY NUMERATOR THREE (3/16)
     print(f"Numeric value of '{chr(0x0BF1)}' is {getNumericValue(0x0BF1)}")  # TAMIL NUMBER ONE HUNDRED
-    print(f"Numeric value of U+0x1ED2D is {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
+    print(f"Numberic value of '百' is {getNumericValue(ord('百'))}")
+    print(f"Numeric value of U+1ED2D is {getNumericValue(0x1ED2D)}")  # OTTOMAN SIYAQ NUMBER NINETY THOUSAND
+    print()
+
+    print(f"Digit value of '3' is {digitValue(ord('3'))}")
+    print(f"Digit value of '{chr(0x0663)}' is {digitValue(0x0663)}")
     print()
 
     print(f"Age of '{chr(0x0220)}' is {getAge(0x0220)}")
+    print()
+
     print(f"'a' is alphabetic: {isAlphabetic(ord('a'))}")
 
 if __name__ == "__main__":
