@@ -15,6 +15,26 @@ def doTest(cp, got, expected, name):
     if got != expected:
         print(f"    Code point {cp:04X} returned {name} {got}, expected {expected}")
 
+binaryTestList = [
+    (CharProps.UPROPS_WHITE_SPACE, "whitespace"),
+    (CharProps.UPROPS_DASH, "dash"),
+    (CharProps.UPROPS_HYPHEN, "hyphen"),
+    (CharProps.UPROPS_QUOTATION_MARK, "quotationMark"),
+    (CharProps.UPROPS_TERMINAL_PUNCTUATION, "terminalPunctuation"),
+    (CharProps.UPROPS_MATH, "math"),
+    (CharProps.UPROPS_HEX_DIGIT, "hexDigit"),
+    (CharProps.UPROPS_ASCII_HEX_DIGIT, "asciiHexDigit"),
+    (CharProps.UPROPS_ALPHABETIC, "alphabetic"),
+    (CharProps.UPROPS_IDEOGRAPHIC, "ideographic"),
+    (CharProps.UPROPS_DIACRITIC, "diacritic"),
+    (CharProps.UPROPS_EXTENDER, "extender")
+]
+def doBinaryTests(cp, binaryProps):
+    for (propMask, field) in binaryTestList:
+        got = CharProps.getBinaryProp(cp, propMask)
+        expected = binaryProps.__dict__[field]
+        doTest(cp, got, expected, field)
+
 def test():
     ucd = UnicodeCharacterData()
 
@@ -43,6 +63,8 @@ def test():
         doTest(cp, lb, characterData.lineBreak, "Line break")
         doTest(cp, sb, characterData.sentenceBreak, "Sentence break")
         doTest(cp, gcb, characterData.graphemeClusterBreak, "Grapheme cluster break")
+
+        doBinaryTests(cp, characterData.binaryProperties)
 
     end = timer()
     print(f"  Test took {end - start} seconds.")

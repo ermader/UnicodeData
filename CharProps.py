@@ -412,6 +412,13 @@ def getDecompType(c):
     props = getUnicodeProperties(c, 2)
     return props & UPROPS_DT_MASK
 
+def getBinaryProp(c, propShift):
+    if propShift >= UPROPS_BINARY_1_TOP:
+        return None  # Or False?
+
+    props = getUnicodeProperties(c, 1)
+    return (props & (1 << propShift)) != 0
+
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
     print(f"General Category of '3' is {generalCategories[getGeneralCategory(ord('3'))]}")
@@ -446,6 +453,8 @@ def test():
     print()
 
     print(f"'a' is alphabetic: {isAlphabetic(ord('a'))}")
+    print(f"' ' is whitespace: {getBinaryProp(ord(' '), UPROPS_WHITE_SPACE)}")
+    print(f"'{chr(CH_U_FW_F)}' is hex digit: {getBinaryProp(CH_U_FW_F, UPROPS_HEX_DIGIT)}")
 
 if __name__ == "__main__":
     test()

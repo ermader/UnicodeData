@@ -9,6 +9,7 @@ from BidiProperties import BidiProperties
 from DecompProperties import DecompProperties
 from CaseProperties import CaseProperties
 from IndicProperties import IndicProperties
+from BinaryProperties import BinaryProperties
 
 class CharacterData(UCDProperties):
     def __init__(self, char, group):
@@ -51,6 +52,8 @@ class CharacterData(UCDProperties):
         self.jamoShortName = self.getCharProperty("JSN")  # maybe empty string => None?
 
         self.indicProperties = IndicProperties(char, group)
+
+        self.binaryProperties = BinaryProperties(char, group)
 
         if self.name is None or len(self.name) == 0:
             self.name = self.getCharProperty("na1")
