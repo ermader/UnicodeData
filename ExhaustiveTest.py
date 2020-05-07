@@ -73,6 +73,9 @@ def test():
         lb = Boundaries.lineBreakNames[CharProps.getLineBreak(cp)]
         sb = Boundaries.sentenceBreakNames[CharProps.getSentenceBreak(cp)]
         gcb = Boundaries.graphemeClusterBreakNames[CharProps.getGraphemeClusterBreak(cp)]
+        ijc = BidiProps.isJoinControl(cp)
+        ibc = BidiProps.isBidiControl(cp)
+        im = BidiProps.isMirrored(cp)
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -84,6 +87,9 @@ def test():
         doTest(cp, lb, characterData.lineBreak, "Line break")
         doTest(cp, sb, characterData.sentenceBreak, "Sentence break")
         doTest(cp, gcb, characterData.graphemeClusterBreak, "Grapheme cluster break")
+        doTest(cp, ijc, characterData.isJoiningControl, "is joining control")
+        doTest(cp, ibc, characterData.bidiProperties.bidiControl, "is bidi control")
+        doTest(cp, im, characterData.bidiProperties.bidiMirrored, "is bidi mirrored")
 
         doBinaryTests(cp, characterData.binaryProperties)
 

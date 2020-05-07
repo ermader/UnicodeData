@@ -24,7 +24,7 @@ class BidiProperties(UCDProperties):
         self.bidiControl = self.getBooleanProperty("Bidi_C")
 
         self.bidiPairedBracketType = self.getCharProperty("bpt")
-        self.bidiPairedBracket = self.getBooleanProperty("bpb")
+        self.bidiPairedBracket = self.getCharProperty("bpb")
 
         # Don't need these any more
         self._char = None

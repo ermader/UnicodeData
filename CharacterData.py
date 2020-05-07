@@ -38,6 +38,7 @@ class CharacterData(UCDProperties):
 
         self.joiningType = self.getCharProperty("jt")
         self.joiningGroup = self.getCharProperty("jg").replace("_", " ")
+        self.isJoiningControl = self.getBooleanProperty("Join_C")
 
         self.lineBreak = self.getCharProperty("lb")
         self.sentenceBreak = self.getCharProperty("SB")
