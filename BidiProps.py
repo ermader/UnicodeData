@@ -92,7 +92,7 @@ def getMirrorFromProps(c, props):
 
         if c == c2:
             mirrorIndex = getMirrorIndexFromProps(m)
-            return getMirrorCodePointFromProps(mirrorIndex)
+            return getMirrorCodePointFromProps(ubidi_props_mirrors[mirrorIndex])
 
         if c < c2:
             break

@@ -19,7 +19,7 @@ class BidiProperties(UCDProperties):
         self.bidiMirrored = self.getBooleanProperty("Bidi_M")
 
         bmg = self.getCharProperty("bmg")
-        self.bidiMirroredGlyph = 0 if bmg == "" else int(bmg, 16)
+        self.bidiMirroredGlyph = self.codePoint if bmg == "" else int(bmg, 16)
 
         self.bidiControl = self.getBooleanProperty("Bidi_C")
 
