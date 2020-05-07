@@ -50,10 +50,25 @@ binaryTestList = [
     (CharProps.UPROPS_PREPENDED_CONCATENATION_MARK, "prependedConcatenationMark")
 ]
 
+binaryTest2List = [
+    (CharProps.UPROPS_2_EMOJI, "emoji"),
+    (CharProps.UPROPS_2_EMOJI_PRESENTATION, "emojiPresentation"),
+    (CharProps.UPROPS_2_EMOJI_MODIFIER, "emojiModifier"),
+    (CharProps.UPROPS_2_EMOJI_MODIFIER_BASE, "emojiModifierBase"),
+    (CharProps.UPROPS_2_EMOJI_COMPONENT, "emojiComponent"),
+    (CharProps.UPROPS_2_EXTENDED_PICTOGRAPHIC, "extendedPictograph")
+]
+
 def doBinaryTests(cp, binaryProps):
     for (propMask, field) in binaryTestList:
         got = CharProps.getBinaryProp(cp, propMask)
         expected = getattr(binaryProps, field)
+        doTest(cp, got, expected, field)
+
+def doBinary2Tests(cp, charData):
+    for (propsMask, field) in binaryTest2List:
+        got = CharProps.getBinaryProp(cp, propsMask, 2)
+        expected = getattr(charData, field)
         doTest(cp, got, expected, field)
 
 def test():
@@ -96,6 +111,7 @@ def test():
         doTest(cp, im, characterData.bidiProperties.bidiMirrored, "is bidi mirrored")
 
         doBinaryTests(cp, characterData.binaryProperties)
+        doBinary2Tests(cp, characterData)
 
     end = timer()
     print(f"  Test took {end - start} seconds.")

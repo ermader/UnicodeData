@@ -56,6 +56,13 @@ class CharacterData(UCDProperties):
 
         self.binaryProperties = BinaryProperties(char, group)
 
+        self.emoji = self.getBooleanProperty("Emoji")
+        self.emojiPresentation = self.getBooleanProperty("EPres")
+        self.emojiModifier = self.getBooleanProperty("EMod")
+        self.emojiModifierBase = self.getBooleanProperty("EBase")
+        self.emojiComponent = self.getBooleanProperty("EComp")
+        self.extendedPictograph = self.getBooleanProperty("ExtPict")
+
         if self.name is None or len(self.name) == 0:
             self.name = self.getCharProperty("na1")
 

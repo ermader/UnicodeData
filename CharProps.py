@@ -412,12 +412,30 @@ def getDecompType(c):
     props = getUnicodeProperties(c, 2)
     return props & UPROPS_DT_MASK
 
-def getBinaryProp(c, propShift):
+def getBinaryProp(c, propShift, column=1):
     if propShift >= UPROPS_BINARY_1_TOP:
         return None  # Or False?
 
-    props = getUnicodeProperties(c, 1)
+    props = getUnicodeProperties(c, column)
     return (props & (1 << propShift)) != 0
+
+def isExtendedPictograph(c):
+    return getBinaryProp(c, UPROPS_2_EXTENDED_PICTOGRAPHIC, 2)
+
+def isEmojiComponent(c):
+    return getBinaryProp(c, UPROPS_2_EMOJI_COMPONENT, 2)
+
+def isEmoji(c):
+    return getBinaryProp(c, UPROPS_2_EMOJI, 2)
+
+def isEmojiPresentation(c):
+    return getBinaryProp(c, UPROPS_2_EMOJI_PRESENTATION, 2)
+
+def isEmojiModifier(c):
+    return getBinaryProp(c, UPROPS_2_EMOJI_MODIFIER, 2)
+
+def isEmojiModifierBase(c):
+    return getBinaryProp(c, UPROPS_2_EMOJI_MODIFIER_BASE, 2)
 
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
@@ -455,6 +473,12 @@ def test():
     print(f"'a' is alphabetic: {isAlphabetic(ord('a'))}")
     print(f"' ' is whitespace: {getBinaryProp(ord(' '), UPROPS_WHITE_SPACE)}")
     print(f"'{chr(CH_U_FW_F)}' is hex digit: {getBinaryProp(CH_U_FW_F, UPROPS_HEX_DIGIT)}")
+    print(f"'{chr(0x1F600)}' is emoji: {isEmoji(0x1F600)}")
+    print(f"'{chr(0x231B)}' is emoji presentation: {isEmojiPresentation(0x231B)}")
+    print(f"'{chr(0x1F3FB)}' is emoji modifier: {isEmojiModifier(0x1F3FB)}")
+    print(f"'{chr(0x1F3C7)}' is emoji modifier base: {isEmojiModifierBase(0x1F3C7)}")
+    print(f"'{chr(0x1F9B0)}' is emoji component: {isEmojiComponent(0x1F9B0)}")
+    print(f"'{chr(0x1FA82)}' is extended pictograph: {isExtendedPictograph(0x1FA82)}")
 
 if __name__ == "__main__":
     test()

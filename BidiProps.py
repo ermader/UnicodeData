@@ -170,6 +170,8 @@ def test():
     print(f"'{chr(0x3010)}' is mirrored: {isMirrored(0x3010)}")
     print(f"'{chr(0x3042)}' is mirrored: {isMirrored(0x3042)}")
     print(f"Mirror of '(' is '{chr(getMirror(ord('(')))}'")
+    print(f"Mirror of '{chr(0x00AB)}' is '{chr(getMirror(0x00AB))}'")
+    print(f"Mirror of '{chr(0x00BB)}' is '{chr(getMirror(0x00BB))}'")
     print(f"Mirror of '{chr(0x3011)}' is '{chr(getMirror(0x3011))}'")
 
     print()
