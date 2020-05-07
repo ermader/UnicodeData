@@ -27,12 +27,33 @@ binaryTestList = [
     (CharProps.UPROPS_ALPHABETIC, "alphabetic"),
     (CharProps.UPROPS_IDEOGRAPHIC, "ideographic"),
     (CharProps.UPROPS_DIACRITIC, "diacritic"),
-    (CharProps.UPROPS_EXTENDER, "extender")
+    (CharProps.UPROPS_EXTENDER, "extender"),
+    (CharProps.UPROPS_NONCHARACTER_CODE_POINT, "nonCharacterCodePoint"),
+    (CharProps.UPROPS_GRAPHEME_EXTEND, "graphemeExtended"),
+    (CharProps.UPROPS_GRAPHEME_LINK, "graphemeLink"),
+    (CharProps.UPROPS_IDS_BINARY_OPERATOR, "idsBinaryOperator"),
+    (CharProps.UPROPS_IDS_TRINARY_OPERATOR, "idsTrinaryOperator"),
+    (CharProps.UPROPS_RADICAL, "radical"),
+    (CharProps.UPROPS_UNIFIED_IDEOGRAPH, "unifiedIdeographic"),
+    (CharProps.UPROPS_DEFAULT_IGNORABLE_CODE_POINT, "defaultIgnorable"),
+    (CharProps.UPROPS_DEPRECATED, "deprecated"),
+    (CharProps.UPROPS_LOGICAL_ORDER_EXCEPTION, "logicalOrderException"),
+    (CharProps.UPROPS_XID_START, "xIDStart"),
+    (CharProps.UPROPS_XID_CONTINUE, "xIDContinue"),
+    (CharProps.UPROPS_ID_START, "idStart"),
+    (CharProps.UPROPS_ID_CONTINUE, "idContinue"),
+    (CharProps.UPROPS_GRAPHEME_BASE, "graphemeBase"),
+    (CharProps.UPROPS_S_TERM, "sentenceTerminalPunctuation"),
+    (CharProps.UPROPS_VARIATION_SELECTOR, "variationSelector"),
+    (CharProps.UPROPS_PATTERN_SYNTAX, "patternSyntax"),
+    (CharProps.UPROPS_PATTERN_WHITE_SPACE, "patternWhitespace"),
+    (CharProps.UPROPS_PREPENDED_CONCATENATION_MARK, "prependedConcatenationMark")
 ]
+
 def doBinaryTests(cp, binaryProps):
     for (propMask, field) in binaryTestList:
         got = CharProps.getBinaryProp(cp, propMask)
-        expected = binaryProps.__dict__[field]
+        expected = getattr(binaryProps, field)
         doTest(cp, got, expected, field)
 
 def test():

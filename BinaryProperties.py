@@ -17,7 +17,7 @@ propsList = [
     ("sentenceTerminalPunctuation", "STerm"),
     ("diacritic", "Dia"),
     ("extender", "Ext"),
-    ("prependedConcatinationMark", "PCM"),
+    ("prependedConcatenationMark", "PCM"),
     ("softDotted", "SD"),
     ("alphabetic", "Alpha"),
     ("otherAlphabetic", "OAlpha"),
@@ -57,7 +57,7 @@ class BinaryProperties(UCDProperties):
 
         for (field, tag) in propsList:
             value = self.getBooleanProperty(tag)
-            self.__dict__[field] = value
+            setattr(self, field, value)
 
         self._char = None
         self._group = None
