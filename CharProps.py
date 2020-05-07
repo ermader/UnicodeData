@@ -132,14 +132,14 @@ def isPrint(c):
 
 def isPrintPOSIX(c):
     gc = getGeneralCategory(c)
-    return gc == GC_SPACE_SEPARATOR or isGraphPosix(c)
+    return gc == GC_SPACE_SEPARATOR or isGraphPOSIX(c)
 
 def isgraph(c):
     gc = getGeneralCategory(c)
     # comparing == 0 returns False for the categories mentioned
     return (gcMask(gc) & (GC_CC_MASK | GC_CF_MASK | GC_CS_MASK | GC_CN_MASK | GC_Z_MASK)) == 0
 
-def isGraphPosix(c):
+def isGraphPOSIX(c):
     gc = getGeneralCategory(c)
     # comparing == 0 returns False for the categories mentioned
     return (gcMask(gc) & (GC_CC_MASK | GC_CS_MASK | GC_CN_MASK | GC_Z_MASK)) == 0

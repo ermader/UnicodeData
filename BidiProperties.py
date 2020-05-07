@@ -19,12 +19,13 @@ class BidiProperties(UCDProperties):
         self.bidiMirrored = self.getBooleanProperty("Bidi_M")
 
         bmg = self.getCharProperty("bmg")
-        self.bidiMirroredGlyph = bmg if bmg == "" else int(bmg, 16)
+        self.bidiMirroredGlyph = 0 if bmg == "" else int(bmg, 16)
 
         self.bidiControl = self.getBooleanProperty("Bidi_C")
 
         self.bidiPairedBracketType = self.getCharProperty("bpt")
-        self.bidiPairedBracket = self.getCharProperty("bpb")
+        bpb = self.getCharProperty("bpb")
+        self.bidiPairedBracket = self.codePoint if bpb == "#" else int(bpb, 16)
 
         # Don't need these any more
         self._char = None

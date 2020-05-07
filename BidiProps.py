@@ -87,17 +87,17 @@ def getMirrorFromProps(c, props):
     if delta != UBIDI_ESC_MIRROR_DELTA:
         return c + delta
 
-        for m in ubidi_props_mirrors:
-            c2 = getMirrorCodePointFromProps(m)
+    for m in ubidi_props_mirrors:
+        c2 = getMirrorCodePointFromProps(m)
 
-            if c == c2:
-                mirrorIndex = getMirrorIndexFromProps(m)
-                return getMirrorCodePointFromProps(mirrorIndex)
+        if c == c2:
+            mirrorIndex = getMirrorIndexFromProps(m)
+            return getMirrorCodePointFromProps(mirrorIndex)
 
-            if c < c2:
-                break
+        if c < c2:
+            break
 
-        return c2
+    return c
 
 def getMirror(c):
     props = bidiPropsTrie.get(c)
