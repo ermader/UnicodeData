@@ -10,6 +10,7 @@ import GeneralCategories
 import JoiningTypesAndGroups
 import CharDirection
 import Boundaries
+import DecompositionType
 
 def doTest(cp, got, expected, name):
     if got != expected:
@@ -93,6 +94,7 @@ def test():
         ijc = BidiProps.isJoinControl(cp)
         ibc = BidiProps.isBidiControl(cp)
         im = BidiProps.isMirrored(cp)
+        dt = DecompositionType.decompositionTypeNames[CharProps.getDecompType(cp)]
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -109,6 +111,7 @@ def test():
         doTest(cp, ijc, characterData.isJoiningControl, "is joining control")
         doTest(cp, ibc, characterData.bidiProperties.bidiControl, "is bidi control")
         doTest(cp, im, characterData.bidiProperties.bidiMirrored, "is bidi mirrored")
+        doTest(cp, dt, characterData.decompProperties.decompositionType, "decomposition type")
 
         doBinaryTests(cp, characterData.binaryProperties)
         doBinary2Tests(cp, characterData)
