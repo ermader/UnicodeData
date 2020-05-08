@@ -3,6 +3,7 @@ from timeit import default_timer as timer
 from UnicodeData import UnicodeCharacterData, CharacterData
 import CharProps
 import BidiProps
+import CaseProps
 import Scripts
 import Blocks
 import EastAsianWidth
@@ -95,6 +96,9 @@ def test():
         ibc = BidiProps.isBidiControl(cp)
         im = BidiProps.isMirrored(cp)
         dt = DecompositionType.decompositionTypeNames[CharProps.getDecompType(cp)]
+        uc = chr(CaseProps.toUpper(cp))
+        lc = chr(CaseProps.toLower(cp))
+        tc = chr(CaseProps.toTitle(cp))
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -112,6 +116,9 @@ def test():
         doTest(cp, ibc, characterData.bidiProperties.bidiControl, "is bidi control")
         doTest(cp, im, characterData.bidiProperties.bidiMirrored, "is bidi mirrored")
         doTest(cp, dt, characterData.decompProperties.decompositionType, "decomposition type")
+        doTest(cp, uc, characterData.caseProperties.upperCase, "upper case")
+        doTest(cp, lc, characterData.caseProperties.lowerCase, "lower case")
+        doTest(cp, tc, characterData.caseProperties.titleCase, "title case")
 
         doBinaryTests(cp, characterData.binaryProperties)
         doBinary2Tests(cp, characterData)

@@ -23,14 +23,14 @@ class UCDProperties(object):
         return self._group.get(property)
 
     def getBooleanProperty(self, property):
-        prop = self.getCharProperty(property);
+        prop = self.getCharProperty(property)
         return prop == "Y"
 
     def getCodePointsProperty(self, property):
         codePointString = self.getCharProperty(property)
 
         if len(codePointString) == 0 or codePointString == "#":
-            return None  # or maybe self.codePoint?
+            return f"{int(self.cp, 16):c}"
 
         codePoints = codePointString.split(" ")
         chars = []
