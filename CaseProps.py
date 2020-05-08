@@ -207,7 +207,7 @@ def toTitle(c):
             delta = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
             return c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta
 
-        for slot in [UCASE_EXC_UPPER, UCASE_EXC_LOWER]:
+        for slot in [UCASE_EXC_TITLE, UCASE_EXC_UPPER]:
             if hasSlot(excWord, slot):
                 return getSlotValue(excWord, slot, exceptionIndex)
 
@@ -235,6 +235,7 @@ def test():
 
     print(f"toTitle('A') is '{chr(toTitle(ord('A')))}'")
     print(f"toTitle('a') is '{chr(toTitle(ord('a')))}'")
+    print(f"toTitle('K') is '{chr(toTitle(ord('K')))}'")
     print(f"toTitle('{chr(0x0130)}') is '{chr(toTitle(0x0130))}'")
     print(f"toTitle('{chr(0x0131)}') is '{chr(toTitle(0x0131))}'")
     print(f"toTitle('Г') is '{chr(toTitle(ord('Г')))}'")
