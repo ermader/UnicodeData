@@ -451,6 +451,7 @@ def test():
     print()
 
     print(f"Script of '{chr(0x0915)}' is '{scriptCodes[getScript(0x0915)]}'")
+    print(f"Script of '{chr(0x0485)}' is '{scriptCodes[getScript(0x0485)]}'")
     print(f"Script of U+1E900 is '{scriptCodes[getScript(0x1E900)]}'")
     print()
 
