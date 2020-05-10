@@ -96,9 +96,9 @@ def test():
         ibc = BidiProps.isBidiControl(cp)
         im = BidiProps.isMirrored(cp)
         dt = DecompositionType.decompositionTypeNames[CharProps.getDecompType(cp)]
-        uc = chr(CaseProps.toUpper(cp))
-        lc = chr(CaseProps.toLower(cp))
-        tc = chr(CaseProps.toTitle(cp))
+        uc =CaseProps.toFullUpper(cp)
+        lc = CaseProps.toFullLower(cp)
+        tc = CaseProps.toFullTitle(cp)
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")

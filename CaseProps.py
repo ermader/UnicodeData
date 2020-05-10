@@ -296,12 +296,16 @@ def toUpperOrTitle(c, upperNotTitle):
             return chr(c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta)
 
         if (not upperNotTitle) and hasSlot(excWord, UCASE_EXC_TITLE):
-            for slot in [UCASE_EXC_TITLE, UCASE_EXC_UPPER]:
-                if hasSlot(excWord, slot):
-                    (ch, _) = getSlotValue(excWord, slot, exceptionIndex2)
-                    return chr(ch)
+            idx = UCASE_EXC_TITLE
+        elif hasSlot(excWord, UCASE_EXC_UPPER):
+            idx = UCASE_EXC_UPPER
+        else:
+            return result
 
-        return result
+        (ch, _) = getSlotValue(excWord, idx, exceptionIndex2)
+        return chr(ch)
+
+    return result
 
 def toFullUpper(c):
     return toUpperOrTitle(c, True)
@@ -324,6 +328,7 @@ def test():
 
     print(f"toUpper('A') is '{chr(toUpper(ord('A')))}'")
     print(f"toUpper('a') is '{chr(toUpper(ord('a')))}'")
+    print(f"toFullUpper('k') is '{toFullUpper(ord('k'))}'")
     print(f"toUpper('{chr(0x00DF)}') is '{chr(toUpper(0x00DF))}'")
     print(f"toFullUpper('{chr(0x00DF)}') is '{toFullUpper(0x00DF)}'")
     print(f"toFullUpper('{chr(0x0130)}') is '{toFullUpper(0x0130)}'")
@@ -336,7 +341,7 @@ def test():
 
     print(f"toTitle('A') is '{chr(toTitle(ord('A')))}'")
     print(f"toTitle('a') is '{chr(toTitle(ord('a')))}'")
-    print(f"toTitle('K') is '{chr(toTitle(ord('K')))}'")
+    print(f"toFullTitle('k') is '{toFullTitle(ord('k'))}'")
     print(f"toFullTitle('{chr(0x00DF)}') is '{toFullTitle(0x00DF)}'")
     print(f"toTitle('{chr(0x0130)}') is '{chr(toTitle(0x0130))}'")
     print(f"toTitle('{chr(0x0131)}') is '{chr(toTitle(0x0131))}'")
