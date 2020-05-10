@@ -147,12 +147,13 @@ def slotOffset(flags, index):
     return flagsOffset[flags & ((1 << index) - 1)]
 
 def getSlotValue(excWord, index, exceptionIndex):
+    slot_offset = slotOffset(excWord, index)
     if (excWord & UCASE_EXC_DOUBLE_SLOTS) == 0:
-        exceptionIndex += slotOffset(excWord, index)
-        return ucase_props_exceptions[exceptionIndex]
+        exceptionIndex += slot_offset
+        return (ucase_props_exceptions[exceptionIndex], slot_offset)
 
-    exceptionIndex += 2 * slotOffset(excWord, index)
-    return (ucase_props_exceptions[exceptionIndex]) << 16 | ucase_props_exceptions[exceptionIndex+1]
+    exceptionIndex += 2 * slot_offset
+    return ((ucase_props_exceptions[exceptionIndex]) << 16 | ucase_props_exceptions[exceptionIndex+1], (2 * slot_offset) + 1)
 
 def toLower(c):
     props = casePropsTrie.get(c)
@@ -166,11 +167,11 @@ def toLower(c):
         excWord = ucase_props_exceptions[exceptionIndex]
         exceptionIndex += 1
         if hasSlot(excWord, UCASE_EXC_DELTA) and isUpperOrTitle(props):
-            delta = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
+            (delta, _) = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
             return c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta
 
         if hasSlot(excWord, UCASE_EXC_LOWER):
-            c = getSlotValue(excWord, UCASE_EXC_LOWER, exceptionIndex)
+            (c, _) = getSlotValue(excWord, UCASE_EXC_LOWER, exceptionIndex)
 
     return c
 
@@ -185,11 +186,11 @@ def toUpper(c):
         excWord = ucase_props_exceptions[exceptionIndex]
         exceptionIndex += 1
         if hasSlot(excWord, UCASE_EXC_DELTA) and getTypeFromProps(props) == UCASE_LOWER:
-            delta = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
+            (delta, _) = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
             return c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta
 
         if hasSlot(excWord, UCASE_EXC_UPPER):
-            c = getSlotValue(excWord, UCASE_EXC_UPPER, exceptionIndex)
+            (c, _) = getSlotValue(excWord, UCASE_EXC_UPPER, exceptionIndex)
 
     return c
 
@@ -204,14 +205,53 @@ def toTitle(c):
         excWord = ucase_props_exceptions[exceptionIndex]
         exceptionIndex += 1
         if hasSlot(excWord, UCASE_EXC_DELTA) and getTypeFromProps(props) == UCASE_LOWER:
-            delta = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
+            (delta, _) = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex)
             return c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta
 
         for slot in [UCASE_EXC_TITLE, UCASE_EXC_UPPER]:
             if hasSlot(excWord, slot):
-                return getSlotValue(excWord, slot, exceptionIndex)
+                return getSlotValue(excWord, slot, exceptionIndex)[0]
 
     return c
+
+# locale?
+def toFullLower(c):
+    result = chr(c)
+    props = casePropsTrie.get(c)
+
+    if not hasException(props):
+        if isUpperOrTitle(props):
+            return chr(c + getDeltaFromProps(props))
+    else:
+        exceptionIndex = props >> UCASE_EXC_SHIFT
+        excWord = ucase_props_exceptions[exceptionIndex]
+        exceptionIndex += 1
+        exceptionIndex2 = exceptionIndex
+
+        if (excWord & UCASE_EXC_CONDITIONAL_SPECIAL) != 0:
+            # this is were to handle locale exceptions
+            if c == 0x0130:  # Upper case dotted I
+                return "i\u0307"
+        elif hasSlot(excWord, UCASE_EXC_FULL_MAPPINGS):
+            (full, offset) = getSlotValue(excWord, UCASE_EXC_FULL_MAPPINGS, exceptionIndex)
+            full &= UCASE_FULL_LOWER
+            if full != 0:
+                chars = []
+                exceptionIndex += offset + 1
+                for i in range(full):
+                    chars.append(chr(ucase_props_exceptions[exceptionIndex + i]))
+
+                return "".join(chars)
+
+        if hasSlot(excWord, UCASE_EXC_DELTA) and isUpperOrTitle(props):
+            (delta, _) = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex2)
+            return chr(c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta)
+
+        if hasSlot(excWord, UCASE_EXC_LOWER):
+            (ch, _) = getSlotValue(excWord, UCASE_EXC_LOWER, exceptionIndex2)
+            return chr(ch)
+
+    return result
 
 # locale?
 def toUpperOrTitle(c, upperNotTitle):
@@ -232,8 +272,8 @@ def toUpperOrTitle(c, upperNotTitle):
             pass
 
         elif hasSlot(excWord, UCASE_EXC_FULL_MAPPINGS):
-            full = getSlotValue(excWord, UCASE_EXC_FULL_MAPPINGS, exceptionIndex)
-            exceptionIndex += 2 + (full & UCASE_FULL_LOWER)
+            (full, offset) = getSlotValue(excWord, UCASE_EXC_FULL_MAPPINGS, exceptionIndex)
+            exceptionIndex += offset + 1 + (full & UCASE_FULL_LOWER)
             full >>= 4
             exceptionIndex += full & 0xF
             full >>= 4
@@ -252,13 +292,14 @@ def toUpperOrTitle(c, upperNotTitle):
                 return "".join(chars)
 
         if hasSlot(excWord, UCASE_EXC_DELTA) and getTypeFromProps(props) == UCASE_LOWER:
-            delta = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex2)
+            (delta, _) = getSlotValue(excWord, UCASE_EXC_DELTA, exceptionIndex2)
             return chr(c + delta if (excWord & UCASE_EXC_DELTA_IS_NEGATIVE) == 0 else c - delta)
 
         if (not upperNotTitle) and hasSlot(excWord, UCASE_EXC_TITLE):
             for slot in [UCASE_EXC_TITLE, UCASE_EXC_UPPER]:
                 if hasSlot(excWord, slot):
-                    return chr(getSlotValue(excWord, slot, exceptionIndex2))
+                    (ch, _) = getSlotValue(excWord, slot, exceptionIndex2)
+                    return chr(ch)
 
         return result
 
@@ -275,7 +316,7 @@ def test():
     print(f"toLower('A') is '{chr(toLower(ord('A')))}'")
     print(f"toLower('a') is '{chr(toLower(ord('a')))}'")
     print(f"toLower('{chr(0x0130)}') is '{chr(toLower(0x0130))}'")
-   # print(f"toFullLower('{chr(0x0130)}') is '{toFullLower(0x0130)}'")
+    print(f"toFullLower('{chr(0x0130)}') is '{toFullLower(0x0130)}'")
     print(f"toLower('{chr(0x0131)}') is '{chr(toLower(0x0131))}'")
     print(f"toLower('Г') is '{chr(toLower(ord('Г')))}'")
     print(f"toLower('г') is '{chr(toLower(ord('г')))}'")
@@ -283,12 +324,14 @@ def test():
 
     print(f"toUpper('A') is '{chr(toUpper(ord('A')))}'")
     print(f"toUpper('a') is '{chr(toUpper(ord('a')))}'")
-    print(f"toUpper('{chr(0x00DF)}' is '{chr(toUpper(0x00DF))}'")
+    print(f"toUpper('{chr(0x00DF)}') is '{chr(toUpper(0x00DF))}'")
     print(f"toFullUpper('{chr(0x00DF)}') is '{toFullUpper(0x00DF)}'")
     print(f"toFullUpper('{chr(0x0130)}') is '{toFullUpper(0x0130)}'")
     print(f"toUpper('{chr(0x0131)}') is '{chr(toUpper(0x0131))}'")
+    print(f"toFullUpper('{chr(0x0149)}') is '{toFullUpper(0x0149)}'")
     print(f"toUpper('Г') is '{chr(toUpper(ord('Г')))}'")
     print(f"toUpper('г') is '{chr(toUpper(ord('г')))}'")
+    print(f"toFullUpper('{chr(0x1E98)}') is '{toFullUpper(0x1E98)}'")
     print()
 
     print(f"toTitle('A') is '{chr(toTitle(ord('A')))}'")
@@ -297,8 +340,10 @@ def test():
     print(f"toFullTitle('{chr(0x00DF)}') is '{toFullTitle(0x00DF)}'")
     print(f"toTitle('{chr(0x0130)}') is '{chr(toTitle(0x0130))}'")
     print(f"toTitle('{chr(0x0131)}') is '{chr(toTitle(0x0131))}'")
+    print(f"toFullTitle('{chr(0x0149)}') is '{toFullTitle(0x0149)}'")
     print(f"toTitle('Г') is '{chr(toTitle(ord('Г')))}'")
     print(f"toTitle('г') is '{chr(toTitle(ord('г')))}'")
+    print(f"toFullTitle('{chr(0x1E98)}') is '{toFullTitle(0x1E98)}'")
 
 
 
