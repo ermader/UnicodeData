@@ -655,6 +655,18 @@ class UnicodeSet:
         """Operator overload: ^ is set xor."""
         return self.symmetric_difference(other)
 
+    def __isub__(self, other):
+        return self.removeAll(other)
+
+    def __iand__(self, other):
+        return self.retainAll(other)
+
+    def __ior__(self, other):
+        return self.addAll(other)
+
+    def __ixor__(self, other):
+        return self.complementAll(other)
+
     def __contains__(self, arg):
         """Operator overload: in is contains."""
         return self.contains(arg)
@@ -798,6 +810,9 @@ if __name__ == "__main__":
 
     s3 = s1 | s2
     print(f"s1 | s2: {s3}")
+
+    s1 |= s2
+    print(f"s1 |= s2: {s1}")
     print()
 
     s1 = UnicodeSet(range(0x0915, 0x0940))
@@ -808,12 +823,23 @@ if __name__ == "__main__":
 
     s3 = s1 & s2
     print(f"s1 & s2: {s3}")
+    s4 = UnicodeSet(s1)
+
+    s4 &= s2
+    print(f"s1 &= s2: {s4}")
 
     s3 = s1 - s2
     print(f"s1 - s2: {s3}")
+    s4 = UnicodeSet(s1)
+    s4 -= s2
+    print(f"s1 -= s2: {s4}")
 
     s3 = s1 ^ s2
     print(f"s1 ^ s2: {s3}")
+
+    s4 = UnicodeSet(s1)
+    s4 ^= s2
+    print(f"s1 ^= s2: {s4}")
 
     print(f"s1.charAt(5) = {s1.charAt(5):04X}")
     print(f"s3.indexOf(0x0940) = {s3.indexOf(0x0940)}")

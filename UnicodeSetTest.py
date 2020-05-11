@@ -131,6 +131,19 @@ def testAddRemove():
     tt.add(ord('q'))
     _expectPairs(tt, "acpq", 5)
 
+def testIndexOf():
+    # [a-cx-y3578]
+    set = UnicodeSet(range(ord('a'), ord('c') + 1))
+    set.addRange(ord('x'), ord('y'))
+    set.add(ord('3'))
+    set.add(ord('5'))
+    set.addRange(ord('7'), ord('8'))
+
+    for i in range(set.size()):
+        c = set.charAt(i)
+        if set.indexOf(c) != i:
+            print(f"  FAIL - charAt({i}) = {c:c} => indexOf() = {set.indexOf(c)}")
+
 def testExhaustive():
     LIMIT = 128
 
@@ -176,6 +189,9 @@ if __name__ == "__main__":
 
     print("\nTestAddRemove:")
     testAddRemove()
+
+    print("\nTestIndexOf:")
+    testIndexOf()
 
     print("\nTestExhaustive:")
     testExhaustive()
