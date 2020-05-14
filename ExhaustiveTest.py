@@ -103,7 +103,7 @@ def test():
         tc = CaseProps.toFullTitle(cp)
         inpc = LayoutTypes.inpcNames[LayoutProps.getInPC(cp)]
         insc = LayoutTypes.inscNames[LayoutProps.getInSC(cp)]
-        # vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
+        vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -126,7 +126,7 @@ def test():
         doTest(cp, tc, characterData.caseProperties.titleCase, "title case")
         doTest(cp, inpc, characterData.indicProperties.positionalCategory, "positional category")
         doTest(cp, insc, characterData.indicProperties.syllabicCategory, "syllabic category")
-        # doTest(cp, vo, characterData.verticalOrientation, "vertical orientation")
+        doTest(cp, vo, characterData.verticalOrientation, "vertical orientation")
 
         doBinaryTests(cp, characterData.binaryProperties)
         doBinary2Tests(cp, characterData)

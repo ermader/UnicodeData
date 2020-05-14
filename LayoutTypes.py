@@ -118,9 +118,9 @@ inscNames = {
     U_INSC_REGISTER_SHIFTER: "Register_Shifter",
     U_INSC_SYLLABLE_MODIFIER: "Syllable_Modifier",
     U_INSC_TONE_LETTER: "Tone_Letter",
-    U_INSC_TONE_MARK: "ToneMark",
+    U_INSC_TONE_MARK: "Tone_Mark",
     U_INSC_VIRAMA: "Virama",
-    U_INSC_VISARGA: "Visraga",
+    U_INSC_VISARGA: "Visarga",
     U_INSC_VOWEL: "Vowel",
     U_INSC_VOWEL_DEPENDENT: "Vowel_Dependent",
     U_INSC_VOWEL_INDEPENDENT: "Vowel_Independent"
@@ -128,8 +128,8 @@ inscNames = {
 
 voNames = {
 U_VO_ROTATED: "R",
-U_VO_TRANSFORMED_ROTATED: "TR",
-U_VO_TRANSFORMED_UPRIGHT: "TU",
+U_VO_TRANSFORMED_ROTATED: "Tr",
+U_VO_TRANSFORMED_UPRIGHT: "Tu",
 U_VO_UPRIGHT: "U"
 }
 

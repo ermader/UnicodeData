@@ -49,12 +49,12 @@ inpcTrie = CPTrie(trieData)
 
 trieOffset = trieLimit
 trieLimit = indices[ULAYOUT_IX_INSC_TRIE_TOP] + dataOffset + headerLength
-triData = id.getData(trieOffset, trieLimit)
+trieData = id.getData(trieOffset, trieLimit)
 inscTrie = CPTrie(trieData)
 
 trieOffset = trieLimit
 trieLimit = indices[ULAYOUT_IX_VO_TRIE_TOP] + dataOffset + headerLength
-triData = id.getData(trieOffset, trieLimit)
+trieData = id.getData(trieOffset, trieLimit)
 voTrie = CPTrie(trieData)
 
 def getInPC(c):
