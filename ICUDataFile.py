@@ -8,8 +8,8 @@ Created on May 12, 2020
 
 import struct
 
-_dataFileName = "icudt64l"  # Needs to change if we change the data file...
-_dataFilePath = f"/usr/share/icu/{_dataFileName}.dat"  # Eventually, keep a copy in our Data directory...
+_dataFileName = "icudt67l"  # Needs to change if we change the data file...
+_dataFilePath = f"Data/{_dataFileName}.dat"
 _namePrefix = f"{_dataFileName}/"
 _namePrefixLen = len(_namePrefix)
 
