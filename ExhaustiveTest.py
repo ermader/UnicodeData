@@ -4,6 +4,7 @@ from UnicodeData import UnicodeCharacterData, CharacterData
 import CharProps
 import BidiProps
 import CaseProps
+import LayoutProps
 import Scripts
 import Blocks
 import EastAsianWidth
@@ -12,6 +13,7 @@ import JoiningTypesAndGroups
 import CharDirection
 import Boundaries
 import DecompositionType
+import LayoutTypes
 
 def doTest(cp, got, expected, name):
     if got != expected:
@@ -99,6 +101,9 @@ def test():
         uc =CaseProps.toFullUpper(cp)
         lc = CaseProps.toFullLower(cp)
         tc = CaseProps.toFullTitle(cp)
+        inpc = LayoutTypes.inpcNames[LayoutProps.getInPC(cp)]
+        # insc = LayoutTypes.inscNames[LayoutProps.getInSC(cp)]
+        # vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
 
         doTest(cp, sc, characterData.script, "script code")
         doTest(cp, gc, characterData.generalCategory, "general category")
@@ -119,6 +124,9 @@ def test():
         doTest(cp, uc, characterData.caseProperties.upperCase, "upper case")
         doTest(cp, lc, characterData.caseProperties.lowerCase, "lower case")
         doTest(cp, tc, characterData.caseProperties.titleCase, "title case")
+        doTest(cp, inpc, characterData.indicProperties.positionalCategory, "positional category")
+        # doTest(cp, insc, characterData.indicProperties.syllabicCategory, "syllabic category")
+        # doTest(cp, vo, characterData.verticalOrientation, "vertical orientation")
 
         doBinaryTests(cp, characterData.binaryProperties)
         doBinary2Tests(cp, characterData)

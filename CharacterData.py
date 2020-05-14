@@ -53,6 +53,7 @@ class CharacterData(UCDProperties):
         self.jamoShortName = self.getCharProperty("JSN")  # maybe empty string => None?
 
         self.indicProperties = IndicProperties(char, group)
+        self.verticalOrientation = self.getCharProperty("vo")
 
         self.binaryProperties = BinaryProperties(char, group)
 
