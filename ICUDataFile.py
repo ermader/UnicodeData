@@ -24,12 +24,18 @@ class ICUData(object):
     _fileData = None
 
     @classmethod
-    def getName(cls, offset):
-        name = ""
+    def getString(cls, offset):
+        s = ""
+
         while cls._fileData[offset] != 0:
-            name += chr(cls._fileData[offset])
+            s += chr(cls._fileData[offset])
             offset += 1
 
+        return s
+
+    @classmethod
+    def getName(cls, offset):
+        name = cls.getString(offset)  # Maybe check to be sure name starts with prefix?
         return name[_namePrefixLen:]
 
     @classmethod

@@ -36,24 +36,26 @@ layoutHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
  dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
     struct.unpack(dataHeaderFormat, layoutHeaderData[:dataHeaderLength])
 
-indicesStart = dataOffset + headerLength
+baseOffset = dataOffset + headerLength
+
+indicesStart = baseOffset
 (indicesCount, ) = struct.unpack("I", id.getData(indicesStart, indicesStart+4))
 indicesLimit = indicesStart + (indicesCount * 4)
 indicesFormat = f"{indicesCount}I"
 indices = struct.unpack(indicesFormat, id.getData(indicesStart, indicesLimit))
 
 trieOffset = indicesLimit
-trieLimit = indices[ULAYOUT_IX_INPC_TRIE_TOP] + dataOffset + headerLength
+trieLimit = indices[ULAYOUT_IX_INPC_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
 inpcTrie = CPTrie(trieData)
 
 trieOffset = trieLimit
-trieLimit = indices[ULAYOUT_IX_INSC_TRIE_TOP] + dataOffset + headerLength
+trieLimit = indices[ULAYOUT_IX_INSC_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
 inscTrie = CPTrie(trieData)
 
 trieOffset = trieLimit
-trieLimit = indices[ULAYOUT_IX_VO_TRIE_TOP] + dataOffset + headerLength
+trieLimit = indices[ULAYOUT_IX_VO_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
 voTrie = CPTrie(trieData)
 
