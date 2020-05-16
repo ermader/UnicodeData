@@ -76,7 +76,19 @@ groupStringsStart = groupStringOffset + baseOffset
 groupStringsLimit = algNamesOffset + baseOffset
 groupStringsData = id.getData(groupStringsStart, groupStringsLimit)
 
-pass
+algorithmicRanges = []
+(algorithmicRangeCount, ) = struct.unpack("I", id.getData(groupStringsLimit, groupStringsLimit + 4))
+
+rangeFormat = "IIBBH"
+rangeLength = struct.calcsize(rangeFormat)
+rangeStart = groupStringsLimit + 4
+rangeLimit = rangeStart + rangeLength
+for _ in range(algorithmicRangeCount):
+    (start, end, type, variant, size) = struct.unpack(rangeFormat, id.getData(rangeStart, rangeLimit))
+    # string = id.getString(rangeLimit
+    algorithmicRanges.append((start, end, type, variant, size, rangeStart + rangeLength))
+    rangeStart += size
+    rangeLimit = rangeStart + rangeLength
 
 def getGroup(code):
     groupMSB = code >> GROUP_SHIFT
@@ -163,8 +175,8 @@ def expandName(s, nameLength, nameChoice):
                 fieldIndex -= 1
                 if fieldIndex <= 0:
                     break
-            else:
-                nameLength = 0
+        else:
+            nameLength = 0
 
     while nameLength > 0:
         c = groupStringsData[s]
@@ -206,6 +218,30 @@ def expandGroupName(group, lineNumber, nameChoice):
     (s, offsets, lengths) = expandGroupLengths(s)
     return expandName(s + offsets[lineNumber], lengths[lineNumber], nameChoice)
 
+def getAlgorithmicName(range, code, nameChoice):
+    name = ""
+
+    if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
+        # Only the normative character name can be algorithmic.
+        return ""
+
+    if range[2] == 0:
+        # name = prefix hex-digits
+        name += id.getString(range[5])
+
+        digits = range[3]
+        if digits == 4:
+            hex = f"{code:04X}"
+        elif digits == 5:
+            hex = f"{code:05X}"
+        else:
+            hex = f"{code:06X}"
+        name += hex
+    elif range[2] == 1:
+        pass
+
+    return name
+
 def getName(code, nameChoice):
     group = getGroup(code)
 
@@ -214,10 +250,23 @@ def getName(code, nameChoice):
 
     return ""
 
-print(f"getName('K') = {getName(ord('K'), U_UNICODE_CHAR_NAME)}")
-print(f"getName('k') = {getName(ord('k'), U_UNICODE_CHAR_NAME)}")
+def getCharName(code, nameChoice):
+    for algorithmicRange in algorithmicRanges:
+        (start, end, _, _, _, _) = algorithmicRange
+        if code in range(start, end+1):
+            return getAlgorithmicName(algorithmicRange, code, nameChoice)
 
-print(f"getName(0x0901) = {getName(0x0901, U_UNICODE_CHAR_NAME)}")
-print(f"getName(0x0915) = {getName(0x0915, U_UNICODE_CHAR_NAME)}")
+    if nameChoice == U_EXTENDED_CHAR_NAME:
+        pass
 
-# print(getName(ord('漢'), U_UNICODE_CHAR_NAME))
+    return getName(code, nameChoice)
+
+print(f"getCharName('K') = {getCharName(ord('K'), U_UNICODE_CHAR_NAME)}")
+print(f"getCharName('k') = {getName(ord('k'), U_UNICODE_CHAR_NAME)}")
+
+print(f"getCharName(0x0901) = {getCharName(0x0901, U_UNICODE_CHAR_NAME)}")
+print(f"getCharName(0x0915) = {getCharName(0x0915, U_UNICODE_CHAR_NAME)}")
+
+print(f"getCharName(0x33E0) = {getCharName(0x33E0, U_UNICODE_CHAR_NAME)}")
+
+print(f"getCharName('漢') = {getCharName(ord('漢'), U_UNICODE_CHAR_NAME)}")
