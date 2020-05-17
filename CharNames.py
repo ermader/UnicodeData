@@ -36,8 +36,45 @@ CP_SEMICOLON = ord(';')
 _nameDataHeaderFormat = "IIII"
 _nameDataHeaderLength = struct.calcsize(_nameDataHeaderFormat)
 
+_rangeFormat = "IIBBH"
+_rangeLength = struct.calcsize(_rangeFormat)
 
 id = ICUData()
+
+class AlgorithmicRange(object):
+    def __init__(self, offset):
+        rangeStart = offset
+        rangeLimit = rangeStart + _rangeLength
+        (self.start, self.end, self.type, self.variant, self.size) = struct.unpack(_rangeFormat, id.getData(rangeStart, rangeLimit))
+
+        if self.type == 0:
+            self.string = id.getString(rangeLimit)
+            self.factors = None
+            self.elements = None
+        elif self.type == 1:
+            factorCount = self.variant
+            factorsFormat = f"{factorCount}H"
+            factorsLength = struct.calcsize(factorsFormat)
+            factorsStart = rangeLimit
+            factorsLimit = factorsStart + factorsLength
+            factorsData = id.getData(factorsStart, factorsLimit)
+            self.factors = struct.unpack(factorsFormat, factorsData)
+            self.string = id.getString(factorsLimit)
+            elementsData = id.getData(factorsLimit + len(self.string) + 1, offset + self.size)
+
+            self.elements = []
+            elementStart = factorsLimit + len(self.string) + 1  # + 1 for null byte
+
+            while elementStart < offset + self.size:
+                element = id.getString(elementStart)
+                self.elements.append(element)
+                elementStart += len(element) + 1
+
+        else:
+            self.string = None
+            self.factors = None
+            self.elements = None
+
 
 dataOffset = id.getDataOffset("unames.icu")
 dataHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
@@ -79,18 +116,12 @@ groupStringsData = id.getData(groupStringsStart, groupStringsLimit)
 algorithmicRanges = []
 (algorithmicRangeCount, ) = struct.unpack("I", id.getData(groupStringsLimit, groupStringsLimit + 4))
 
-rangeFormat = "IIBBH"
-rangeLength = struct.calcsize(rangeFormat)
 rangeStart = groupStringsLimit + 4
-rangeLimit = rangeStart + rangeLength
+rangeLimit = rangeStart + _rangeLength
 for _ in range(algorithmicRangeCount):
-    (start, end, type, variant, size) = struct.unpack(rangeFormat, id.getData(rangeStart, rangeLimit))
-    dataStart = rangeStart + rangeLength
-    dataLimit = rangeStart + size
-    rangeData = id.getData(dataStart, dataLimit)
-    algorithmicRanges.append((start, end, type, variant, size, rangeData))
-    rangeStart += size
-    rangeLimit = rangeStart + rangeLength
+    algRange = AlgorithmicRange(rangeStart)
+    algorithmicRanges.append(algRange)
+    rangeStart += algRange.size
 
 def getGroup(code):
     groupMSB = code >> GROUP_SHIFT
@@ -220,25 +251,38 @@ def expandGroupName(group, lineNumber, nameChoice):
     (s, offsets, lengths) = expandGroupLengths(s)
     return expandName(s + offsets[lineNumber], lengths[lineNumber], nameChoice)
 
+def factorSuffix(factors, elements, code):
+    indexes = []
+    suffix = ""
+
+    count = len(factors) - 1
+
+    for i in range(count, 0, -1):
+        factor = factors[i]
+        indexes.insert(0, code % factor)
+        code //= factor
+
+    indexes.insert(0, code)
+
+    elementIndex = 0
+    for i in range(count + 1):
+        elementIndex += indexes[i]
+        suffix += elements[elementIndex]
+        elementIndex += factors[i] - indexes[i]
+
+    return suffix
+
 def getAlgorithmicName(algorithmicRange, code, nameChoice):
     name = ""
 
-    (_, _, type, variant, length, data) = algorithmicRange
     if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
         # Only the normative character name can be algorithmic.
         return ""
 
-    if type == 0:
-        # name = prefix hex-digits
-        # name += range[5].decode("ascii")
-        dataLength = len(data)
-        i = 0
-        # Length is padded to four byte boundaries, so we have to scan for the null byte
-        while data[i] != 0:
-            name += chr(data[i])
-            i += 1
+    if algorithmicRange.type == 0:
+        name += algorithmicRange.string
 
-        digits = variant
+        digits = algorithmicRange.variant
         if digits == 4:
             hex = f"{code:04X}"
         elif digits == 5:
@@ -246,8 +290,9 @@ def getAlgorithmicName(algorithmicRange, code, nameChoice):
         else:
             hex = f"{code:06X}"
         name += hex
-    elif type == 1:
-        pass
+    elif algorithmicRange.type == 1:
+        name += algorithmicRange.string
+        name += factorSuffix(algorithmicRange.factors, algorithmicRange.elements, code - algorithmicRange.start)
 
     return name
 
@@ -261,8 +306,7 @@ def getName(code, nameChoice):
 
 def getCharName(code, nameChoice):
     for algorithmicRange in algorithmicRanges:
-        (start, end, _, _, _, _) = algorithmicRange
-        if code in range(start, end+1):
+        if code in range(algorithmicRange.start, algorithmicRange.end + 1):
             return getAlgorithmicName(algorithmicRange, code, nameChoice)
 
     if nameChoice == U_EXTENDED_CHAR_NAME:
@@ -274,12 +318,19 @@ def test():
     print(f"getCharName('K') = {getCharName(ord('K'), U_UNICODE_CHAR_NAME)}")
     print(f"getCharName('k') = {getName(ord('k'), U_UNICODE_CHAR_NAME)}")
 
-    print(f"getCharName(0x0901) = {getCharName(0x0901, U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName(0x0915) = {getCharName(0x0915, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0x0901)}') = {getCharName(0x0901, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('क') = {getCharName(ord('क'), U_UNICODE_CHAR_NAME)}")
 
-    print(f"getCharName(0x33E0) = {getCharName(0x33E0, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0x33E0)}') = {getCharName(0x33E0, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0x33F0)}') = {getCharName(0x33F0, U_UNICODE_CHAR_NAME)}")
 
     print(f"getCharName('漢') = {getCharName(ord('漢'), U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0xD55C)}') = {getCharName(0xD55C, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0xAD81)}') = {getCharName(0xAD81, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0xC544)}') = {getCharName(0xC544, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0xCA8D)}') = {getCharName(0xCA8D, U_UNICODE_CHAR_NAME)}")
+
+    print(f"getCharName(0x17020) = {getCharName(0x17020, U_UNICODE_CHAR_NAME)}")
 
 if __name__ == "__main__":
     test()
