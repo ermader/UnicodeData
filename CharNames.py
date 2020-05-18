@@ -161,7 +161,7 @@ def expandGroupLengths(s):
 
         # read even nibble - MSBs of lengthByte
         if length >= 12:
-            length = ((length & 0x3) << 4) | ((lengthByte >> 4) + 12)
+            length = ((length & 0x3) << 4 | lengthByte >> 4) + 12
             lengthByte &= 0xF
         elif lengthByte >= 0xC0:
             length = (lengthByte & 0x3F) + 12
@@ -185,8 +185,8 @@ def expandGroupLengths(s):
                 lengths.append(length)
                 offset += length
                 i += 1
-            else:
-                length = 0  # prevent double-nibble detection in the next iteration
+        else:
+            length = 0  # prevent double-nibble detection in the next iteration
 
     return (s, offsets, lengths)
 
@@ -304,7 +304,7 @@ def getName(code, nameChoice):
 
     return ""
 
-def getCharName(code, nameChoice):
+def getCharName(code, nameChoice=U_UNICODE_CHAR_NAME):
     for algorithmicRange in algorithmicRanges:
         if code in range(algorithmicRange.start, algorithmicRange.end + 1):
             return getAlgorithmicName(algorithmicRange, code, nameChoice)
@@ -315,22 +315,28 @@ def getCharName(code, nameChoice):
     return getName(code, nameChoice)
 
 def test():
-    print(f"getCharName('K') = {getCharName(ord('K'), U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('k') = {getName(ord('k'), U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName(0x007F) = {getCharName(0x007F)}")
+    print(f"getCharName(0x007F, U_UNICODE_10_CHAR_NAME) = {getCharName(0x007F, U_UNICODE_10_CHAR_NAME)}")
+    print(f"getCharName(0x007F, U_CHAR_NAME_ALIAS) = {getCharName(0x007F, U_CHAR_NAME_ALIAS)}")
 
-    print(f"getCharName('{chr(0x0901)}') = {getCharName(0x0901, U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('क') = {getCharName(ord('क'), U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0x00AF)}') = {getCharName(0x00AF)}")
 
-    print(f"getCharName('{chr(0x33E0)}') = {getCharName(0x33E0, U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('{chr(0x33F0)}') = {getCharName(0x33F0, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('K') = {getCharName(ord('K'))}")
+    print(f"getCharName('k') = {getCharName(ord('k'))}")
 
-    print(f"getCharName('漢') = {getCharName(ord('漢'), U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('{chr(0xD55C)}') = {getCharName(0xD55C, U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('{chr(0xAD81)}') = {getCharName(0xAD81, U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('{chr(0xC544)}') = {getCharName(0xC544, U_UNICODE_CHAR_NAME)}")
-    print(f"getCharName('{chr(0xCA8D)}') = {getCharName(0xCA8D, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0x0901)}') = {getCharName(0x0901)}")
+    print(f"getCharName('क') = {getCharName(ord('क'))}")
 
-    print(f"getCharName(0x17020) = {getCharName(0x17020, U_UNICODE_CHAR_NAME)}")
+    print(f"getCharName('{chr(0x33E0)}') = {getCharName(0x33E0)}")
+    print(f"getCharName('{chr(0x33F0)}') = {getCharName(0x33F0)}")
+
+    print(f"getCharName('漢') = {getCharName(ord('漢'))}")
+    print(f"getCharName('{chr(0xD55C)}') = {getCharName(0xD55C)}")
+    print(f"getCharName('{chr(0xAD81)}') = {getCharName(0xAD81)}")
+    print(f"getCharName('{chr(0xC544)}') = {getCharName(0xC544)}")
+    print(f"getCharName('{chr(0xCA8D)}') = {getCharName(0xCA8D)}")
+
+    print(f"getCharName(0x17020) = {getCharName(0x17020)}")
 
 if __name__ == "__main__":
     test()
