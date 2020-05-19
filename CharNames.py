@@ -41,6 +41,64 @@ _rangeLength = struct.calcsize(_rangeFormat)
 
 id = ICUData()
 
+class Tokens(object):
+    _tokens = []
+    _strings = []
+
+    @classmethod
+    def _populateData(cls, tokensStart, tokenStringsStart, tokenStringsLimit):
+        if len(cls._tokens) == 0:
+            (tokenCount, ) = struct.unpack("H", id.getData(tokensStart, tokensStart + 2))
+            tokensData = id.getData(tokensStart + 2, tokenStringsStart)
+            cls._tokens = struct.unpack(f"{tokenCount}H", tokensData)
+
+            cls._strings = id.getData(tokenStringsStart, tokenStringsLimit)
+
+    @classmethod
+    def expand(cls, string, nameChoice):
+        expandedName = ""
+
+        nameLength = len(string)
+
+        s = 0
+        while nameLength > 0:
+            c = string[s]
+            s += 1
+            nameLength -= 1
+
+            if c >= len(cls._tokens):
+                if c != CP_SEMICOLON:
+                    expandedName += chr(c)
+                else:
+                    break
+            else:
+                token = cls._tokens[c]
+                if token == 0xFFFE:
+                    # this is a lead byte for a double-byte token
+                    token = cls._tokens[c << 8 | string[s]]
+                    s += 1
+                    nameLength -= 1
+
+                if token == 0xFFFF:
+                    if c != CP_SEMICOLON:
+                        expandedName += chr(c)
+                    else:
+                        if len(expandedName) == 0 and nameChoice == U_EXTENDED_CHAR_NAME:
+                            if CP_SEMICOLON >= tokenCount or tokens[CP_SEMICOLON] == 0xFFFF:
+                                continue
+                        break
+                else:
+                    while cls._strings[token] != 0:
+                        expandedName += chr(cls._strings[token])
+                        token += 1
+
+        return expandedName
+
+    def __init__(self, tokensStart, tokenStringsStart, tokenStringsLimit):
+        Tokens._populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
+
+
+
 class Group(object):
     _groupFormat = "HHH"
     _groupLength = struct.calcsize(_groupFormat)
@@ -110,47 +168,10 @@ class Group(object):
             self.strings.append(id.getData(stringStart, stringLimit))
 
     def expandName(self, lineNumber, nameChoice):
-        expandedName = ""
-
         if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
             pass  # Not sure semicolons actually appear in the data...
 
-        string = self.strings[lineNumber]
-        nameLength = len(string)
-        s = 0
-        while nameLength > 0:
-            c = string[s]
-            s += 1
-            nameLength -= 1
-
-            if c >= tokenCount:
-                if c != CP_SEMICOLON:
-                    expandedName += chr(c)
-                else:
-                    break
-            else:
-                token = tokens[c]
-                if token == 0xFFFE:
-                    # this is a lead byte for a double-byte token
-                    token = tokens[c << 8 | string[s]]
-                    s += 1
-                    nameLength -= 1
-
-                if token == 0xFFFF:
-                    if c != CP_SEMICOLON:
-                        expandedName += chr(c)
-                    else:
-                        if len(expandedName) == 0 and nameChoice == U_EXTENDED_CHAR_NAME:
-                            if CP_SEMICOLON >= tokenCount or tokens[CP_SEMICOLON] == 0xFFFF:
-                                continue
-                        break
-                else:
-                    while tokenStringsData[token] != 0:
-                        expandedName += chr(tokenStringsData[token])
-                        token += 1
-
-        return expandedName
-
+        return Tokens.expand(self.strings[lineNumber], nameChoice)
 
 class AlgorithmicRange(object):
     def __init__(self, offset):
@@ -254,16 +275,10 @@ namesDataHeaderData = id.getData(namesDataHeaderStart, namesDataHeaderLimit)
 (tokenStringOffset, groupsOffset, groupStringOffset, algNamesOffset) = struct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength])
 
 tokensStart = namesDataHeaderLimit
-tokensLimit = tokenStringOffset + baseOffset
-tokensFormat = f"{(tokensLimit - tokensStart) // 2}H"
-tokensData = id.getData(tokensStart, tokensLimit)
-tokens = struct.unpack(tokensFormat, tokensData)
-tokenCount = tokens[0]
-tokens = tokens[1:]
-
 tokenStringsStart = tokenStringOffset + baseOffset
 tokenStringsLimit = groupsOffset + baseOffset
-tokenStringsData = id.getData(tokenStringsStart, tokenStringsLimit)
+
+Tokens._populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
 
 groupsStart = groupsOffset + baseOffset
 (groupsLimit, ) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
