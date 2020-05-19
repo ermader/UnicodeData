@@ -55,7 +55,7 @@ class Tokens(object):
             cls._strings = id.getData(tokenStringsStart, tokenStringsLimit)
 
     @classmethod
-    def expand(cls, string, nameChoice):
+    def expandString(cls, string, nameChoice):
         expandedName = ""
 
         nameLength = len(string)
@@ -84,7 +84,7 @@ class Tokens(object):
                         expandedName += chr(c)
                     else:
                         if len(expandedName) == 0 and nameChoice == U_EXTENDED_CHAR_NAME:
-                            if CP_SEMICOLON >= tokenCount or tokens[CP_SEMICOLON] == 0xFFFF:
+                            if CP_SEMICOLON >= len(cls._tokens) or cls._tokens[CP_SEMICOLON] == 0xFFFF:
                                 continue
                         break
                 else:
@@ -171,7 +171,7 @@ class Group(object):
         if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
             pass  # Not sure semicolons actually appear in the data...
 
-        return Tokens.expand(self.strings[lineNumber], nameChoice)
+        return Tokens.expandString(self.strings[lineNumber], nameChoice)
 
 class AlgorithmicRange(object):
     def __init__(self, offset):
