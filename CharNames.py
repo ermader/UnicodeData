@@ -295,6 +295,8 @@ def getName(code, nameChoice):
     if groupMSB in groupDict:
         return groupDict[groupMSB].expandName(code & GROUP_MASK, nameChoice)
 
+    return ""
+
 def getCharName(code, nameChoice=U_UNICODE_CHAR_NAME):
     for algorithmicRange in algorithmicRanges:
         if algorithmicRange.charInRange(code):
