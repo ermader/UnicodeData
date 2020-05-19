@@ -46,7 +46,7 @@ class Tokens(object):
     _strings = []
 
     @classmethod
-    def _populateData(cls, tokensStart, tokenStringsStart, tokenStringsLimit):
+    def populateData(cls, tokensStart, tokenStringsStart, tokenStringsLimit):
         if len(cls._tokens) == 0:
             (tokenCount, ) = struct.unpack("H", id.getData(tokensStart, tokensStart + 2))
             tokensData = id.getData(tokensStart + 2, tokenStringsStart)
@@ -95,7 +95,7 @@ class Tokens(object):
         return expandedName
 
     def __init__(self, tokensStart, tokenStringsStart, tokenStringsLimit):
-        Tokens._populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
+        Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
 
 
 
@@ -278,13 +278,12 @@ tokensStart = namesDataHeaderLimit
 tokenStringsStart = tokenStringOffset + baseOffset
 tokenStringsLimit = groupsOffset + baseOffset
 
-Tokens._populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
+Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
 
 groupsStart = groupsOffset + baseOffset
 (groupsLimit, ) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
 
 groupStringsStart = groupStringOffset + baseOffset
-groupStringsLimit = algNamesOffset + baseOffset
 
 groupDict = {}
 groupStart = groupsStart + 2
@@ -295,9 +294,10 @@ for _ in range(groupsLimit):
     groupStart += Group._groupLength
 
 algorithmicRanges = []
-(algorithmicRangeCount, ) = struct.unpack("I", id.getData(groupStringsLimit, groupStringsLimit + 4))
+rangeStart = algNamesOffset + baseOffset
+(algorithmicRangeCount, ) = struct.unpack("I", id.getData(rangeStart, rangeStart + 4))
 
-rangeStart = groupStringsLimit + 4
+rangeStart += 4
 rangeLimit = rangeStart + _rangeLength
 for _ in range(algorithmicRangeCount):
     algRange = AlgorithmicRange(rangeStart)
