@@ -64,8 +64,8 @@ class CharacterData(UCDProperties):
         self.emojiComponent = self.getBooleanProperty("EComp")
         self.extendedPictograph = self.getBooleanProperty("ExtPict")
 
-        if self.name is None or len(self.name) == 0:
-            self.name = self.getCharProperty("na1")
+        # if self.name is None or len(self.name) == 0:
+        #     self.name = self.getCharProperty("na1")
 
         self.name = self.name.replace("#", self.cp)
 
