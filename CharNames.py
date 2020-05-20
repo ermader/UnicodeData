@@ -421,6 +421,7 @@ def test():
 
     print()
     print(f"getCharName('[', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('['), U_EXTENDED_CHAR_NAME)}")
+    print(f"getCharName(']', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord(']'), U_EXTENDED_CHAR_NAME)}")
 
     print(f"getCharName('{chr(0x00AF)}', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(0x00AF, U_EXTENDED_CHAR_NAME)}")
 
