@@ -69,6 +69,8 @@ GC_INITIAL_PUNCTUATION = 28
 # Pf @stable ICU 2.0
 GC_FINAL_PUNCTUATION = 29
 
+GC_CATEFORY_COUNT = 30
+
 # GC_XX_MASK constants are bit flags corresponding to Unicode
 # general category values.
 # For each category, the nth bit is set if the numeric value of the

@@ -8,6 +8,49 @@ Created on May 15, 2020
 
 import struct
 from ICUDataFile import ICUData, dataHeaderFormat, dataHeaderLength
+from CharProps import getGeneralCategory
+from GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
+
+# "extra" general categories
+GC_NONCHARACTER_CODEPOINT = GC_CATEFORY_COUNT
+GC_LEAD_SURROGATE = GC_CATEFORY_COUNT + 1
+GC_TRAIL_SURROGATE = GC_CATEFORY_COUNT + 2
+
+charCatNames = [
+    "unassigned",
+    "uppercase letter",
+    "lowercase letter",
+    "titlecase letter",
+    "modifier letter",
+    "other letter",
+    "non spacing mark",
+    "enclosing mark",
+    "combining spacing mark",
+    "decimal digit number",
+    "letter number",
+    "other number",
+    "space separator",
+    "line separator",
+    "paragraph separator",
+    "control",
+    "format",
+    "private use area",
+    "surrogate",
+    "dash punctuation",
+    "start punctuation",
+    "end punctuation",
+    "connector punctuation",
+    "other punctuation",
+    "math symbol",
+    "currency symbol",
+    "modifier symbol",
+    "other symbol",
+    "initial punctuation",
+    "final punctuation",
+    "noncharacter",
+    "lead surrogate",
+    "trail surrogate"
+]
 
 # Character name choices
 U_UNICODE_CHAR_NAME = 0  # Unicode character name (Name property).
@@ -309,6 +352,32 @@ class CharNames(object):
             rangeStart += algRange.size
 
     @classmethod
+    def isUnicodeNoncharacter(cls, code):
+        return code >= 0xfdd0 and \
+         (code <= 0xfdef or (code & 0xfffe) == 0xfffe) and code <= 0x10ffff
+
+    @classmethod
+    def isLead(cls, code):
+        return (code & 0xfffffc00) == 0xd800
+
+    @classmethod
+    def getCharCat(cls, code):
+        if cls.isUnicodeNoncharacter(code):
+            return GC_NONCHARACTER_CODEPOINT
+
+        cat = getGeneralCategory(code)
+        if cat == GC_SURROGATE:
+            GC_LEAD_SURROGATE if cls.isLead(code) else GC_TRAIL_SURROGATE
+
+        return cat
+
+    @classmethod
+    def getCharCatName(cls, code):
+        cat = cls.getCharCat(code)
+
+        return "unknown" if cat >= len(charCatNames) else charCatNames[cat]
+
+    @classmethod
     def _getName(cls, code, nameChoice):
         groupMSB = code >> GROUP_SHIFT
 
@@ -324,7 +393,7 @@ class CharNames(object):
                 return algorithmicRange.getName(code, nameChoice)
 
         if nameChoice == U_EXTENDED_CHAR_NAME:
-            return f"<algorithmic name-{code:04X}>"
+            return f"<{cls.getCharCatName(code)}-{code:04X}>"
 
         return CharNames._getName(code, nameChoice)
 
@@ -349,6 +418,14 @@ def test():
     print(f"getCharName('{chr(0xCA8D)}') = {CharNames.getCharName(0xCA8D)}")
 
     print(f"getCharName(0x17020) = {CharNames.getCharName(0x17020)}")
+
+    print()
+    print(f"getCharName('[', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('['), U_EXTENDED_CHAR_NAME)}")
+
+    print(f"getCharName('{chr(0x00AF)}', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(0x00AF, U_EXTENDED_CHAR_NAME)}")
+
+    print(f"getCharName('K', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('K'), U_EXTENDED_CHAR_NAME)}")
+    print(f"getCharName('k', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('k'), U_EXTENDED_CHAR_NAME)}")
 
 if __name__ == "__main__":
     test()
