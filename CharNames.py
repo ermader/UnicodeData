@@ -39,20 +39,18 @@ _nameDataHeaderLength = struct.calcsize(_nameDataHeaderFormat)
 _rangeFormat = "IIBBH"
 _rangeLength = struct.calcsize(_rangeFormat)
 
-id = ICUData()
-
 class Tokens(object):
     _tokens = []
     _strings = []
 
     @classmethod
-    def populateData(cls, tokensStart, tokenStringsStart, tokenStringsLimit):
+    def populateData(cls, icuData, tokensStart, tokenStringsStart, tokenStringsLimit):
         if len(cls._tokens) == 0:
-            (tokenCount, ) = struct.unpack("H", id.getData(tokensStart, tokensStart + 2))
-            tokensData = id.getData(tokensStart + 2, tokenStringsStart)
+            (tokenCount, ) = struct.unpack("H", icuData.getData(tokensStart, tokensStart + 2))
+            tokensData = icuData.getData(tokensStart + 2, tokenStringsStart)
             cls._tokens = struct.unpack(f"{tokenCount}H", tokensData)
 
-            cls._strings = id.getData(tokenStringsStart, tokenStringsLimit)
+            cls._strings = icuData.getData(tokenStringsStart, tokenStringsLimit)
 
     @classmethod
     def expandString(cls, string, nameChoice):
@@ -111,7 +109,7 @@ class Group(object):
     # Calculation see below.
     # The offsets and lengths arrays must be at least 33 (one more) long because
     # there is no check here at the end if the last nibble is still used.
-    def expandGroupLengths(self,  groupStringsOffset):
+    def expandGroupLengths(self, icuData,  groupStringsOffset):
         i = 0
         s = groupStringsOffset
         offset = 0
@@ -120,7 +118,7 @@ class Group(object):
         lengths = []
 
         while i < LINES_PER_GROUP:
-            (lengthByte, ) = id.getData(s, s + 1)
+            (lengthByte, ) = icuData.getData(s, s + 1)
             s += 1
 
             # read even nibble - MSBs of lengthByte
@@ -154,18 +152,18 @@ class Group(object):
 
         return (s, offsets, lengths)
 
-    def __init__(self, groupStart, groupStringsStart):
+    def __init__(self, icuData, groupStart, groupStringsStart):
         groupLimit = groupStart + self._groupLength
-        (self.msb, offsetHigh, offsetLow) = struct.unpack(self._groupFormat, id.getData(groupStart, groupLimit))
+        (self.msb, offsetHigh, offsetLow) = struct.unpack(self._groupFormat, icuData.getData(groupStart, groupLimit))
         offset = (offsetHigh << 16) | offsetLow
 
         self.strings = []
-        (dataOffset, offsets, lengths) = self.expandGroupLengths(groupStringsStart + offset)
+        (dataOffset, offsets, lengths) = self.expandGroupLengths(icuData, groupStringsStart + offset)
         for i in range(len(offsets)):
             stringStart = dataOffset + offsets[i]
             stringLimit = stringStart + lengths[i]
 
-            self.strings.append(id.getData(stringStart, stringLimit))
+            self.strings.append(icuData.getData(stringStart, stringLimit))
 
     def expandName(self, lineNumber, nameChoice):
         if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
@@ -174,14 +172,14 @@ class Group(object):
         return Tokens.expandString(self.strings[lineNumber], nameChoice)
 
 class AlgorithmicRange(object):
-    def __init__(self, offset):
+    def __init__(self, icuData, offset):
         rangeStart = offset
         rangeLimit = rangeStart + _rangeLength
-        (start, end, self.type, self.variant, self.size) = struct.unpack(_rangeFormat, id.getData(rangeStart, rangeLimit))
+        (start, end, self.type, self.variant, self.size) = struct.unpack(_rangeFormat, icuData.getData(rangeStart, rangeLimit))
 
         self.charRange = range(start, end + 1)
         if self.type == 0:
-            self.string = id.getString(rangeLimit)
+            self.string = icuData.getString(rangeLimit)
             self.factors = None
             self.elements = None
         elif self.type == 1:
@@ -190,16 +188,16 @@ class AlgorithmicRange(object):
             factorsLength = struct.calcsize(factorsFormat)
             factorsStart = rangeLimit
             factorsLimit = factorsStart + factorsLength
-            factorsData = id.getData(factorsStart, factorsLimit)
+            factorsData = icuData.getData(factorsStart, factorsLimit)
             self.factors = struct.unpack(factorsFormat, factorsData)
-            self.string = id.getString(factorsLimit)
-            elementsData = id.getData(factorsLimit + len(self.string) + 1, offset + self.size)
+            self.string = icuData.getString(factorsLimit)
+            elementsData = icuData.getData(factorsLimit + len(self.string) + 1, offset + self.size)
 
             self.elements = []
             elementStart = factorsLimit + len(self.string) + 1  # + 1 for null byte
 
             while elementStart < offset + self.size:
-                element = id.getString(elementStart)
+                element = icuData.getString(elementStart)
                 self.elements.append(element)
                 elementStart += len(element) + 1
 
@@ -261,15 +259,15 @@ class AlgorithmicRange(object):
         return char - self.charRange.start
 
 class CharNames(object):
+    _icuData = ICUData()
     _groups = {}
     _algorithmicRanges = []
 
     @classmethod
     def populateData(cls):
-        id = ICUData()
 
-        dataOffset = id.getDataOffset("unames.icu")
-        dataHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
+        dataOffset = cls._icuData.getDataOffset("unames.icu")
+        dataHeaderData = cls._icuData.getData(dataOffset, dataOffset + dataHeaderLength)
 
         (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
          dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
@@ -278,7 +276,7 @@ class CharNames(object):
         baseOffset = dataOffset + headerLength
         namesDataHeaderStart = baseOffset
         namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
-        namesDataHeaderData = id.getData(namesDataHeaderStart, namesDataHeaderLimit)
+        namesDataHeaderData = cls._icuData.getData(namesDataHeaderStart, namesDataHeaderLimit)
         (tokenStringOffset, groupsOffset, groupStringOffset, algNamesOffset) = \
             struct.unpack(_nameDataHeaderFormat,  namesDataHeaderData[:_nameDataHeaderLength])
 
@@ -286,27 +284,27 @@ class CharNames(object):
         tokenStringsStart = tokenStringOffset + baseOffset
         tokenStringsLimit = groupsOffset + baseOffset
 
-        Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
+        Tokens.populateData(cls._icuData, tokensStart, tokenStringsStart, tokenStringsLimit)
 
         groupsStart = groupsOffset + baseOffset
-        (groupsLimit,) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
+        (groupsLimit,) = struct.unpack("H", cls._icuData.getData(groupsStart, groupsStart + 2))
 
         groupStringsStart = groupStringOffset + baseOffset
 
         groupStart = groupsStart + 2
 
         for _ in range(groupsLimit):
-            group = Group(groupStart, groupStringsStart)
+            group = Group(cls._icuData, groupStart, groupStringsStart)
             cls._groups[group.msb] = group
             groupStart += Group._groupLength
 
         rangeStart = algNamesOffset + baseOffset
-        (algorithmicRangeCount,) = struct.unpack("I", id.getData(rangeStart, rangeStart + 4))
+        (algorithmicRangeCount,) = struct.unpack("I", cls._icuData.getData(rangeStart, rangeStart + 4))
 
         rangeStart += 4
         rangeLimit = rangeStart + _rangeLength
         for _ in range(algorithmicRangeCount):
-            algRange = AlgorithmicRange(rangeStart)
+            algRange = AlgorithmicRange(cls._icuData, rangeStart)
             cls._algorithmicRanges.append(algRange)
             rangeStart += algRange.size
 
