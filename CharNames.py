@@ -330,67 +330,6 @@ class CharNames(object):
 
         return CharNames._getName(code, nameChoice)
 
-# dataOffset = id.getDataOffset("unames.icu")
-# dataHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
-#
-# (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
-#  dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
-#     struct.unpack(dataHeaderFormat, dataHeaderData[:dataHeaderLength])
-#
-# baseOffset = dataOffset + headerLength
-# namesDataHeaderStart = baseOffset
-# namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
-# namesDataHeaderData = id.getData(namesDataHeaderStart, namesDataHeaderLimit)
-# (tokenStringOffset, groupsOffset, groupStringOffset, algNamesOffset) = struct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength])
-#
-# tokensStart = namesDataHeaderLimit
-# tokenStringsStart = tokenStringOffset + baseOffset
-# tokenStringsLimit = groupsOffset + baseOffset
-#
-# Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
-#
-# groupsStart = groupsOffset + baseOffset
-# (groupsLimit, ) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
-#
-# groupStringsStart = groupStringOffset + baseOffset
-#
-# groupDict = {}
-# groupStart = groupsStart + 2
-#
-# for _ in range(groupsLimit):
-#     group = Group(groupStart, groupStringsStart)
-#     groupDict[group.msb] = group
-#     groupStart += Group._groupLength
-#
-# algorithmicRanges = []
-# rangeStart = algNamesOffset + baseOffset
-# (algorithmicRangeCount, ) = struct.unpack("I", id.getData(rangeStart, rangeStart + 4))
-#
-# rangeStart += 4
-# rangeLimit = rangeStart + _rangeLength
-# for _ in range(algorithmicRangeCount):
-#     algRange = AlgorithmicRange(rangeStart)
-#     algorithmicRanges.append(algRange)
-#     rangeStart += algRange.size
-#
-# def getName(code, nameChoice):
-#     groupMSB = code >> GROUP_SHIFT
-#
-#     if groupMSB in groupDict:
-#         return groupDict[groupMSB].expandName(code & GROUP_MASK, nameChoice)
-#
-#     return ""
-#
-# def getCharName(code, nameChoice=U_UNICODE_CHAR_NAME):
-#     for algorithmicRange in algorithmicRanges:
-#         if algorithmicRange.charInRange(code):
-#             return algorithmicRange.getName(code, nameChoice)
-#
-#     if nameChoice == U_EXTENDED_CHAR_NAME:
-#         return f"algorithmic name<{code:04X}>"
-#
-#     return getName(code, nameChoice)
-
 CharNames.populateData()
 
 def test():
