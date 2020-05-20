@@ -260,87 +260,158 @@ class AlgorithmicRange(object):
     def charOffsetInRange(self, char):
         return char - self.charRange.start
 
+class CharNames(object):
+    _groups = {}
+    _algorithmicRanges = []
 
-dataOffset = id.getDataOffset("unames.icu")
-dataHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
+    @classmethod
+    def populateData(cls):
+        id = ICUData()
 
-(headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
- dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
-    struct.unpack(dataHeaderFormat, dataHeaderData[:dataHeaderLength])
+        dataOffset = id.getDataOffset("unames.icu")
+        dataHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
 
-baseOffset = dataOffset + headerLength
-namesDataHeaderStart = baseOffset
-namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
-namesDataHeaderData = id.getData(namesDataHeaderStart, namesDataHeaderLimit)
-(tokenStringOffset, groupsOffset, groupStringOffset, algNamesOffset) = struct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength])
+        (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
+         dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
+            struct.unpack(dataHeaderFormat, dataHeaderData[:dataHeaderLength])
 
-tokensStart = namesDataHeaderLimit
-tokenStringsStart = tokenStringOffset + baseOffset
-tokenStringsLimit = groupsOffset + baseOffset
+        baseOffset = dataOffset + headerLength
+        namesDataHeaderStart = baseOffset
+        namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
+        namesDataHeaderData = id.getData(namesDataHeaderStart, namesDataHeaderLimit)
+        (tokenStringOffset, groupsOffset, groupStringOffset, algNamesOffset) = \
+            struct.unpack(_nameDataHeaderFormat,  namesDataHeaderData[:_nameDataHeaderLength])
 
-Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
+        tokensStart = namesDataHeaderLimit
+        tokenStringsStart = tokenStringOffset + baseOffset
+        tokenStringsLimit = groupsOffset + baseOffset
 
-groupsStart = groupsOffset + baseOffset
-(groupsLimit, ) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
+        Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
 
-groupStringsStart = groupStringOffset + baseOffset
+        groupsStart = groupsOffset + baseOffset
+        (groupsLimit,) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
 
-groupDict = {}
-groupStart = groupsStart + 2
+        groupStringsStart = groupStringOffset + baseOffset
 
-for _ in range(groupsLimit):
-    group = Group(groupStart, groupStringsStart)
-    groupDict[group.msb] = group
-    groupStart += Group._groupLength
+        groupStart = groupsStart + 2
 
-algorithmicRanges = []
-rangeStart = algNamesOffset + baseOffset
-(algorithmicRangeCount, ) = struct.unpack("I", id.getData(rangeStart, rangeStart + 4))
+        for _ in range(groupsLimit):
+            group = Group(groupStart, groupStringsStart)
+            cls._groups[group.msb] = group
+            groupStart += Group._groupLength
 
-rangeStart += 4
-rangeLimit = rangeStart + _rangeLength
-for _ in range(algorithmicRangeCount):
-    algRange = AlgorithmicRange(rangeStart)
-    algorithmicRanges.append(algRange)
-    rangeStart += algRange.size
+        rangeStart = algNamesOffset + baseOffset
+        (algorithmicRangeCount,) = struct.unpack("I", id.getData(rangeStart, rangeStart + 4))
 
-def getName(code, nameChoice):
-    groupMSB = code >> GROUP_SHIFT
+        rangeStart += 4
+        rangeLimit = rangeStart + _rangeLength
+        for _ in range(algorithmicRangeCount):
+            algRange = AlgorithmicRange(rangeStart)
+            cls._algorithmicRanges.append(algRange)
+            rangeStart += algRange.size
 
-    if groupMSB in groupDict:
-        return groupDict[groupMSB].expandName(code & GROUP_MASK, nameChoice)
+    @classmethod
+    def _getName(cls, code, nameChoice):
+        groupMSB = code >> GROUP_SHIFT
 
-    return ""
+        if groupMSB in cls._groups:
+            return cls._groups[groupMSB].expandName(code & GROUP_MASK, nameChoice)
 
-def getCharName(code, nameChoice=U_UNICODE_CHAR_NAME):
-    for algorithmicRange in algorithmicRanges:
-        if algorithmicRange.charInRange(code):
-            return algorithmicRange.getName(code, nameChoice)
+        return ""
 
-    if nameChoice == U_EXTENDED_CHAR_NAME:
-        return f"algorithmic name<{code:04X}>"
+    @classmethod
+    def getCharName(cls, code, nameChoice=U_UNICODE_CHAR_NAME):
+        for algorithmicRange in cls._algorithmicRanges:
+            if algorithmicRange.charInRange(code):
+                return algorithmicRange.getName(code, nameChoice)
 
-    return getName(code, nameChoice)
+        if nameChoice == U_EXTENDED_CHAR_NAME:
+            return f"<algorithmic name-{code:04X}>"
+
+        return CharNames._getName(code, nameChoice)
+
+# dataOffset = id.getDataOffset("unames.icu")
+# dataHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
+#
+# (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
+#  dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
+#     struct.unpack(dataHeaderFormat, dataHeaderData[:dataHeaderLength])
+#
+# baseOffset = dataOffset + headerLength
+# namesDataHeaderStart = baseOffset
+# namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
+# namesDataHeaderData = id.getData(namesDataHeaderStart, namesDataHeaderLimit)
+# (tokenStringOffset, groupsOffset, groupStringOffset, algNamesOffset) = struct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength])
+#
+# tokensStart = namesDataHeaderLimit
+# tokenStringsStart = tokenStringOffset + baseOffset
+# tokenStringsLimit = groupsOffset + baseOffset
+#
+# Tokens.populateData(tokensStart, tokenStringsStart, tokenStringsLimit)
+#
+# groupsStart = groupsOffset + baseOffset
+# (groupsLimit, ) = struct.unpack("H", id.getData(groupsStart, groupsStart + 2))
+#
+# groupStringsStart = groupStringOffset + baseOffset
+#
+# groupDict = {}
+# groupStart = groupsStart + 2
+#
+# for _ in range(groupsLimit):
+#     group = Group(groupStart, groupStringsStart)
+#     groupDict[group.msb] = group
+#     groupStart += Group._groupLength
+#
+# algorithmicRanges = []
+# rangeStart = algNamesOffset + baseOffset
+# (algorithmicRangeCount, ) = struct.unpack("I", id.getData(rangeStart, rangeStart + 4))
+#
+# rangeStart += 4
+# rangeLimit = rangeStart + _rangeLength
+# for _ in range(algorithmicRangeCount):
+#     algRange = AlgorithmicRange(rangeStart)
+#     algorithmicRanges.append(algRange)
+#     rangeStart += algRange.size
+#
+# def getName(code, nameChoice):
+#     groupMSB = code >> GROUP_SHIFT
+#
+#     if groupMSB in groupDict:
+#         return groupDict[groupMSB].expandName(code & GROUP_MASK, nameChoice)
+#
+#     return ""
+#
+# def getCharName(code, nameChoice=U_UNICODE_CHAR_NAME):
+#     for algorithmicRange in algorithmicRanges:
+#         if algorithmicRange.charInRange(code):
+#             return algorithmicRange.getName(code, nameChoice)
+#
+#     if nameChoice == U_EXTENDED_CHAR_NAME:
+#         return f"algorithmic name<{code:04X}>"
+#
+#     return getName(code, nameChoice)
+
+CharNames.populateData()
 
 def test():
-    print(f"getCharName('{chr(0x00AF)}') = {getCharName(0x00AF)}")
+    print(f"getCharName('{chr(0x00AF)}') = {CharNames.getCharName(0x00AF)}")
 
-    print(f"getCharName('K') = {getCharName(ord('K'))}")
-    print(f"getCharName('k') = {getCharName(ord('k'))}")
+    print(f"getCharName('K') = {CharNames.getCharName(ord('K'))}")
+    print(f"getCharName('k') = {CharNames.getCharName(ord('k'))}")
 
-    print(f"getCharName('{chr(0x0901)}') = {getCharName(0x0901)}")
-    print(f"getCharName('क') = {getCharName(ord('क'))}")
+    print(f"getCharName('{chr(0x0901)}') = {CharNames.getCharName(0x0901)}")
+    print(f"getCharName('क') = {CharNames.getCharName(ord('क'))}")
 
-    print(f"getCharName('{chr(0x33E0)}') = {getCharName(0x33E0)}")
-    print(f"getCharName('{chr(0x33F0)}') = {getCharName(0x33F0)}")
+    print(f"getCharName('{chr(0x33E0)}') = {CharNames.getCharName(0x33E0)}")
+    print(f"getCharName('{chr(0x33F0)}') = {CharNames.getCharName(0x33F0)}")
 
-    print(f"getCharName('漢') = {getCharName(ord('漢'))}")
-    print(f"getCharName('{chr(0xD55C)}') = {getCharName(0xD55C)}")
-    print(f"getCharName('{chr(0xAD84)}') = {getCharName(0xAD84)}")
-    print(f"getCharName('{chr(0xC5B4)}') = {getCharName(0xC5B4)}")
-    print(f"getCharName('{chr(0xCA8D)}') = {getCharName(0xCA8D)}")
+    print(f"getCharName('漢') = {CharNames.getCharName(ord('漢'))}")
+    print(f"getCharName('{chr(0xD55C)}') = {CharNames.getCharName(0xD55C)}")
+    print(f"getCharName('{chr(0xAD84)}') = {CharNames.getCharName(0xAD84)}")
+    print(f"getCharName('{chr(0xC5B4)}') = {CharNames.getCharName(0xC5B4)}")
+    print(f"getCharName('{chr(0xCA8D)}') = {CharNames.getCharName(0xCA8D)}")
 
-    print(f"getCharName(0x17020) = {getCharName(0x17020)}")
+    print(f"getCharName(0x17020) = {CharNames.getCharName(0x17020)}")
 
 if __name__ == "__main__":
     test()

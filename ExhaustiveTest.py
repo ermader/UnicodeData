@@ -14,7 +14,7 @@ import CharDirection
 import Boundaries
 import DecompositionType
 import LayoutTypes
-import CharNames
+from CharNames import CharNames
 
 def doTest(cp, got, expected, name):
     if got != expected:
