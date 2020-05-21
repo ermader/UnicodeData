@@ -202,6 +202,7 @@ class Group(object):
         startChar = self.msb << GROUP_SHIFT
         limitChar = startChar + LINES_PER_GROUP
         self.charRange = range(startChar, limitChar)
+        self.nameChoice = U_UNICODE_CHAR_NAME
 
         self.strings = []
         (dataOffset, offsets, lengths) = self.expandGroupLengths(icuData, groupStringsStart + offset)
@@ -212,17 +213,22 @@ class Group(object):
             self.strings.append(icuData.getData(stringStart, stringLimit))
 
     def expandName(self, lineNumber, nameChoice):
-        if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
-            pass  # Not sure semicolons actually appear in the data...
+        string = self.strings[lineNumber]
 
-        return Tokens.expandString(self.strings[lineNumber], nameChoice)
+        if nameChoice != U_UNICODE_CHAR_NAME and nameChoice != U_EXTENDED_CHAR_NAME:
+            fieldIndex = 2 if nameChoice == U_ISO_COMMENT else nameChoice
+            fields = string.split(b';')
+            string = fields[fieldIndex] if fieldIndex < len(fields) else b''
+
+        return Tokens.expandString(string, nameChoice)
 
     def __iter__(self):
         for code in self.charRange:
-            yield (code, self.expandName(code & GROUP_MASK, U_UNICODE_CHAR_NAME))
+            yield (code, self.expandName(code & GROUP_MASK, self.nameChoice))
 
 class AlgorithmicRange(object):
     def __init__(self, icuData, offset):
+        self.nameChoice = U_UNICODE_CHAR_NAME
         rangeStart = offset
         rangeLimit = rangeStart + _rangeLength
         (start, end, self.type, self.variant, self.size) = struct.unpack(_rangeFormat, icuData.getData(rangeStart, rangeLimit))
@@ -310,7 +316,7 @@ class AlgorithmicRange(object):
 
     def __iter__(self):
         for code in self.charRange:
-            yield (code, self.getName(code, U_UNICODE_CHAR_NAME))
+            yield (code, self.getName(code, self.nameChoice))
 
 class CharNames(object):
     _icuData = ICUData()
@@ -423,6 +429,9 @@ class CharNames(object):
 
         return CharNames._getName(code, nameChoice)
 
+    def __init__(self, nameChoice=U_UNICODE_CHAR_NAME):
+        self.nameChoice = nameChoice
+
     def __iter__(self):
         charLimit = max(self._groups[-1].charRange.stop, self._algorithmicRanges[-1].charRange.stop)
         char = 0
@@ -430,14 +439,17 @@ class CharNames(object):
         while char < charLimit:
             group = self.getGroup(char)
             if group is not None and char in group.charRange:
+                group.nameChoice = self.nameChoice
                 for (code, name) in group:
                     if name: yield (code, name)
                 char = group.charRange.stop
             elif algRange < len(self._algorithmicRanges) and self._algorithmicRanges[algRange].charInRange(char):
-                    for (code, name) in self._algorithmicRanges[algRange]:
-                        if name: yield (code, name)
-                    char = self._algorithmicRanges[algRange].charRange.stop
-                    algRange += 1
+                algorithmicRange = self._algorithmicRanges[algRange]
+                algorithmicRange.nameChoice = self.nameChoice
+                for (code, name) in algorithmicRange:
+                    if name: yield (code, name)
+                char = algorithmicRange.charRange.stop
+                algRange += 1
             else:
                 char += LINES_PER_GROUP
 
@@ -469,8 +481,12 @@ def test():
     print(f"getCharName('{chr(0xCA8D)}') = {CharNames.getCharName(0xCA8D)}")
 
     print(f"getCharName(0x17020) = {CharNames.getCharName(0x17020)}")
-
     print()
+
+    print(f"getCharName('{chr(0x01A2)}') = {CharNames.getCharName(0x01A2)}")
+    print(f"getCharName('{chr(0x01A2)}', U_CHAR_NAME_ALIAS) = {CharNames.getCharName(0x01A2, U_CHAR_NAME_ALIAS)}")
+    print(f"getCharName('{chr(0x01A3)}') = {CharNames.getCharName(0x01A3)}")
+    print(f"getCharName('{chr(0x01A3)}', U_CHAR_NAME_ALIAS) = {CharNames.getCharName(0x01A3, U_CHAR_NAME_ALIAS)}")
     print(f"getCharName('[', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('['), U_EXTENDED_CHAR_NAME)}")
     print(f"getCharName(']', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord(']'), U_EXTENDED_CHAR_NAME)}")
 
@@ -484,11 +500,12 @@ def test():
     print(f'charFromName("HANGUL SYLLABLE GIM") is {chr(CharNames().charFromName("HANGUL SYLLABLE GIM"))}')
     print(f'charFromName("HANGUL SYLLABLE CI") is {chr(CharNames().charFromName("HANGUL SYLLABLE CI"))}')
     print(f'charFromName("CJK UNIFIED IDEOGRAPH-6F22") is {chr(CharNames().charFromName("CJK UNIFIED IDEOGRAPH-6F22"))}')
-
+    print()
 
     allNames = []
-    for (code, name) in CharNames():
+    for (code, name) in CharNames(U_CHAR_NAME_ALIAS):
         allNames.append(name)
+        print(f'U+{code:04X}: "{name}"')
     print()
 
 if __name__ == "__main__":
