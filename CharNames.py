@@ -431,11 +431,11 @@ class CharNames(object):
             group = self.getGroup(char)
             if group is not None and char in group.charRange:
                 for (code, name) in group:
-                    yield (code, name)
+                    if name: yield (code, name)
                 char = group.charRange.stop
             elif algRange < len(self._algorithmicRanges) and self._algorithmicRanges[algRange].charInRange(char):
                     for (code, name) in self._algorithmicRanges[algRange]:
-                        yield (code, name)
+                        if name: yield (code, name)
                     char = self._algorithmicRanges[algRange].charRange.stop
                     algRange += 1
             else:
