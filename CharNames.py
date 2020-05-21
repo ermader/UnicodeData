@@ -219,7 +219,7 @@ class Group(object):
 
     def __iter__(self):
         for code in self.charRange:
-            yield self.expandName(code & GROUP_MASK, U_UNICODE_CHAR_NAME)
+            yield (code, self.expandName(code & GROUP_MASK, U_UNICODE_CHAR_NAME))
 
 class AlgorithmicRange(object):
     def __init__(self, icuData, offset):
@@ -310,11 +310,11 @@ class AlgorithmicRange(object):
 
     def __iter__(self):
         for code in self.charRange:
-            yield self.getName(code, U_UNICODE_CHAR_NAME)
+            yield (code, self.getName(code, U_UNICODE_CHAR_NAME))
 
 class CharNames(object):
     _icuData = ICUData()
-    _groups = {}
+    _groups = []
     _algorithmicRanges = []
 
     @classmethod
@@ -349,7 +349,7 @@ class CharNames(object):
 
         for _ in range(groupsLimit):
             group = Group(cls._icuData, groupStart, groupStringsStart)
-            cls._groups[group.msb] = group
+            cls._groups.append(group)
             groupStart += Group._groupLength
 
         rangeStart = algNamesOffset + baseOffset
@@ -361,6 +361,21 @@ class CharNames(object):
             algRange = AlgorithmicRange(cls._icuData, rangeStart)
             cls._algorithmicRanges.append(algRange)
             rangeStart += algRange.size
+
+    @classmethod
+    def getGroup(cls, code):
+        groupMSB = code >> GROUP_SHIFT
+        start = 0
+        limit = len(cls._groups)
+
+        while start < limit - 1:
+            midpoint = (start + limit) // 2
+            if groupMSB < cls._groups[midpoint].msb:
+                limit = midpoint
+            else:
+                start = midpoint
+
+        return cls._groups[start] if cls._groups[start].msb == groupMSB else None
 
     @classmethod
     def isUnicodeNoncharacter(cls, code):
@@ -378,7 +393,7 @@ class CharNames(object):
 
         cat = getGeneralCategory(code)
         if cat == GC_SURROGATE:
-            GC_LEAD_SURROGATE if cls.isLead(code) else GC_TRAIL_SURROGATE
+            return GC_LEAD_SURROGATE if cls.isLead(code) else GC_TRAIL_SURROGATE
 
         return cat
 
@@ -390,10 +405,10 @@ class CharNames(object):
 
     @classmethod
     def _getName(cls, code, nameChoice):
-        groupMSB = code >> GROUP_SHIFT
+        group = cls.getGroup(code)
 
-        if groupMSB in cls._groups:
-            return cls._groups[groupMSB].expandName(code & GROUP_MASK, nameChoice)
+        if group is not None:
+            return group.expandName(code & GROUP_MASK, nameChoice)
 
         return ""
 
@@ -409,24 +424,29 @@ class CharNames(object):
         return CharNames._getName(code, nameChoice)
 
     def __iter__(self):
-        # need to intermix groups and algorithmic ranges,
-        # so we'll need some context for start, end char ranges
-        # Or maybe we can assume that groups and algorithmic ranges don't overlap...
+        charLimit = max(self._groups[-1].charRange.stop, self._algorithmicRanges[-1].charRange.stop)
         char = 0
         algRange = 0
-        while char < 0x110000:
-            msb = char >> GROUP_SHIFT
-            if msb in self._groups:
-                for name in self._groups[msb]:
-                    yield name
-                char = self._groups[msb].charRange.stop
+        while char < charLimit:
+            group = self.getGroup(char)
+            if group is not None and char in group.charRange:
+                for (code, name) in group:
+                    yield (code, name)
+                char = group.charRange.stop
             elif algRange < len(self._algorithmicRanges) and self._algorithmicRanges[algRange].charInRange(char):
-                    for name in self._algorithmicRanges[algRange]:
-                        yield name
+                    for (code, name) in self._algorithmicRanges[algRange]:
+                        yield (code, name)
                     char = self._algorithmicRanges[algRange].charRange.stop
                     algRange += 1
             else:
                 char += LINES_PER_GROUP
+
+    def charFromName(self, theName):
+        for (code, name) in self:
+            if name == theName:
+                return code
+
+        return 0xFFFFFFFF
 
 CharNames.populateData()
 
@@ -460,8 +480,14 @@ def test():
     print(f"getCharName('k', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('k'), U_EXTENDED_CHAR_NAME)}")
     print()
 
+    print(f'charFromName("DEVANAGARA LETTER KA") is {chr(CharNames().charFromName("DEVANAGARI LETTER KA"))}')
+    print(f'charFromName("HANGUL SYLLABLE GIM") is {chr(CharNames().charFromName("HANGUL SYLLABLE GIM"))}')
+    print(f'charFromName("HANGUL SYLLABLE CI") is {chr(CharNames().charFromName("HANGUL SYLLABLE CI"))}')
+    print(f'charFromName("CJK UNIFIED IDEOGRAPH-6F22") is {chr(CharNames().charFromName("CJK UNIFIED IDEOGRAPH-6F22"))}')
+
+
     allNames = []
-    for name in CharNames():
+    for (code, name) in CharNames():
         allNames.append(name)
     print()
 
