@@ -199,6 +199,9 @@ class Group(object):
         groupLimit = groupStart + self._groupLength
         (self.msb, offsetHigh, offsetLow) = struct.unpack(self._groupFormat, icuData.getData(groupStart, groupLimit))
         offset = (offsetHigh << 16) | offsetLow
+        startChar = self.msb << GROUP_SHIFT
+        limitChar = startChar + LINES_PER_GROUP
+        self.charRange = range(startChar, limitChar)
 
         self.strings = []
         (dataOffset, offsets, lengths) = self.expandGroupLengths(icuData, groupStringsStart + offset)
@@ -213,6 +216,10 @@ class Group(object):
             pass  # Not sure semicolons actually appear in the data...
 
         return Tokens.expandString(self.strings[lineNumber], nameChoice)
+
+    def __iter__(self):
+        for code in self.charRange:
+            yield self.expandName(code & GROUP_MASK, U_UNICODE_CHAR_NAME)
 
 class AlgorithmicRange(object):
     def __init__(self, icuData, offset):
@@ -300,6 +307,10 @@ class AlgorithmicRange(object):
 
     def charOffsetInRange(self, char):
         return char - self.charRange.start
+
+    def __iter__(self):
+        for code in self.charRange:
+            yield self.getName(code, U_UNICODE_CHAR_NAME)
 
 class CharNames(object):
     _icuData = ICUData()
@@ -397,6 +408,26 @@ class CharNames(object):
 
         return CharNames._getName(code, nameChoice)
 
+    def __iter__(self):
+        # need to intermix groups and algorithmic ranges,
+        # so we'll need some context for start, end char ranges
+        # Or maybe we can assume that groups and algorithmic ranges don't overlap...
+        char = 0
+        algRange = 0
+        while char < 0x110000:
+            msb = char >> GROUP_SHIFT
+            if msb in self._groups:
+                for name in self._groups[msb]:
+                    yield name
+                char = self._groups[msb].charRange.stop
+            elif algRange < len(self._algorithmicRanges) and self._algorithmicRanges[algRange].charInRange(char):
+                    for name in self._algorithmicRanges[algRange]:
+                        yield name
+                    char = self._algorithmicRanges[algRange].charRange.stop
+                    algRange += 1
+            else:
+                char += LINES_PER_GROUP
+
 CharNames.populateData()
 
 def test():
@@ -427,6 +458,12 @@ def test():
 
     print(f"getCharName('K', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('K'), U_EXTENDED_CHAR_NAME)}")
     print(f"getCharName('k', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('k'), U_EXTENDED_CHAR_NAME)}")
+    print()
+
+    allNames = []
+    for name in CharNames():
+        allNames.append(name)
+    print()
 
 if __name__ == "__main__":
     test()
