@@ -88,7 +88,7 @@ class ICUData(object):
         dataFile = open(_dataFilePath, "rb")
         cls._fileData = dataFile.read()
 
-        header = sstruct.unpack(dataHeaderFormat2, cls._fileData[:dataHeaderLength], _object())
+        header = sstruct.unpack(dataHeaderFormat2, cls._fileData[:dataHeaderLength2], _object())
 
         # this would be a good place to verify (some of) the magic bytes, the data format,
         # the isBigEndian, charsetFamily and sizeofUChar...

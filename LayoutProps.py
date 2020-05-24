@@ -6,7 +6,7 @@ Created on My 13, 2020
 @author Eric Mader
 """
 
-from ICUDataFile import ICUData, dataHeaderFormat, dataHeaderLength
+from ICUDataFile import ICUData
 import struct
 from CPTrie import CPTrie
 
@@ -29,14 +29,9 @@ ULAYOUT_IX_COUNT = 12
 
 id = ICUData()
 
-dataOffset = id.getDataOffset("ulayout.icu")
-layoutHeaderData = id.getData(dataOffset, dataOffset + dataHeaderLength)
+(dataOffset, dataHeader) = id.getDataOffsetAndHeader("ulayout.icu")
 
-(headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
- dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
-    struct.unpack(dataHeaderFormat, layoutHeaderData[:dataHeaderLength])
-
-baseOffset = dataOffset + headerLength
+baseOffset = dataOffset + dataHeader.headerLength
 
 indicesStart = baseOffset
 (indicesCount, ) = struct.unpack("I", id.getData(indicesStart, indicesStart+4))

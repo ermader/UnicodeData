@@ -8,7 +8,7 @@ Created on May 15, 2020
 
 import struct
 from fontTools.misc import sstruct
-from ICUDataFile import ICUData, dataHeaderFormat, dataHeaderLength
+from ICUDataFile import ICUData
 from CharProps import getGeneralCategory
 from GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
 
