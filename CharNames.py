@@ -338,16 +338,9 @@ class CharNames(object):
     @classmethod
     def populateData(cls):
 
-        dataOffset = cls._icuData.getDataOffset("unames.icu")
-        dataHeaderData = cls._icuData.getData(dataOffset, dataOffset + dataHeaderLength)
+        (dataOffset, dataHeader) = cls._icuData.getDataOffsetAndHeader("unames.icu")
 
-        (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
-         dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
-            struct.unpack(dataHeaderFormat, dataHeaderData[:dataHeaderLength])
-
-        dataHeader = cls._icuData.getDataHeader("unames.icu")
-
-        baseOffset = dataOffset + headerLength
+        baseOffset = dataOffset + dataHeader.headerLength
         namesDataHeaderStart = baseOffset
         namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
         namesDataHeaderData = cls._icuData.getData(namesDataHeaderStart, namesDataHeaderLimit)
@@ -375,7 +368,6 @@ class CharNames(object):
         (algorithmicRangeCount,) = struct.unpack("I", cls._icuData.getData(rangeStart, rangeStart + 4))
 
         rangeStart += 4
-        rangeLimit = rangeStart + _rangeLength
         for _ in range(algorithmicRangeCount):
             algRange = AlgorithmicRange(cls._icuData, rangeStart)
             cls._algorithmicRanges.append(algRange)

@@ -75,9 +75,10 @@ class ICUData(object):
         return cls._fileData[startOffset:limitOffset]
 
     @classmethod
-    def getDataHeader(cls, name):
+    def getDataOffsetAndHeader(cls, name):
         dataOffset = cls._dataOffsets[name]
-        return sstruct.unpack(dataHeaderFormat2, cls._fileData[dataOffset:dataOffset + dataHeaderLength2])
+        header = sstruct.unpack(dataHeaderFormat2, cls._fileData[dataOffset:dataOffset + dataHeaderLength2], _object())
+        return (dataOffset, header)
 
     @classmethod
     def _populateData(cls):
