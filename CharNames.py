@@ -81,9 +81,6 @@ CP_SEMICOLON = ord(';')
 class _object(object):
     pass
 
-
-_obj = _object()
-
 _nameDataHeaderFormat = "tokenStringOffset: I; groupsOffset: I; groupStringOffset: I; algNamesOffset: I"
 _nameDataHeaderLength = sstruct.calcsize(_nameDataHeaderFormat)
 
@@ -206,7 +203,7 @@ class Group(object):
 
     def __init__(self, icuData, groupStart, groupStringsStart):
         groupLimit = groupStart + self._groupLength
-        group = sstruct.unpack(self._groupFormat, icuData.getData(groupStart, groupLimit), _obj)
+        group = sstruct.unpack(self._groupFormat, icuData.getData(groupStart, groupLimit), _object())
         self.msb = group.msb
         offset = (group.offsetHigh << 16) | group.offsetLow
         startChar = self.msb << GROUP_SHIFT
@@ -241,7 +238,7 @@ class AlgorithmicRange(object):
         self.nameChoice = U_UNICODE_CHAR_NAME
         rangeStart = offset
         rangeLimit = rangeStart + _rangeLength
-        algRange = sstruct.unpack(_rangeFormat, icuData.getData(rangeStart, rangeLimit), _obj)
+        algRange = sstruct.unpack(_rangeFormat, icuData.getData(rangeStart, rangeLimit), _object())
         self.type = algRange.type
         self.variant = algRange.variant
         self.size = algRange.size
@@ -344,7 +341,7 @@ class CharNames(object):
         namesDataHeaderStart = baseOffset
         namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
         namesDataHeaderData = cls._icuData.getData(namesDataHeaderStart, namesDataHeaderLimit)
-        nameDataHeader = sstruct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength], _obj)
+        nameDataHeader = sstruct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength], _object())
 
         tokensStart = namesDataHeaderLimit
         tokenStringsStart = nameDataHeader.tokenStringOffset + baseOffset
