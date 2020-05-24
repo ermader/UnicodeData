@@ -7,6 +7,7 @@ Created on May 12, 2020
 """
 
 import struct
+from fontTools.misc import sstruct
 
 _dataFileName = "icudt67l"  # Needs to change if we change the data file...
 _dataFilePath = f"Data/{_dataFileName}.dat"
@@ -16,8 +17,35 @@ _namePrefixLen = len(_namePrefix)
 dataHeaderFormat = "HBBHHBBBB4s4B4B"  # MappedData + UDataInfo
 dataHeaderLength = struct.calcsize(dataHeaderFormat)
 
-_tocEntryFormat = "II"
-_tocEntryLength = struct.calcsize(_tocEntryFormat)
+dataHeaderFormat2 = """
+# MappedData header
+headerLength: H
+magic1: B; magic2: B
+
+# UDataInfo info
+infoSize: H
+reservedWord: H
+isBigEndian: B
+charsetFamily: B
+sizeofUChar: B
+reservedByte: B
+dataFormat: 4s
+fvMajor: B
+fvMinor: B
+fvMilli: B
+fvMicro: B
+dvMajor: B
+dvMinor: B
+dvMilli: B
+dvMicro: B
+"""
+dataHeaderLength2 = sstruct.calcsize(dataHeaderFormat2)
+
+class _object(object):
+    pass
+
+_tocEntryFormat = "nameOffset: I; dataOffset: I"
+_tocEntryLength = sstruct.calcsize(_tocEntryFormat)
 
 class ICUData(object):
     _dataOffsets = {}
@@ -47,6 +75,11 @@ class ICUData(object):
         return cls._fileData[startOffset:limitOffset]
 
     @classmethod
+    def getDataHeader(cls, name):
+        dataOffset = cls._dataOffsets[name]
+        return sstruct.unpack(dataHeaderFormat2, cls._fileData[dataOffset:dataOffset + dataHeaderLength2])
+
+    @classmethod
     def _populateData(cls):
         if cls._fileData is not None:
             return
@@ -54,95 +87,26 @@ class ICUData(object):
         dataFile = open(_dataFilePath, "rb")
         cls._fileData = dataFile.read()
 
-        (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
-         dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) =\
-            struct.unpack(dataHeaderFormat, cls._fileData[:dataHeaderLength])
+        header = sstruct.unpack(dataHeaderFormat2, cls._fileData[:dataHeaderLength], _object())
 
         # this would be a good place to verify (some of) the magic bytes, the data format,
         # the isBigEndian, charsetFamily and sizeofUChar...
 
-        tocOffset = headerLength
+        tocOffset = header.headerLength
         (tocCount, ) = struct.unpack("I", cls._fileData[tocOffset:tocOffset + 4])
 
         tocEntryStart = tocOffset + 4
         tocEntryLimit = tocEntryStart + _tocEntryLength
 
         for _ in range(tocCount):
-            (nameOffset, dataOffset) = struct.unpack(_tocEntryFormat, cls._fileData[tocEntryStart:tocEntryLimit])
-            name = ICUData.getName(nameOffset + headerLength)
-            cls._dataOffsets[name] = dataOffset + headerLength
+            tocEntry = sstruct.unpack(_tocEntryFormat, cls._fileData[tocEntryStart:tocEntryLimit], _object())
+            name = ICUData.getName(tocEntry.nameOffset + header.headerLength)
+            cls._dataOffsets[name] = tocEntry.dataOffset + header.headerLength
             tocEntryStart = tocEntryLimit
             tocEntryLimit += _tocEntryLength
 
     def __init__(self):
         ICUData._populateData()
-
-# dataFilePath = "/usr/share/icu/icudt64l.dat"  # Eventually, keep a copy in our Data directory...
-#
-# dataHeaderFormat = "HBBHHBBBB4s4B4B"  # MappedData + UDataInfo
-# dataHeaderLength = struct.calcsize(dataHeaderFormat)
-#
-# tocEntryFormat = "II"
-# tocEntryLength = struct.calcsize(tocEntryFormat)
-#
-# dataFile = open(dataFilePath, "rb")
-#
-# dataHeader = dataFile.read(dataHeaderLength)
-#
-# (headerLength, magic1, magic2, infoSize, infoReserved, isBigEndian, charsetFamily, sizeofUChar, reservedByte, \
-#  dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) =\
-#     struct.unpack(dataHeaderFormat, dataHeader)
-#
-# tocOffset = headerLength
-#
-# dataFile.seek(tocOffset)
-# tocHeader = dataFile.read(4)
-# (tocCount, ) = struct.unpack("I", tocHeader)
-# tocLength = tocCount * tocEntryLength
-# tocEntriesData = dataFile.read(tocLength)
-#
-# tocEntries = []
-#
-# tocEntryStart = 0
-# tocEntryLimit = tocEntryLength
-# minNameOffset = 0xFFFFFFFF
-# maxDataOffset = 0
-# for _ in range(tocCount):
-#     (nameOffset, dataOffset) = struct.unpack(tocEntryFormat, tocEntriesData[tocEntryStart:tocEntryLimit])
-#     tocEntries.append((nameOffset, dataOffset))
-#     if nameOffset < minNameOffset:
-#         minNameOffset = nameOffset
-#     if dataOffset > maxDataOffset:
-#         maxDataOffset = dataOffset
-#     tocEntryStart = tocEntryLimit
-#     tocEntryLimit += tocEntryLength
-#
-# (nameOffset0, dataOffset0) = tocEntries[0]
-# (nameOffset1, dataOffset1) = tocEntries[1]
-# (nameOffsetH, dataOffsetH) = tocEntries[tocCount // 2]
-# (nameOffsetH1, dataOffsetH1) = tocEntries[tocCount // 2 + 1]
-# (nameOffsetX, dataOffsetX) = tocEntries[tocCount - 2]
-# (nameOffsetL, dataOffsetL) = tocEntries[tocCount - 1]
-#
-# namesDataLength = dataOffset0 - nameOffset0  # this is a bit too long...
-# dataFile.seek(nameOffset0 + headerLength)
-# namesData = dataFile.read(namesDataLength)
-#
-# names = []
-#
-# # This assumes that all names start with the prefix...
-# for (nameOffset, _) in tocEntries:
-#     name = ""
-#     while namesData[nameOffset - nameOffset0] != 0:
-#         name += chr(namesData[nameOffset - nameOffset0])
-#         nameOffset += 1
-#     names.append(name[_namePrefixLen:])
-#
-# for name in names:
-#     if name.endswith(".icu"):
-#         print(f'Found "{name}"')
-#
-# print(f'Last name: "{names[-1]}"')
 
 def test():
     id = ICUData()
