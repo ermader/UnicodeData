@@ -28,14 +28,8 @@ charsetFamily: B
 sizeofUChar: B
 reservedByte: B
 dataFormat: 4s
-fvMajor: B
-fvMinor: B
-fvMilli: B
-fvMicro: B
-dvMajor: B
-dvMinor: B
-dvMilli: B
-dvMicro: B
+fvMajor: B; fvMinor: B; fvMilli: B; fvMicro: B
+dvMajor: B; dvMinor: B; dvMilli: B; dvMicro: B
 """
 dataHeaderLength = sstruct.calcsize(dataHeaderFormat)
 
