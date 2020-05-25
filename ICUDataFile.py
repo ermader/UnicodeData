@@ -14,10 +14,8 @@ _dataFilePath = f"Data/{_dataFileName}.dat"
 _namePrefix = f"{_dataFileName}/"
 _namePrefixLen = len(_namePrefix)
 
-dataHeaderFormat = "HBBHHBBBB4s4B4B"  # MappedData + UDataInfo
-dataHeaderLength = struct.calcsize(dataHeaderFormat)
 
-dataHeaderFormat2 = """
+dataHeaderFormat = """
 # MappedData header
 headerLength: H
 magic1: B; magic2: B
@@ -39,7 +37,7 @@ dvMinor: B
 dvMilli: B
 dvMicro: B
 """
-dataHeaderLength2 = sstruct.calcsize(dataHeaderFormat2)
+dataHeaderLength = sstruct.calcsize(dataHeaderFormat)
 
 class _object(object):
     pass
@@ -77,7 +75,7 @@ class ICUData(object):
     @classmethod
     def getDataOffsetAndHeader(cls, name):
         dataOffset = cls._dataOffsets[name]
-        header = sstruct.unpack(dataHeaderFormat2, cls._fileData[dataOffset:dataOffset + dataHeaderLength2], _object())
+        header = sstruct.unpack(dataHeaderFormat, cls._fileData[dataOffset:dataOffset + dataHeaderLength], _object())
         return (dataOffset, header)
 
     @classmethod
@@ -88,7 +86,7 @@ class ICUData(object):
         dataFile = open(_dataFilePath, "rb")
         cls._fileData = dataFile.read()
 
-        header = sstruct.unpack(dataHeaderFormat2, cls._fileData[:dataHeaderLength2], _object())
+        header = sstruct.unpack(dataHeaderFormat, cls._fileData[:dataHeaderLength], _object())
 
         # this would be a good place to verify (some of) the magic bytes, the data format,
         # the isBigEndian, charsetFamily and sizeofUChar...
@@ -118,11 +116,7 @@ def test():
 
     print(f'Last name: "{name}"')
 
-    layoutOffset = id.getDataOffset("unames.icu")
-    layoutHeader = id.getData(layoutOffset, layoutOffset + dataHeaderLength)
-    (headerLength, magic1, magic2, infoSize, _, isBigEndian, charsetFamily, sizeofUChar, _, \
-     dataFormat, fvMajor, fvMinor, fvMilli, fvMicro, dvMajor, dvMinor, dvMilli, dvMicro) = \
-        struct.unpack(dataHeaderFormat, layoutHeader[:dataHeaderLength])
+    (layoutOffset, layoutHeaderData) = id.getDataOffsetAndHeader("unames.icu")
     pass
 
 if __name__ == "__main__":
