@@ -6,6 +6,7 @@ Created on May 14, 2020
 @author Eric Mader
 """
 import struct
+from fontTools.misc import sstruct
 
 UCPTRIE_SIG = 0x54726933  # "Tri3"
 
@@ -103,22 +104,50 @@ UCPTRIE_OPTIONS_VALUE_BITS_MASK = 7
 UCPTRIE_NO_INDEX3_NULL_OFFSET = 0x7fff
 UCPTRIE_NO_DATA_NULL_OFFSET = 0xfffff
 
+class _object(object):
+    pass
 
 class CPTrie(object):
-    _trieHeaderFormat = "IHHHHHH"
-    _trieHeaderLength = struct.calcsize(_trieHeaderFormat)
+    _trieHeaderFormat = """
+    # "Tri3" in big-endian US-ASCII (0x54726933)
+    sig: I
+    
+    # Options bit field:
+    # Bits 15..12: Data length bits 19..16.
+    # Bits 11..8: Data null block offset bits 19..16.
+    # Bits 7..6: UCPTrieType
+    # Bits 5..3: Reserved (0).
+    # Bits 2..0: UCPTrieValueWidth
+    options: H
+    
+    # Total length of the index tables.
+    indexLength: H
+    
+    # Data length bits 15..0.
+    dataLength: H
+    
+    # Index-3 null block offset, 0x7fff or 0xffff if none.
+    index3NullOffset: H
+    
+    # Data null block offset bits 15..0, 0xfffff if none. 
+    dataNullOffset: H
+    
+    # First code point of the single-value range ending with U+10ffff,
+    # rounded up and then shifted right by UCPTRIE_SHIFT_2.
+    shiftedHighStart: H
+    """
+    _trieHeaderLength = sstruct.calcsize(_trieHeaderFormat)
 
     def __init__(self, trieData):
-        (sig, options, indexLength, dataLength, index3NullOffset, dataNullOffset, shiftedHighStart) = struct.unpack(
-            self._trieHeaderFormat, trieData[:self._trieHeaderLength])
+        trieHeader = sstruct.unpack(self._trieHeaderFormat, trieData[:self._trieHeaderLength], _object())
 
-        self.type = (options >> 6) & 3  # There should be constants for these numbers...
-        self.valueWidth = options & UCPTRIE_OPTIONS_VALUE_BITS_MASK
-        self.indexLength = indexLength
-        self.dataLength = ((options & UCPTRIE_OPTIONS_DATA_LENGTH_MASK) << 4) | dataLength
-        self.index3NullOffset = index3NullOffset
-        self.dataNullOffset = ((options & UCPTRIE_OPTIONS_DATA_NULL_OFFSET_MASK) << 8) | dataNullOffset
-        self.highStart = shiftedHighStart << UCPTRIE_SHIFT_2
+        self.type = (trieHeader.options >> 6) & 3  # There should be constants for these numbers...
+        self.valueWidth = trieHeader.options & UCPTRIE_OPTIONS_VALUE_BITS_MASK
+        self.indexLength = trieHeader.indexLength
+        self.dataLength = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_LENGTH_MASK) << 4) |trieHeader.dataLength
+        self.index3NullOffset = trieHeader.index3NullOffset
+        self.dataNullOffset = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_NULL_OFFSET_MASK) << 8) | trieHeader.dataNullOffset
+        self.highStart = trieHeader.shiftedHighStart << UCPTRIE_SHIFT_2
         self.shifted12HighStart = (self.highStart + 0xfff) >> 12
         actualLength = self._trieHeaderLength + self.indexLength * 2
 
