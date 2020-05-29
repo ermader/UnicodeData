@@ -7,6 +7,7 @@ Created on May 14, 2020
 """
 import struct
 from fontTools.misc import sstruct
+from Utilities import _object
 
 UCPTRIE_SIG = 0x54726933  # "Tri3"
 
@@ -103,9 +104,6 @@ UCPTRIE_OPTIONS_VALUE_BITS_MASK = 7
 # 18-bit indexes.
 UCPTRIE_NO_INDEX3_NULL_OFFSET = 0x7fff
 UCPTRIE_NO_DATA_NULL_OFFSET = 0xfffff
-
-class _object(object):
-    pass
 
 class CPTrie(object):
     _trieHeaderFormat = """

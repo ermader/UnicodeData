@@ -105,7 +105,7 @@ def test():
     id = ICUData()
 
     for name in id._dataOffsets.keys():
-        if name.endswith(".icu"):
+        if name.endswith(".icu") or name.find("norm") >= 0:
             print(f'Found "{name}"')
 
     print(f'Last name: "{name}"')

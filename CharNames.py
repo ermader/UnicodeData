@@ -11,6 +11,7 @@ from fontTools.misc import sstruct
 from ICUDataFile import ICUData
 from CharProps import getGeneralCategory
 from GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
+from Utilities import _object
 
 # "extra" general categories
 GC_NONCHARACTER_CODEPOINT = GC_CATEFORY_COUNT
@@ -76,10 +77,6 @@ GROUP_OFFSET_LOW = 2
 GROUP_LENGTH = 3
 
 CP_SEMICOLON = ord(';')
-
-
-class _object(object):
-    pass
 
 _nameDataHeaderFormat = "tokenStringOffset: I; groupsOffset: I; groupStringOffset: I; algNamesOffset: I"
 _nameDataHeaderLength = sstruct.calcsize(_nameDataHeaderFormat)

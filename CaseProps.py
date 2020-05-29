@@ -8,6 +8,7 @@ Created on May 8, 2020
 
 from CasePropsData import *
 from Utrie2 import UTrie2
+from Utilities import arithmeticShift
 
 # Indexes into ucase_props_indexes
 UCASE_IX_INDEX_TOP = 0
@@ -115,15 +116,6 @@ flagsOffset = [
     3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
     4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
 ]
-
-# We want an arithmetic shift. There's got to be a better way to do this...
-# This should be in a utilities module...
-def arithmeticShift(value, bitsInWord, bitsInField):
-    signBit = 1 << (bitsInWord - 1)
-    shift = bitsInWord - bitsInField
-    result = value >> shift
-
-    return result - (1 << bitsInField) if (value & signBit) != 0 else result
 
 def getDeltaFromProps(props):
     return arithmeticShift(props, UCASE_PROPS_BITS, UCASE_DELTA_BITS)

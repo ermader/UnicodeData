@@ -10,6 +10,7 @@ from BidiPropsData import *
 from Utrie2 import UTrie2
 from CharDirection import *
 from JoiningTypesAndGroups import *
+from Utilities import arithmeticShift
 
 #indices into the indexes array
 UBIDI_IX_INDEX_TOP = 0
@@ -35,6 +36,7 @@ UBIDI_BIDI_CONTROL_SHIFT = 11
 
 UBIDI_IS_MIRRORED_SHIFT = 12  # 'is mirrored'
 UBIDI_MIRROR_DELTA_SHIFT = 13  # bidi mirroring delta: 3 bits (15..13)
+UBIDI_MIRROR_DELTA_BITS = 16 - UBIDI_MIRROR_DELTA_SHIFT
 
 UBIDI_MAX_JG_SHIFT = 16  # max JG value in indexes[UBIDI_MAX_VALUES_INDEX] bits 23..16
 
@@ -50,10 +52,8 @@ def getClassFromProps(props):
 def getFlagFromProps(props, shift):
     return ((props >> shift) & 1) != 0
 
-# We want a 16-bit arithmetic shift. There's got to be a better way to do this...
 def getMirrorDeltaFromProps(props):
-    delta = props >> UBIDI_MIRROR_DELTA_SHIFT
-    return delta - 8 if (props & 0x8000) != 0 else delta
+    return arithmeticShift(props, 16, UBIDI_MIRROR_DELTA_BITS)
 
 UBIDI_ESC_MIRROR_DELTA = -4
 UBIDI_MIN_MIRROR_DELTA = -3

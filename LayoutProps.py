@@ -9,6 +9,7 @@ Created on My 13, 2020
 from ICUDataFile import ICUData
 import struct
 from CPTrie import CPTrie
+import LayoutTypes
 
 # Layout indexes indices
 # Element 0 stores the length of the indexes[] array.
@@ -64,10 +65,10 @@ def getVO(c):
     return voTrie.get(c)
 
 def test():
-    print(f"getInPC(0x0901) is {getInPC(0x0901)}")
-    print(f"getInPC(0x0915) is {getInPC(0x0915)}")
-    print(f"getInPC(0x0B55) is {getInPC(0x0B55)}")
-    print(f"getInSC('0') is {getInSC(ord('0'))}")
+    print(f"getInPC(0x0901) is {LayoutTypes.inpcNames[getInPC(0x0901)]}")
+    print(f"getInPC(0x0915) is {LayoutTypes.inpcNames[getInPC(0x0915)]}")
+    print(f"getInPC(0x0B55) is {LayoutTypes.inpcNames[getInPC(0x0B55)]}")
+    print(f"getInSC('0') is {LayoutTypes.inscNames[getInSC(ord('0'))]}")
 
 if __name__ == "__main__":
     test()
