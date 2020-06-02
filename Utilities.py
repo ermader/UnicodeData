@@ -6,12 +6,18 @@ Created on May 28, 2020
 @author Eric Mader
 """
 
-import struct
+# import struct
 
 class _object(object):
     """Useful for passing object instances to sstruct.unpack()"""
     pass
 
+def isUnicodeNoncharacter(code):
+    return code >= 0xfdd0 and \
+     (code <= 0xfdef or (code & 0xfffe) == 0xfffe) and code <= 0x10ffff
+
+def isLead(code):
+    return (code & 0xfffffc00) == 0xd800
 
 def arithmeticShift(value, bitsInWord, bitsInField):
     """\

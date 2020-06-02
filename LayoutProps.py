@@ -43,17 +43,17 @@ indices = struct.unpack(indicesFormat, id.getData(indicesStart, indicesLimit))
 trieOffset = indicesLimit
 trieLimit = indices[ULAYOUT_IX_INPC_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
-inpcTrie = CPTrie(trieData)
+inpcTrie = CPTrie.createFromData(trieData)
 
 trieOffset = trieLimit
 trieLimit = indices[ULAYOUT_IX_INSC_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
-inscTrie = CPTrie(trieData)
+inscTrie = CPTrie.createFromData(trieData)
 
 trieOffset = trieLimit
 trieLimit = indices[ULAYOUT_IX_VO_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
-voTrie = CPTrie(trieData)
+voTrie = CPTrie.createFromData(trieData)
 
 def getInPC(c):
     return inpcTrie.get(c)

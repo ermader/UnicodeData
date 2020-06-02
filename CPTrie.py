@@ -136,43 +136,50 @@ class CPTrie(object):
     """
     _trieHeaderLength = sstruct.calcsize(_trieHeaderFormat)
 
-    def __init__(self, trieData):
-        trieHeader = sstruct.unpack(self._trieHeaderFormat, trieData[:self._trieHeaderLength], _object())
+    def __init__(self, index, data, type, valueWidth, index3NullOffset, dataNullOffset, highStart, shifted12HighStart):
+        self.type = type
+        self.valueWidth = valueWidth
+        self.indexLength = index[0]
+        self.dataLength = len(data)
+        self.index3NullOffset = index3NullOffset
+        self.dataNullOffset = dataNullOffset
+        self.highStart = highStart
+        self.shifted12HighStart = shifted12HighStart
+        self.index = index
+        self.data = data
 
-        self.type = (trieHeader.options >> 6) & 3  # There should be constants for these numbers...
-        self.valueWidth = trieHeader.options & UCPTRIE_OPTIONS_VALUE_BITS_MASK
-        self.indexLength = trieHeader.indexLength
-        self.dataLength = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_LENGTH_MASK) << 4) |trieHeader.dataLength
-        self.index3NullOffset = trieHeader.index3NullOffset
-        self.dataNullOffset = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_NULL_OFFSET_MASK) << 8) | trieHeader.dataNullOffset
-        self.highStart = trieHeader.shiftedHighStart << UCPTRIE_SHIFT_2
-        self.shifted12HighStart = (self.highStart + 0xfff) >> 12
-        actualLength = self._trieHeaderLength + self.indexLength * 2
+    @classmethod
+    def createFromData(cls, trieData):
+        trieHeader = sstruct.unpack(cls._trieHeaderFormat, trieData[:cls._trieHeaderLength], _object())
 
-        if self.valueWidth == UCPTRIE_VALUE_BITS_16:
-            actualLength += self.dataLength * 2
-        elif self.valueWidth == UCPTRIE_VALUE_BITS_32:
-            actualLength += self.dataLength * 4
-        else:
-            actualLength += self.dataLength
+        type = (trieHeader.options >> 6) & 3  # There should be constants for these numbers...
+        valueWidth = trieHeader.options & UCPTRIE_OPTIONS_VALUE_BITS_MASK
+        indexLength = trieHeader.indexLength
+        dataLength = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_LENGTH_MASK) << 4) |trieHeader.dataLength
+        index3NullOffset = trieHeader.index3NullOffset
+        dataNullOffset = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_NULL_OFFSET_MASK) << 8) | trieHeader.dataNullOffset
+        highStart = trieHeader.shiftedHighStart << UCPTRIE_SHIFT_2
+        shifted12HighStart = (highStart + 0xfff) >> 12
 
-        indexFormat = f"{self.indexLength}H"
-        indexStart = self._trieHeaderLength
+        indexFormat = f"{indexLength}H"
+        indexStart = cls._trieHeaderLength
         indexLimit = indexStart + struct.calcsize(indexFormat)
-        self.index = struct.unpack(indexFormat, trieData[indexStart:indexLimit])
+        index = struct.unpack(indexFormat, trieData[indexStart:indexLimit])
 
         dataStart = indexLimit
 
-        if self.valueWidth == UCPTRIE_VALUE_BITS_16:
+        if valueWidth == UCPTRIE_VALUE_BITS_16:
             dataType = "H"
-        elif self.valueWidth == UCPTRIE_VALUE_BITS_32:
+        elif valueWidth == UCPTRIE_VALUE_BITS_32:
             dataType = "I"
         else:
             dataType = "B"
 
-        dataFormat = f"{self.dataLength}{dataType}"
+        dataFormat = f"{dataLength}{dataType}"
         dataLimit = dataStart + struct.calcsize(dataFormat)
-        self.data = struct.unpack(dataFormat, trieData[dataStart:dataLimit])
+        data = struct.unpack(dataFormat, trieData[dataStart:dataLimit])
+
+        return CPTrie(index, data, type, valueWidth, index3NullOffset, dataNullOffset, highStart, shifted12HighStart)
 
     def fastIndex(self, c):
         return self.index[c >> UCPTRIE_FAST_SHIFT] + (c & UCPTRIE_FAST_DATA_MASK)
