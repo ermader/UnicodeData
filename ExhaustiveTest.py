@@ -15,6 +15,7 @@ import Boundaries
 import DecompositionType
 import LayoutTypes
 from CharNames import CharNames
+import Normalizer2
 
 def doTest(cp, got, expected, name):
     if got != expected:
@@ -105,6 +106,7 @@ def test():
         inpc = LayoutTypes.inpcNames[LayoutProps.getInPC(cp)]
         insc = LayoutTypes.inscNames[LayoutProps.getInSC(cp)]
         vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
+        dm = Normalizer2.getRawDecomposition(cp)
         name = CharNames.getCharName(cp)
 
         doTest(cp, sc, characterData.script, "script code")
@@ -129,6 +131,7 @@ def test():
         doTest(cp, inpc, characterData.indicProperties.positionalCategory, "positional category")
         doTest(cp, insc, characterData.indicProperties.syllabicCategory, "syllabic category")
         doTest(cp, vo, characterData.verticalOrientation, "vertical orientation")
+        doTest(cp, dm, characterData.decompProperties.decomposition, "decomposition")
         doTest(cp, name, characterData.name, "character name")
 
         doBinaryTests(cp, characterData.binaryProperties)

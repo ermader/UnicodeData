@@ -165,7 +165,7 @@ def rawHangulDecomposition(c):
 
     if c2 == 0:
         c //= JAMO_T_COUNT
-        decomposition += chr(JAMO_L_BASE + c / JAMO_V_COUNT)
+        decomposition += chr(JAMO_L_BASE + c // JAMO_V_COUNT)
         decomposition += chr(JAMO_V_BASE + c % JAMO_V_COUNT)
     else:
         decomposition += chr(orig - c2)  # LV syllable
@@ -222,7 +222,7 @@ def getRawDecomposition(c):
         norm16 = getRawNorm16(c)
 
     if norm16 < minYesNo:
-        return decomposition
+        return None if not decomposition else decomposition
 
     if isHangulLV(norm16) or isHangulLVT(norm16):
         # Hangul syllable: decompose algorithmically
@@ -268,6 +268,8 @@ def test():
     print(f"getRawDecomposition('{chr(0x00C0)}') is '{getRawDecomposition(0x00C0)}'")
     print(f"getRawDecomposition('{chr(0x1EA6)}') is '{getRawDecomposition(0x1EA6)}'")
     print(f"getRawDecomposition('{chr(0xCA8D)}') = '{getRawDecomposition(0xCA8D)}'")
+    print(f"getRawDecomposition('{chr(0x6595)}') = '{getRawDecomposition(0x6595)}'")
+
 
 
 

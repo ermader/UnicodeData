@@ -13,8 +13,10 @@ class DecompProperties(UCDProperties):
         # We don't care about characters that decompose to a single character -
         # they either decompose to themselves or are for compatibility.
         # We also don't care about decompositions that start w/ a space
-        if " " not in dm or dm.startswith("0020 "):
-            return None
+        # if " " not in dm or dm.startswith("0020 "):
+        #     return None
+
+        if not dm or dm == "#": return None
 
         codePoints = dm.split(" ")
         chars = []
