@@ -8,6 +8,7 @@ Created on May 12, 2020
 
 import struct
 from fontTools.misc import sstruct
+from Utilities import _object
 
 _dataFileName = "icudt67l"  # Needs to change if we change the data file...
 _dataFilePath = f"Data/{_dataFileName}.dat"
@@ -32,9 +33,6 @@ fvMajor: B; fvMinor: B; fvMilli: B; fvMicro: B
 dvMajor: B; dvMinor: B; dvMilli: B; dvMicro: B
 """
 dataHeaderLength = sstruct.calcsize(dataHeaderFormat)
-
-class _object(object):
-    pass
 
 _tocEntryFormat = "nameOffset: I; dataOffset: I"
 _tocEntryLength = sstruct.calcsize(_tocEntryFormat)
@@ -105,7 +103,7 @@ def test():
     id = ICUData()
 
     for name in id._dataOffsets.keys():
-        if name.endswith(".icu") or name.find("norm") >= 0 or name.find("nrm") >= 0:
+        if name.endswith(".icu") or name.endswith(".nrm"):
             print(f'Found "{name}"')
 
     print(f'Last name: "{name}"')
