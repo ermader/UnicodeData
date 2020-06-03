@@ -179,6 +179,25 @@ def mapAlgorithmic(c, norm16):
 def getMappingIndex(norm16):
     return norm16 >> OFFSET_SHIFT
 
+def stringFromData(index, length):
+    s = ""
+    lead = 0  # for the lead byte of a surrogate pair
+    for i in range(length):
+        ch = extraData[index + i]
+
+        # handle surrogate pairs
+        if lead != 0:
+            ch = lead + (ch - 0xDC00 + 0x10000)
+            lead = 0
+        elif isLead(ch):
+            lead = (ch - 0xD800) * 0x400
+            continue
+
+        s += chr(ch)
+
+    return s
+
+
 def getDecomosition(c):
     decomposition = ""
     norm16 = getNorm16(c)
@@ -193,7 +212,7 @@ def getDecomosition(c):
         norm16 = getRawNorm16(c)
 
     if norm16 < minYesNo:
-        return decomposition
+        return decomposition if len(decomposition) > 0 else None
 
     if isHangulLV(norm16) or isHangulLVT(norm16):
         # Hangul syllable: decompose algorithmically
@@ -203,8 +222,7 @@ def getDecomosition(c):
     ix = getMappingIndex(norm16)
     length = extraData[ix] & MAPPING_LENGTH_MASK
 
-    for i in range(length):
-        decomposition += chr(extraData[ix + i + 1])
+    decomposition += stringFromData(ix + 1, length)
 
     return decomposition
 
@@ -216,13 +234,12 @@ def getRawDecomposition(c):
         return None
 
     if isDecompNoAlgorithmic(norm16):
-        # Maps to an isCompYesAndZeroCC.
         c = mapAlgorithmic(c, norm16)
         decomposition += chr(c)
-        norm16 = getRawNorm16(c)
+        return decomposition
 
     if norm16 < minYesNo:
-        return None if not decomposition else decomposition
+        return decomposition if len(decomposition) > 0 else None
 
     if isHangulLV(norm16) or isHangulLVT(norm16):
         # Hangul syllable: decompose algorithmically
@@ -251,24 +268,43 @@ def getRawDecomposition(c):
         ix += 1
         length = mLength
 
-    for i in range(length):
-        decomposition += chr(extraData[ix + i])
+    decomposition += stringFromData(ix, length)
 
     return decomposition
 
+def stringToCharList(decomp):
+    if not decomp: return None
+
+    chars = [c for c in decomp]
+    charList = ", ".join(chars)
+    return f"[{charList}]"
+
+def decompToCharList(c):
+    return stringToCharList(getDecomosition(c))
+
+def rawDecompToCharList(c):
+    return stringToCharList(getRawDecomposition(c))
 
 def test():
-    print(f"getDecomposition('A') is '{getDecomosition(ord('A'))}'")
-    print(f"getDecomposition('{chr(0x00C0)}') is '{getDecomosition(0x00C0)}'")
-    print(f"getDecomposition('{chr(0x1EA6)}') is '{getDecomosition(0x1EA6)}'")
-    print(f"getDecomposition('{chr(0xCA8D)}') = '{getDecomosition(0xCA8D)}'")
+    print(f"getDecomposition('A') is {decompToCharList(ord('A'))}")
+    print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(0x00A0)}")
+    print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(0x00A8)}")
+    print(f"getDecomposition('{chr(0x00C0)}') is {decompToCharList(0x00C0)}")
+    print(f"getDecomposition('{chr(0x1EA6)}') is {decompToCharList(0x1EA6)}")
+    print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(0x3307)}")
+    print(f"getDecomposition('{chr(0xCA8D)}') is {decompToCharList(0xCA8D)}")
+    print(f"getDecomposition('{chr(0xFA6C)}') is {decompToCharList(0xFA6C)}")
     print()
 
-    print(f"getRawDecomposition('A') is '{getRawDecomposition(ord('A'))}'")
-    print(f"getRawDecomposition('{chr(0x00C0)}') is '{getRawDecomposition(0x00C0)}'")
-    print(f"getRawDecomposition('{chr(0x1EA6)}') is '{getRawDecomposition(0x1EA6)}'")
-    print(f"getRawDecomposition('{chr(0xCA8D)}') = '{getRawDecomposition(0xCA8D)}'")
-    print(f"getRawDecomposition('{chr(0x6595)}') = '{getRawDecomposition(0x6595)}'")
+    print(f"getRawDecomposition('A') is {rawDecompToCharList(ord('A'))}")
+    print(f"getRawDecomposition('{chr(0x00A0)}') is {rawDecompToCharList(0x00A0)}")
+    print(f"getRawDecomposition('{chr(0x00A8)}') is {rawDecompToCharList(0x00A8)}")
+    print(f"getRawDecomposition('{chr(0x00C0)}') is {rawDecompToCharList(0x00C0)}")
+    print(f"getRawDecomposition('{chr(0x1EA6)}') is {rawDecompToCharList(0x1EA6)}")
+    print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(0x3307)}")
+    print(f"getRawDecomposition('{chr(0xCA8D)}') is {rawDecompToCharList(0xCA8D)}")
+    print(f"getRawDecomposition('{chr(0x6595)}') is {rawDecompToCharList(0x6595)}")
+    print(f"getRawDecomposition('{chr(0xFA6C)}') is {rawDecompToCharList(0xFA6C)}")
 
 
 

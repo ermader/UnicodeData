@@ -31,7 +31,7 @@ class DecompProperties(UCDProperties):
         self.decompositionType = self.getCharProperty("dt")
 
         dm = self.getCharProperty("dm")
-        self.decomposition = self.dmToString(dm)
+        self.decomposition = self.dmToString(dm) if self.decompositionType == "can" else None
 
         self.compositionExclusion = self.getBooleanProperty("CE")
         self.fullCompositionExclusion = self.getBooleanProperty("Comp_Ex")

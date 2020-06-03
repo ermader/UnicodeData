@@ -187,7 +187,7 @@ class CPTrie(object):
     def internalSmallIndex(self, c):
         i1 = c >> UCPTRIE_SHIFT_1
 
-        if self.type == type == UCPTRIE_TYPE_FAST:
+        if self.type == UCPTRIE_TYPE_FAST:
             i1 += UCPTRIE_BMP_INDEX_LENGTH - UCPTRIE_OMITTED_BMP_INDEX_1_LENGTH
         else:
             i1 += UCPTRIE_SMALL_INDEX_LENGTH
