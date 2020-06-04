@@ -6,7 +6,9 @@ Created on June 2, 2020
 @author Eric Mader
 """
 
+import struct
 from Norm2NFCData import *
+from ICUDataFile import ICUData
 from CPTrie import CPTrie
 from Utilities import isLead, charFromSurrogates
 
@@ -92,185 +94,222 @@ JAMO_VT_COUNT = JAMO_V_COUNT * JAMO_T_COUNT
 HANGUL_COUNT = JAMO_L_COUNT * JAMO_V_COUNT * JAMO_T_COUNT
 HANGUL_LIMIT = HANGUL_BASE + HANGUL_COUNT
 
-minDecompNoCP = norm2_nfc_data_indexes[IX_MIN_DECOMP_NO_CP]
-minCompNoMaybeCP = norm2_nfc_data_indexes[IX_MIN_COMP_NO_MAYBE_CP]
-minLcccCP = norm2_nfc_data_indexes[IX_MIN_LCCC_CP]
+class Normalizer2(object):
+    def __init__(self, trie, indexes, extraData):
+        self.trie = trie
 
-minYesNo = norm2_nfc_data_indexes[IX_MIN_YES_NO]
-minYesNoMappingsOnly = norm2_nfc_data_indexes[IX_MIN_YES_NO_MAPPINGS_ONLY]
-minNoNo = norm2_nfc_data_indexes[IX_MIN_NO_NO]
-minNoNoCompBoundaryBefore = norm2_nfc_data_indexes[IX_MIN_NO_NO_COMP_BOUNDARY_BEFORE]
-minNoNoCompNoMaybeCC = norm2_nfc_data_indexes[IX_MIN_NO_NO_COMP_NO_MAYBE_CC]
-minNoNoEmpty = norm2_nfc_data_indexes[IX_MIN_NO_NO_EMPTY]
-limitNoNo = norm2_nfc_data_indexes[IX_LIMIT_NO_NO]
-minMaybeYes = norm2_nfc_data_indexes[IX_MIN_MAYBE_YES]
-assert (minMaybeYes & 7) == 0  # 8-aligned for noNoDelta bit fields
-centerNoNoDelta = (minMaybeYes >> DELTA_SHIFT) - MAX_DELTA - 1
+        self.minDecompNoCP = indexes[IX_MIN_DECOMP_NO_CP]
+        self.minCompNoMaybeCP = indexes[IX_MIN_COMP_NO_MAYBE_CP]
+        self.minLcccCP = indexes[IX_MIN_LCCC_CP]
 
-maybeYesCompositions = norm2_nfc_data_extraData
-extraData = norm2_nfc_data_extraData[(MIN_NORMAL_MAYBE_YES-minMaybeYes)>>OFFSET_SHIFT:]
+        self.minYesNo = indexes[IX_MIN_YES_NO]
+        self.minYesNoMappingsOnly = indexes[IX_MIN_YES_NO_MAPPINGS_ONLY]
+        self.minNoNo = indexes[IX_MIN_NO_NO]
+        self.minNoNoCompBoundaryBefore = indexes[IX_MIN_NO_NO_COMP_BOUNDARY_BEFORE]
+        self.minNoNoCompNoMaybeCC = indexes[IX_MIN_NO_NO_COMP_NO_MAYBE_CC]
+        self.minNoNoEmpty = indexes[IX_MIN_NO_NO_EMPTY]
+        self.limitNoNo = indexes[IX_LIMIT_NO_NO]
+        self.minMaybeYes = indexes[IX_MIN_MAYBE_YES]
+        assert (self.minMaybeYes & 7) == 0  # 8-aligned for noNoDelta bit fields
+        self.centerNoNoDelta = (self.minMaybeYes >> DELTA_SHIFT) - MAX_DELTA - 1
 
-normTrie = CPTrie(norm2_nfc_data_trieIndex, norm2_nfc_data_trieData, norm2_nfc_data_type, norm2_nfc_data_valueWidth, \
-                  norm2_nfc_data_index3NullOffset, norm2_nfc_data_dataNullOffset, norm2_nfc_data_highStart, norm2_nfc_data_shifted12HighStart)
+        extraDataStart = (MIN_NORMAL_MAYBE_YES - indexes[IX_MIN_MAYBE_YES]) >> OFFSET_SHIFT
+        self.maybeYesCompositions = extraData[:extraDataStart]
+        self.extraData = extraData[extraDataStart:]
 
-def getNorm16(c):
-    return INERT if isLead(c) else normTrie.get(c)
+    @classmethod
+    def createFromHardCodedData(cls):
+        trie = CPTrie(norm2_nfc_data_trieIndex, norm2_nfc_data_trieData, norm2_nfc_data_type, norm2_nfc_data_valueWidth, \
+                      norm2_nfc_data_index3NullOffset, norm2_nfc_data_dataNullOffset, norm2_nfc_data_highStart, norm2_nfc_data_shifted12HighStart)
 
-def getRawNorm16(c):
-    return normTrie.get(c)
+        return Normalizer2(trie, norm2_nfc_data_indexes, norm2_nfc_data_extraData)
 
-def isMaybeOrNonZeroCC(norm16):
-    return norm16 >= minMaybeYes
+    @classmethod
+    def createFromFileData(cls, package):
+        icuData = ICUData()
 
-def isDecompNoAlgorithmic(norm16):
-    return norm16 >= limitNoNo
+        dataOffset, dataHeader = icuData.getDataOffsetAndHeader(f"{package}.nrm")
+        baseOffset = dataOffset + dataHeader.headerLength
 
-def isInert(norm16) :
-    return norm16 == INERT
+        indicesStart = baseOffset
+        indicesCount, = struct.unpack("I", icuData.getData(indicesStart, indicesStart + 4))
+        indicesCount //= 4
+        indicesLimit = indicesStart + (indicesCount * 4)
+        indicesFormat = f"{indicesCount}I"
+        indices = struct.unpack(indicesFormat, icuData.getData(indicesStart, indicesLimit))
 
-def isJamoL(norm16):
-    return norm16 == JAMO_L
+        trieStart = indices[IX_NORM_TRIE_OFFSET] + baseOffset
+        trieLimit = indices[IX_EXTRA_DATA_OFFSET] + baseOffset
 
-def isJamoVT(norm16):
-    return norm16 == JAMO_VT
+        trie = CPTrie.createFromData(icuData.getData(trieStart, trieLimit))
 
-def hangulLVT():
-    return minYesNoMappingsOnly | HAS_COMP_BOUNDARY_AFTER
+        extraDataStart = trieLimit
+        extraDataLimit = indices[IX_SMALL_FCD_OFFSET] + baseOffset
+        extraDataLength = (extraDataLimit - extraDataStart) // 2
+        extraDataFormat = f"{extraDataLength}H"
+        extraData = struct.unpack(extraDataFormat, icuData.getData(extraDataStart, extraDataLimit))
 
-def isHangulLV(norm16):
-    return norm16 == minYesNo
+        return Normalizer2(trie, indices, extraData)
 
-def isHangulLVT(norm16):
-        return norm16 == hangulLVT()
+    def getNorm16(self, c):
+        return INERT if isLead(c) else self.trie.get(c)
 
-def hangulDecomposition(c):
-    decomposition = ""
-    c -= HANGUL_BASE
-    c2 = c % JAMO_T_COUNT
-    c //= JAMO_T_COUNT
+    def getRawNorm16(self, c):
+        return self.trie.get(c)
 
-    decomposition += chr(JAMO_L_BASE + c // JAMO_V_COUNT)
-    decomposition += chr(JAMO_V_BASE + c % JAMO_V_COUNT)
+    def isMaybeOrNonZeroCC(self, norm16):
+        return norm16 >= self.minMaybeYes
 
-    if c2 != 0:
-        decomposition += chr(JAMO_T_BASE + c2)
+    def isDecompNoAlgorithmic(self, norm16):
+        return norm16 >= self.limitNoNo
 
-    return decomposition
+    def isInert(self, norm16) :
+        return norm16 == INERT
 
-def rawHangulDecomposition(c):
-    decomposition = ""
-    orig = c
-    c -= HANGUL_BASE
-    c2 = c % JAMO_T_COUNT
+    def isJamoL(self, norm16):
+        return norm16 == JAMO_L
 
-    if c2 == 0:
+    def isJamoVT(self, norm16):
+        return norm16 == JAMO_VT
+
+    def hangulLVT(self):
+        return self.minYesNoMappingsOnly | HAS_COMP_BOUNDARY_AFTER
+
+    def isHangulLV(self, norm16):
+        return norm16 == self.minYesNo
+
+    def isHangulLVT(self, norm16):
+            return norm16 == self.hangulLVT()
+
+    def hangulDecomposition(self, c):
+        decomposition = ""
+        c -= HANGUL_BASE
+        c2 = c % JAMO_T_COUNT
         c //= JAMO_T_COUNT
+
         decomposition += chr(JAMO_L_BASE + c // JAMO_V_COUNT)
         decomposition += chr(JAMO_V_BASE + c % JAMO_V_COUNT)
-    else:
-        decomposition += chr(orig - c2)  # LV syllable
-        decomposition += chr(JAMO_T_BASE + c2)
 
-    return decomposition
+        if c2 != 0:
+            decomposition += chr(JAMO_T_BASE + c2)
 
-def mapAlgorithmic(c, norm16):
-        return c + (norm16 >> DELTA_SHIFT) - centerNoNoDelta
-
-def getMappingIndex(norm16):
-    return norm16 >> OFFSET_SHIFT
-
-def stringFromData(index, length):
-    s = ""
-    lead = 0  # for the lead byte of a surrogate pair
-    for i in range(length):
-        ch = extraData[index + i]
-
-        # handle surrogate pairs
-        if lead != 0:
-            ch = charFromSurrogates(lead, ch)
-            lead = 0
-        elif isLead(ch):
-            lead = ch
-            continue
-
-        s += chr(ch)
-
-    return s
-
-
-def getDecomosition(c):
-    decomposition = ""
-    norm16 = getNorm16(c)
-    if c < minDecompNoCP or isMaybeOrNonZeroCC(norm16):
-        # c does not decompose
-        return None
-
-    if isDecompNoAlgorithmic(norm16):
-        # Maps to an isCompYesAndZeroCC.
-        c = mapAlgorithmic(c, norm16)
-        decomposition += chr(c)
-        norm16 = getRawNorm16(c)
-
-    if norm16 < minYesNo:
-        return decomposition if len(decomposition) > 0 else None
-
-    if isHangulLV(norm16) or isHangulLVT(norm16):
-        # Hangul syllable: decompose algorithmically
-        return hangulDecomposition(c)
-
-    # c decomposes, get everything from the variable-length extra data
-    ix = getMappingIndex(norm16)
-    length = extraData[ix] & MAPPING_LENGTH_MASK
-
-    decomposition += stringFromData(ix + 1, length)
-
-    return decomposition
-
-def getRawDecomposition(c):
-    decomposition = ""
-    norm16 = getNorm16(c)
-    if c < minDecompNoCP or isMaybeOrNonZeroCC(norm16):
-        # c does not decompose
-        return None
-
-    if isDecompNoAlgorithmic(norm16):
-        c = mapAlgorithmic(c, norm16)
-        decomposition += chr(c)
         return decomposition
 
-    if norm16 < minYesNo:
-        return decomposition if len(decomposition) > 0 else None
+    def rawHangulDecomposition(self, c):
+        decomposition = ""
+        orig = c
+        c -= HANGUL_BASE
+        c2 = c % JAMO_T_COUNT
 
-    if isHangulLV(norm16) or isHangulLVT(norm16):
-        # Hangul syllable: decompose algorithmically
-        return rawHangulDecomposition(c)
-
-    # c decomposes, get everything from the variable-length extra data
-    ix = getMappingIndex(norm16)
-    firstUnit = extraData[ix]
-    mLength = firstUnit & MAPPING_LENGTH_MASK
-    if firstUnit & MAPPING_HAS_RAW_MAPPING:
-        # Read the raw mapping from before the firstUnit
-        # and before the optional ccc/lccc word.
-        # Bit 7 = MAPPING_HAS_CCC_LCCC_WORD
-        rawMappingIndex = ix - ((firstUnit >> 7) & 1) - 1
-        rm0 = extraData[rawMappingIndex]
-
-        if rm0 <= MAPPING_LENGTH_MASK:
-            length = rm0
-            ix = rawMappingIndex - rm0
+        if c2 == 0:
+            c //= JAMO_T_COUNT
+            decomposition += chr(JAMO_L_BASE + c // JAMO_V_COUNT)
+            decomposition += chr(JAMO_V_BASE + c % JAMO_V_COUNT)
         else:
-            # Copy the normal mapping and replace its first two code units with rm0.
-            decomposition += chr(rm0)
-            ix += 3
-            length = mLength - 2
-    else:
-        ix += 1
-        length = mLength
+            decomposition += chr(orig - c2)  # LV syllable
+            decomposition += chr(JAMO_T_BASE + c2)
 
-    decomposition += stringFromData(ix, length)
+        return decomposition
 
-    return decomposition
+    def mapAlgorithmic(self, c, norm16):
+            return c + (norm16 >> DELTA_SHIFT) - self.centerNoNoDelta
+
+    def getMappingIndex(self, norm16):
+        return norm16 >> OFFSET_SHIFT
+
+    def stringFromData(self, index, length):
+        s = ""
+        lead = 0  # for the lead byte of a surrogate pair
+        for i in range(length):
+            ch = self.extraData[index + i]
+
+            # handle surrogate pairs
+            if lead != 0:
+                ch = charFromSurrogates(lead, ch)
+                lead = 0
+            elif isLead(ch):
+                lead = ch
+                continue
+
+            s += chr(ch)
+
+        return s
+
+
+    def getDecomosition(self, c):
+        decomposition = ""
+        norm16 = self.getNorm16(c)
+        if c < self.minDecompNoCP or self.isMaybeOrNonZeroCC(norm16):
+            # c does not decompose
+            return None
+
+        if self.isDecompNoAlgorithmic(norm16):
+            # Maps to an isCompYesAndZeroCC.
+            c = self.mapAlgorithmic(c, norm16)
+            decomposition += chr(c)
+            norm16 = self.getRawNorm16(c)
+
+        if norm16 < self.minYesNo:
+            return decomposition if len(decomposition) > 0 else None
+
+        if self.isHangulLV(norm16) or self.isHangulLVT(norm16):
+            # Hangul syllable: decompose algorithmically
+            return self.hangulDecomposition(c)
+
+        # c decomposes, get everything from the variable-length extra data
+        ix = self.getMappingIndex(norm16)
+        length = self.extraData[ix] & MAPPING_LENGTH_MASK
+
+        decomposition += self.stringFromData(ix + 1, length)
+
+        return decomposition
+
+    def getRawDecomposition(self, c):
+        decomposition = ""
+        norm16 = self.getNorm16(c)
+        if c < self.minDecompNoCP or self.isMaybeOrNonZeroCC(norm16):
+            # c does not decompose
+            return None
+
+        if self.isDecompNoAlgorithmic(norm16):
+            c = self.mapAlgorithmic(c, norm16)
+            decomposition += chr(c)
+            return decomposition
+
+        if norm16 < self.minYesNo:
+            return decomposition if len(decomposition) > 0 else None
+
+        if self.isHangulLV(norm16) or self.isHangulLVT(norm16):
+            # Hangul syllable: decompose algorithmically
+            return self.rawHangulDecomposition(c)
+
+        # c decomposes, get everything from the variable-length extra data
+        ix = self.getMappingIndex(norm16)
+        firstUnit = self.extraData[ix]
+        mLength = firstUnit & MAPPING_LENGTH_MASK
+        if firstUnit & MAPPING_HAS_RAW_MAPPING:
+            # Read the raw mapping from before the firstUnit
+            # and before the optional ccc/lccc word.
+            # Bit 7 = MAPPING_HAS_CCC_LCCC_WORD
+            rawMappingIndex = ix - ((firstUnit >> 7) & 1) - 1
+            rm0 = self.extraData[rawMappingIndex]
+
+            if rm0 <= MAPPING_LENGTH_MASK:
+                length = rm0
+                ix = rawMappingIndex - rm0
+            else:
+                # Copy the normal mapping and replace its first two code units with rm0.
+                decomposition += chr(rm0)
+                ix += 3
+                length = mLength - 2
+        else:
+            ix += 1
+            length = mLength
+
+        decomposition += self.stringFromData(ix, length)
+
+        return decomposition
+
 
 def stringToCharList(decomp):
     if not decomp: return None
@@ -279,34 +318,39 @@ def stringToCharList(decomp):
     charList = ", ".join(chars)
     return f"[{charList}]"
 
-def decompToCharList(c):
-    return stringToCharList(getDecomosition(c))
+def decompToCharList(norm, c):
+    return stringToCharList(norm.getDecomosition(c))
 
-def rawDecompToCharList(c):
-    return stringToCharList(getRawDecomposition(c))
+def rawDecompToCharList(norm, c):
+    return stringToCharList(norm.getRawDecomposition(c))
 
 def test():
-    print(f"getDecomposition('A') is {decompToCharList(ord('A'))}")
-    print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(0x00A0)}")
-    print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(0x00A8)}")
-    print(f"getDecomposition('{chr(0x00C0)}') is {decompToCharList(0x00C0)}")
-    print(f"getDecomposition('{chr(0x1EA6)}') is {decompToCharList(0x1EA6)}")
-    print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(0x3307)}")
-    print(f"getDecomposition('{chr(0xCA8D)}') is {decompToCharList(0xCA8D)}")
-    print(f"getDecomposition('{chr(0xFA6C)}') is {decompToCharList(0xFA6C)}")
+    trie = Normalizer2.createFromHardCodedData()
+    nfkcTrie = Normalizer2.createFromFileData("nfkc")
+
+    print(f"getDecomposition('A') is {decompToCharList(trie, ord('A'))}")
+    print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(trie, 0x00A0)}")
+    print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(trie, 0x00A8)}")
+    print(f"getDecomposition('{chr(0x00C0)}') is {decompToCharList(trie, 0x00C0)}")
+    print(f"getDecomposition('{chr(0x1EA6)}') is {decompToCharList(trie, 0x1EA6)}")
+    print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(trie, 0x3307)}")
+    print(f"getDecomposition('{chr(0xCA8D)}') is {decompToCharList(trie, 0xCA8D)}")
+    print(f"getDecomposition('{chr(0xFA6C)}') is {decompToCharList(trie, 0xFA6C)}")
     print()
 
-    print(f"getRawDecomposition('A') is {rawDecompToCharList(ord('A'))}")
-    print(f"getRawDecomposition('{chr(0x00A0)}') is {rawDecompToCharList(0x00A0)}")
-    print(f"getRawDecomposition('{chr(0x00A8)}') is {rawDecompToCharList(0x00A8)}")
-    print(f"getRawDecomposition('{chr(0x00C0)}') is {rawDecompToCharList(0x00C0)}")
-    print(f"getRawDecomposition('{chr(0x1EA6)}') is {rawDecompToCharList(0x1EA6)}")
-    print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(0x3307)}")
-    print(f"getRawDecomposition('{chr(0xCA8D)}') is {rawDecompToCharList(0xCA8D)}")
-    print(f"getRawDecomposition('{chr(0x6595)}') is {rawDecompToCharList(0x6595)}")
-    print(f"getRawDecomposition('{chr(0xFA6C)}') is {rawDecompToCharList(0xFA6C)}")
+    print(f"getRawDecomposition('A') is {rawDecompToCharList(trie, ord('A'))}")
+    print(f"getRawDecomposition('{chr(0x00A0)}') is {rawDecompToCharList(trie, 0x00A0)}")
+    print(f"getRawDecomposition('{chr(0x00A8)}') is {rawDecompToCharList(trie, 0x00A8)}")
+    print(f"getRawDecomposition('{chr(0x00C0)}') is {rawDecompToCharList(trie, 0x00C0)}")
+    print(f"getRawDecomposition('{chr(0x1EA6)}') is {rawDecompToCharList(trie, 0x1EA6)}")
+    print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(trie, 0x3307)}")
+    print(f"getRawDecomposition('{chr(0xCA8D)}') is {rawDecompToCharList(trie, 0xCA8D)}")
+    print(f"getRawDecomposition('{chr(0x6595)}') is {rawDecompToCharList(trie, 0x6595)}")
+    print(f"getRawDecomposition('{chr(0xFA6C)}') is {rawDecompToCharList(trie, 0xFA6C)}")
+    print()
 
-
+    print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(nfkcTrie, 0x3307)}")
+    print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(nfkcTrie, 0x3307)}")
 
 
 if __name__ == "__main__":
