@@ -19,6 +19,15 @@ def isUnicodeNoncharacter(code):
 def isLead(code):
     return (code & 0xfffffc00) == 0xd800
 
+def charFromSurrogates(high, low):
+    return ((high - 0xD800) << 10) + (low - 0xDC00) + 0x10000
+
+def surrogatesFromChar(ch):
+    base = ch - 0x10000
+    high = (base >> 10) + 0xD800
+    low = (base & 0x03FF) + 0xDC00
+    return high, low
+
 def arithmeticShift(value, bitsInWord, bitsInField):
     """\
     Arithmetic right shifts the top bits in a word.
@@ -42,3 +51,10 @@ def arithmeticShift(value, bitsInWord, bitsInField):
 #     arrayLimit = arrayOffset + (itemCount * itemLength)
 #     return struct.unpack(f"{itemCount}{dataFormat}", data[arrayOffset:arrayLimit])
 
+def test():
+    ch = charFromSurrogates(0xD850, 0xDEEE)
+    high, low = surrogatesFromChar(ch)
+    print(f"ch = {ch:04X}, high = {high:04X}, low = {low:04X}")
+
+if __name__ == "__main__":
+    test()

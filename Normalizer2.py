@@ -8,7 +8,7 @@ Created on June 2, 2020
 
 from Norm2NFCData import *
 from CPTrie import CPTrie
-from Utilities import isLead
+from Utilities import isLead, charFromSurrogates
 
 # Fixed norm16 values.
 MIN_YES_YES_WITH_CC = 0xfe02
@@ -187,10 +187,10 @@ def stringFromData(index, length):
 
         # handle surrogate pairs
         if lead != 0:
-            ch = lead + (ch - 0xDC00 + 0x10000)
+            ch = charFromSurrogates(lead, ch)
             lead = 0
         elif isLead(ch):
-            lead = (ch - 0xD800) * 0x400
+            lead = ch
             continue
 
         s += chr(ch)
