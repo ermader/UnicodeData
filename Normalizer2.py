@@ -328,6 +328,7 @@ def test():
     trie = Normalizer2.createFromHardCodedData()
     nfkcTrie = Normalizer2.createFromFileData("nfkc")
 
+    print("NFC:")
     print(f"getDecomposition('A') is {decompToCharList(trie, ord('A'))}")
     print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(trie, 0x00A0)}")
     print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(trie, 0x00A8)}")
@@ -349,8 +350,19 @@ def test():
     print(f"getRawDecomposition('{chr(0xFA6C)}') is {rawDecompToCharList(trie, 0xFA6C)}")
     print()
 
+    print("NFKC:")
+    print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(nfkcTrie, 0x00A0)}")
+    print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(nfkcTrie, 0x00A8)}")
     print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(nfkcTrie, 0x3307)}")
+    print(f"getDecomposition('{chr(0xCA8D)}') is {decompToCharList(nfkcTrie, 0xCA8D)}")
+    print(f"getDecomposition('{chr(0xFA6C)}') is {decompToCharList(nfkcTrie, 0xFA6C)}")
+    print()
+
+    print(f"getRawDecomposition('{chr(0x00A0)}') is {rawDecompToCharList(nfkcTrie, 0x00A0)}")
+    print(f"getRawDecomposition('{chr(0x00A8)}') is {rawDecompToCharList(nfkcTrie, 0x00A8)}")
     print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(nfkcTrie, 0x3307)}")
+    print(f"getRawDecomposition('{chr(0xCA8D)}') is {rawDecompToCharList(nfkcTrie, 0xCA8D)}")
+    print(f"getRawDecomposition('{chr(0xFA6C)}') is {rawDecompToCharList(nfkcTrie, 0xFA6C)}")
 
 
 if __name__ == "__main__":
