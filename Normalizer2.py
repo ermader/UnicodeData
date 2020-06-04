@@ -1,5 +1,5 @@
 """\
-Based on Normalizer2.cpp, Normalizer2.h from ICU
+Based on normalizer2impl.cpp, normalizer2impl.h from ICU
 
 Created on June 2, 2020
 
@@ -332,6 +332,7 @@ def test():
     print(f"getDecomposition('A') is {decompToCharList(trie, ord('A'))}")
     print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(trie, 0x00A0)}")
     print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(trie, 0x00A8)}")
+    print(f"getDecomposition('{chr(0x00BE)}') is {decompToCharList(trie, 0x00BE)}")
     print(f"getDecomposition('{chr(0x00C0)}') is {decompToCharList(trie, 0x00C0)}")
     print(f"getDecomposition('{chr(0x1EA6)}') is {decompToCharList(trie, 0x1EA6)}")
     print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(trie, 0x3307)}")
@@ -342,6 +343,7 @@ def test():
     print(f"getRawDecomposition('A') is {rawDecompToCharList(trie, ord('A'))}")
     print(f"getRawDecomposition('{chr(0x00A0)}') is {rawDecompToCharList(trie, 0x00A0)}")
     print(f"getRawDecomposition('{chr(0x00A8)}') is {rawDecompToCharList(trie, 0x00A8)}")
+    print(f"getRawDecomposition('{chr(0x00BE)}') is {rawDecompToCharList(trie, 0x00BE)}")
     print(f"getRawDecomposition('{chr(0x00C0)}') is {rawDecompToCharList(trie, 0x00C0)}")
     print(f"getRawDecomposition('{chr(0x1EA6)}') is {rawDecompToCharList(trie, 0x1EA6)}")
     print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(trie, 0x3307)}")
@@ -353,6 +355,7 @@ def test():
     print("NFKC:")
     print(f"getDecomposition('{chr(0x00A0)}') is {decompToCharList(nfkcTrie, 0x00A0)}")
     print(f"getDecomposition('{chr(0x00A8)}') is {decompToCharList(nfkcTrie, 0x00A8)}")
+    print(f"getDecomposition('{chr(0x00BE)}') is {decompToCharList(nfkcTrie, 0x00BE)}")
     print(f"getDecomposition('{chr(0x3307)}') is {decompToCharList(nfkcTrie, 0x3307)}")
     print(f"getDecomposition('{chr(0xCA8D)}') is {decompToCharList(nfkcTrie, 0xCA8D)}")
     print(f"getDecomposition('{chr(0xFA6C)}') is {decompToCharList(nfkcTrie, 0xFA6C)}")
@@ -360,6 +363,7 @@ def test():
 
     print(f"getRawDecomposition('{chr(0x00A0)}') is {rawDecompToCharList(nfkcTrie, 0x00A0)}")
     print(f"getRawDecomposition('{chr(0x00A8)}') is {rawDecompToCharList(nfkcTrie, 0x00A8)}")
+    print(f"getRawDecomposition('{chr(0x00BE)}') is {rawDecompToCharList(nfkcTrie, 0x00BE)}")
     print(f"getRawDecomposition('{chr(0x3307)}') is {rawDecompToCharList(nfkcTrie, 0x3307)}")
     print(f"getRawDecomposition('{chr(0xCA8D)}') is {rawDecompToCharList(nfkcTrie, 0xCA8D)}")
     print(f"getRawDecomposition('{chr(0xFA6C)}') is {rawDecompToCharList(nfkcTrie, 0xFA6C)}")
