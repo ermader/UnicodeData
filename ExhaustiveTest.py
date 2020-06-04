@@ -15,7 +15,7 @@ import Boundaries
 import DecompositionType
 import LayoutTypes
 from CharNames import CharNames
-import Normalizer2
+from Normalizer2 import Normalizer2
 
 def doTest(cp, got, expected, name):
     if got != expected:
@@ -79,7 +79,8 @@ def doBinary2Tests(cp, charData):
 
 def test():
     ucd = UnicodeCharacterData()
-
+    normNFC = Normalizer2.createFromHardCodedData()
+    normNFKC = Normalizer2.createFromFileData("nfkc")
     print("  Starting exhaustive test:")
 
     start = timer()
@@ -106,7 +107,8 @@ def test():
         inpc = LayoutTypes.inpcNames[LayoutProps.getInPC(cp)]
         insc = LayoutTypes.inscNames[LayoutProps.getInSC(cp)]
         vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
-        dm = Normalizer2.getRawDecomposition(cp)
+        nfc = normNFC.getRawDecomposition(cp)
+        nfkc = normNFKC.getRawDecomposition(cp)
         name = CharNames.getCharName(cp)
 
         doTest(cp, sc, characterData.script, "script code")
@@ -131,7 +133,11 @@ def test():
         doTest(cp, inpc, characterData.indicProperties.positionalCategory, "positional category")
         doTest(cp, insc, characterData.indicProperties.syllabicCategory, "syllabic category")
         doTest(cp, vo, characterData.verticalOrientation, "vertical orientation")
-        doTest(cp, dm, characterData.decompProperties.decomposition, "decomposition")
+
+        if characterData.decompProperties.decompositionType == "can":
+            doTest(cp, nfc, characterData.decompProperties.decomposition, "NFC decomposition")
+
+        doTest(cp, nfkc, characterData.decompProperties.decomposition, "NFKC decomposition")
         doTest(cp, name, characterData.name, "character name")
 
         doBinaryTests(cp, characterData.binaryProperties)
