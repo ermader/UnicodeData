@@ -163,6 +163,9 @@ class Normalizer2(object):
     def isDecompNoAlgorithmic(self, norm16):
         return norm16 >= self.limitNoNo
 
+    def isDecompYes(self, norm16):
+        return norm16 < self.minYesNo or self.minMaybeYes <= norm16
+
     def isInert(self, norm16) :
         return norm16 == INERT
 
@@ -252,6 +255,7 @@ class Normalizer2(object):
         if norm16 < self.minYesNo:
             return decomposition if len(decomposition) > 0 else None
 
+        decomposition = ""
         if self.isHangulLV(norm16) or self.isHangulLVT(norm16):
             # Hangul syllable: decompose algorithmically
             return self.hangulDecomposition(c)
@@ -267,21 +271,18 @@ class Normalizer2(object):
     def getRawDecomposition(self, c):
         decomposition = ""
         norm16 = self.getNorm16(c)
-        if c < self.minDecompNoCP or self.isMaybeOrNonZeroCC(norm16):
+        if c < self.minDecompNoCP or self.isDecompYes(norm16):
             # c does not decompose
             return None
+
+        if self.isHangulLV(norm16) or self.isHangulLVT(norm16):
+            # Hangul syllable: decompose algorithmically
+            return self.rawHangulDecomposition(c)
 
         if self.isDecompNoAlgorithmic(norm16):
             c = self.mapAlgorithmic(c, norm16)
             decomposition += chr(c)
             return decomposition
-
-        if norm16 < self.minYesNo:
-            return decomposition if len(decomposition) > 0 else None
-
-        if self.isHangulLV(norm16) or self.isHangulLVT(norm16):
-            # Hangul syllable: decompose algorithmically
-            return self.rawHangulDecomposition(c)
 
         # c decomposes, get everything from the variable-length extra data
         ix = self.getMappingIndex(norm16)
@@ -327,6 +328,7 @@ def rawDecompToCharList(norm, c):
 def test():
     trie = Normalizer2.createFromHardCodedData()
     nfkcTrie = Normalizer2.createFromFileData("nfkc")
+    nfkc_cfTrie = Normalizer2.createFromFileData("nfkc_cf")
 
     charList = [0x0041, 0x00A0, 0x00A8, 0x00BE, 0x00C0, 0x1EA6, 0x3307, 0x6569, 0xCA8D, 0xFA6C]
 
@@ -346,6 +348,15 @@ def test():
 
     for ch in charList:
         print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(nfkcTrie, ch)}")
+    print()
+
+    print("NFKC_CF:")
+    for ch in charList:
+        print(f"getDecomposition('{chr(ch)}') is {decompToCharList(nfkc_cfTrie, ch)}")
+    print()
+
+    for ch in charList:
+        print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(nfkc_cfTrie, ch)}")
 
 
 if __name__ == "__main__":
