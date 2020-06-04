@@ -50,5 +50,5 @@ class DecompProperties(UCDProperties):
         self.nfkcFullClosure = self.dmToString(self.getCharProperty("FC_NFKC"))
 
         # Don't need these any more
-        self._char = None
-        self._group = None
+        del self._char
+        del self._group

@@ -38,5 +38,5 @@ class CaseProperties(UCDProperties):
         self.changesWhenUppercased = self.getBooleanProperty("CWU")
         self.nkfcCasefold = self.getCodePointsProperty("NFKC_CF")
 
-        self._char = None
-        self._group = None
+        del self._char
+        del self._group

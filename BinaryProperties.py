@@ -59,6 +59,6 @@ class BinaryProperties(UCDProperties):
             value = self.getBooleanProperty(tag)
             setattr(self, field, value)
 
-        self._char = None
-        self._group = None
+        del self._char
+        del self._group
 

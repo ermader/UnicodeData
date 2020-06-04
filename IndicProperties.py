@@ -16,5 +16,5 @@ class IndicProperties(UCDProperties):
         self.positionalCategory = self.getCharProperty("InPC")
 
         # Don't need these any more
-        self._char = None
-        self._group = None
+        del self._char
+        del self._group
