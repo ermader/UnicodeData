@@ -9,19 +9,22 @@ Character Decomposition properties
 from UCDProperties import UCDProperties
 
 class DecompProperties(UCDProperties):
-    def dmToString(self, dm):
+    def dmToString(self, dm, doPoundSign=False):
         # We don't care about characters that decompose to a single character -
         # they either decompose to themselves or are for compatibility.
         # We also don't care about decompositions that start w/ a space
         # if " " not in dm or dm.startswith("0020 "):
         #     return None
 
+        if doPoundSign and dm == "#":
+            return chr(self.codePoint)
+
         if not dm or dm == "#": return None
 
         codePoints = dm.split(" ")
         chars = []
         for codePoint in codePoints:
-            chars.append(f"{int(codePoint, 16):c}")
+            chars.append(chr(int(codePoint, 16)))
 
         return "".join(chars)
 
@@ -48,6 +51,7 @@ class DecompProperties(UCDProperties):
         self.expandOnNFKD = self.getBooleanProperty("XO_NFKD")
 
         self.nfkcFullClosure = self.dmToString(self.getCharProperty("FC_NFKC"))
+        self.nfkcCaseFolded = self.dmToString(self.getCharProperty("NFKC_CF"), doPoundSign=True)
 
         # Don't need these any more
         del self._char

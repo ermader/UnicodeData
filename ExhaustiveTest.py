@@ -81,6 +81,8 @@ def test():
     ucd = UnicodeCharacterData()
     normNFC = Normalizer2.createFromHardCodedData()
     normNFKC = Normalizer2.createFromFileData("nfkc")
+    normNFKC_CF = Normalizer2.createFromFileData("nfkc_cf")
+
     print("  Starting exhaustive test:")
 
     start = timer()
@@ -109,6 +111,7 @@ def test():
         vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
         nfc = normNFC.getRawDecomposition(cp)
         nfkc = normNFKC.getRawDecomposition(cp)
+        nfkc_cf = normNFKC_CF.getRawDecomposition(cp)
         name = CharNames.getCharName(cp)
 
         doTest(cp, sc, characterData.script, "script code")
@@ -138,6 +141,18 @@ def test():
             doTest(cp, nfc, characterData.decompProperties.decomposition, "NFC decomposition")
 
         doTest(cp, nfkc, characterData.decompProperties.decomposition, "NFKC decomposition")
+
+        # Really not sure about this:
+        # - characters with decomp type "none" don't have a decomposition in the ICU data
+        # - some charaters have an NFKC_CF of theselves, but the ICU data file has the normal decomposition
+        if characterData.decompProperties.decompositionType != "none":
+            if characterData.decompProperties.nfkcCaseFolded == chr(cp):
+                expected = characterData.decompProperties.decomposition
+            else:
+                expected = characterData.decompProperties.nfkcCaseFolded
+
+            doTest(cp, nfkc_cf, expected, "NFKC_CF decomposition")
+
         doTest(cp, name, characterData.name, "character name")
 
         doBinaryTests(cp, characterData.binaryProperties)

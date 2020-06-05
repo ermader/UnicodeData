@@ -281,13 +281,12 @@ class Normalizer2(object):
 
         if self.isDecompNoAlgorithmic(norm16):
             c = self.mapAlgorithmic(c, norm16)
-            decomposition += chr(c)
-            return decomposition
+            return chr(c)
 
         # c decomposes, get everything from the variable-length extra data
         ix = self.getMappingIndex(norm16)
         firstUnit = self.extraData[ix]
-        mLength = firstUnit & MAPPING_LENGTH_MASK
+        length = firstUnit & MAPPING_LENGTH_MASK
         if firstUnit & MAPPING_HAS_RAW_MAPPING:
             # Read the raw mapping from before the firstUnit
             # and before the optional ccc/lccc word.
@@ -302,10 +301,11 @@ class Normalizer2(object):
                 # Copy the normal mapping and replace its first two code units with rm0.
                 decomposition += chr(rm0)
                 ix += 3
-                length = mLength - 2
+                length -= 2
         else:
             ix += 1
-            length = mLength
+
+        if not decomposition and length == 0: return None
 
         decomposition += self.stringFromData(ix, length)
 
@@ -326,19 +326,19 @@ def rawDecompToCharList(norm, c):
     return stringToCharList(norm.getRawDecomposition(c))
 
 def test():
-    trie = Normalizer2.createFromHardCodedData()
+    nfcTrie = Normalizer2.createFromHardCodedData()
     nfkcTrie = Normalizer2.createFromFileData("nfkc")
     nfkc_cfTrie = Normalizer2.createFromFileData("nfkc_cf")
 
-    charList = [0x0041, 0x00A0, 0x00A8, 0x00BE, 0x00C0, 0x1EA6, 0x3307, 0x6569, 0xCA8D, 0xFA6C]
+    charList = [0x0041, 0x0061, 0x00A0, 0x00A8, 0x00AD, 0x00BE, 0x00C0, 0x00E0, 0x0178, 0x1EA6, 0x3307, 0x6569, 0xCA8D, 0xFA6C]
 
     print("NFC:")
     for ch in charList:
-        print(f"getDecomposition('{chr(ch)}') is {decompToCharList(trie, ch)}")
+        print(f"getDecomposition('{chr(ch)}') is {decompToCharList(nfcTrie, ch)}")
     print()
 
     for ch in charList:
-        print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(trie, ch)}")
+        print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(nfcTrie, ch)}")
     print()
 
     print("NFKC:")
