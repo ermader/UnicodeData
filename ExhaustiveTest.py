@@ -143,8 +143,8 @@ def test():
         doTest(cp, nfkc, characterData.decompProperties.decomposition, "NFKC decomposition")
 
         # Really not sure about this:
-        # - characters with decomp type "none" don't have a decomposition in the ICU data
-        # - some charaters have an NFKC_CF of theselves, but the ICU data file has the normal decomposition
+        # - characters with decomp type "none" don't have a decomposition in the ICU data file
+        # - some charaters have an NFKC_CF of themselves, but the ICU data file has the normal decomposition
         if characterData.decompProperties.decompositionType != "none":
             if characterData.decompProperties.nfkcCaseFolded == chr(cp):
                 expected = characterData.decompProperties.decomposition
