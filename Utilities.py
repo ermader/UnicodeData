@@ -16,17 +16,21 @@ def isUnicodeNoncharacter(code):
     return code >= 0xfdd0 and \
      (code <= 0xfdef or (code & 0xfffe) == 0xfffe) and code <= 0x10ffff
 
-def isLead(code):
-    return (code & 0xfffffc00) == 0xd800
+_firstLead = 0xD800
+_firstTrail = 0xDC00
+_surrogateOffset = (_firstLead << 10) + _firstTrail - 0x10000
+_leadOffset = _firstLead - (0x10000 >> 10)
 
-def charFromSurrogates(high, low):
-    return ((high - 0xD800) << 10) + (low - 0xDC00) + 0x10000
+def isLead(code):
+    return (code & 0xfffffc00) == _firstLead
+
+def charFromSurrogates(lead, trail):
+    return (lead << 10) + trail - _surrogateOffset
 
 def surrogatesFromChar(ch):
-    base = ch - 0x10000
-    high = (base >> 10) + 0xD800
-    low = (base & 0x03FF) + 0xDC00
-    return high, low
+    lead = (ch >> 10) + _leadOffset
+    trail = (ch & 0x03FF) + 0xDC00
+    return lead, trail
 
 def arithmeticShift(value, bitsInWord, bitsInField):
     """\
