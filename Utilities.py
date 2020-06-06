@@ -62,18 +62,30 @@ def arithmeticShift(value, bitsInWord, bitsInField):
 #     arrayLimit = arrayOffset + (itemCount * itemLength)
 #     return struct.unpack(f"{itemCount}{dataFormat}", data[arrayOffset:arrayLimit])
 
-def test():
+def listOFCodes(codes):
+    codeList = [f"{code:04X}" for code in codes]
+    return ", ".join(codeList)
 
+def test():
     print("isLead test:")
+    failures = []
     for code in range(_firstLead, _firstTrail):
         if not isLead(code):
-            print(f"    isLead({code:04X}) failed!")
-    print()
+            failures.append(code)
+    if len(failures) == 0:
+        print("    Passed!")
+    else:
+        print(f"    Failed: [{listOFCodes(failures)}]")
 
     print("isTrail test:")
+    failures = []
     for code in range(_firstTrail, 0xE000):
         if not isTrail(code):
-            print(f"    isTrail({code:04X}) failed!")
+            failures.append(code)
+    if len(failures) == 0:
+        print("    Passed!")
+    else:
+        print(f"    Failed: [{listOFCodes(failures)}]")
     print()
 
     ch = charFromSurrogates(0xD850, 0xDEEE)

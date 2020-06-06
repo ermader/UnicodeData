@@ -6,6 +6,8 @@ A simplified version of the UnicodeSet class from ICU.
 @author: emader
 '''
 
+from Utilities import listOFCodes
+
 UNICODE_SET_HIGH = 0x0110000
 """A value greater than all Unicode code points."""
 
@@ -850,7 +852,5 @@ if __name__ == "__main__":
     print(f"s1.charAt(5) = {s1.charAt(5):04X}")
     print(f"s3.indexOf(0x0940) = {s3.indexOf(0x0940)}")
 
-    print("\nCodePoints in s1 ^ s2:")
-    for cp in s3:
-        print(f"{cp:04X}, ", end="")
+    print(f"\nCodePoints in s1 ^ s2:\n    [{listOFCodes([code for code in s3])}]")
     print()
