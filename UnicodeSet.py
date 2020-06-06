@@ -801,6 +801,12 @@ class UnicodeSet:
 
         return ranges
 
+    def __iter__(self):
+        for i in range(0, len(self.list) - 1, 2):
+            for cp in range(self.list[i], self.list[i+1]):
+                yield cp
+
+
 if __name__ == "__main__":
     s1 = UnicodeSet(0x0915)
     print(f"s1 = UnicodeSet(0x0915): {s1}")
@@ -843,3 +849,8 @@ if __name__ == "__main__":
 
     print(f"s1.charAt(5) = {s1.charAt(5):04X}")
     print(f"s3.indexOf(0x0940) = {s3.indexOf(0x0940)}")
+
+    print("\nCodePoints in s1 ^ s2:")
+    for cp in s3:
+        print(f"{cp:04X}, ", end="")
+    print()
