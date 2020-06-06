@@ -18,18 +18,25 @@ def isUnicodeNoncharacter(code):
 
 _firstLead = 0xD800
 _firstTrail = 0xDC00
-_surrogateOffset = (_firstLead << 10) + _firstTrail - 0x10000
-_leadOffset = _firstLead - (0x10000 >> 10)
+_firstNonBMP = 0x10000
+_leadShift = 10
+_surrogateMask = 0xFFFFFC00
+_trailMask = 0xFFFFFFFF - _surrogateMask
+_surrogateOffset = (_firstLead << _leadShift) + _firstTrail - _firstNonBMP
+_leadOffset = _firstLead - (_firstNonBMP >> _leadShift)
 
 def isLead(code):
-    return (code & 0xfffffc00) == _firstLead
+    return (code & _surrogateMask) == _firstLead
+
+def isTrail(code):
+    return (code & _surrogateMask) == _firstTrail
 
 def charFromSurrogates(lead, trail):
-    return (lead << 10) + trail - _surrogateOffset
+    return (lead << _leadShift) + trail - _surrogateOffset
 
 def surrogatesFromChar(ch):
-    lead = (ch >> 10) + _leadOffset
-    trail = (ch & 0x03FF) + 0xDC00
+    lead = (ch >> _leadShift) + _leadOffset
+    trail = (ch & _trailMask) + _firstTrail
     return lead, trail
 
 def arithmeticShift(value, bitsInWord, bitsInField):
@@ -56,6 +63,19 @@ def arithmeticShift(value, bitsInWord, bitsInField):
 #     return struct.unpack(f"{itemCount}{dataFormat}", data[arrayOffset:arrayLimit])
 
 def test():
+
+    print("isLead test:")
+    for code in range(_firstLead, _firstTrail):
+        if not isLead(code):
+            print(f"    isLead({code:04X}) failed!")
+    print()
+
+    print("isTrail test:")
+    for code in range(_firstTrail, 0xE000):
+        if not isTrail(code):
+            print(f"    isTrail({code:04X}) failed!")
+    print()
+
     ch = charFromSurrogates(0xD850, 0xDEEE)
     high, low = surrogatesFromChar(ch)
     print(f"ch = {ch:04X}, high = {high:04X}, low = {low:04X}")
