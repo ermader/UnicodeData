@@ -54,6 +54,44 @@ def arithmeticShift(value, bitsInWord, bitsInField):
 
     return result - (1 << bitsInField) if (value & signBit) != 0 else result
 
+def highBit(value):
+    """\
+    Return the bit number of the highest bit set in a value.
+
+    :param value: the value. Can be up to 64 bits long
+    :returns: the bit number, counting from the low order bit
+    """
+    bit = 0
+
+    if value == 0: return None  # return None if no bits are set
+
+    # binary search through the bits, looking for the highest one
+    if value >= 1 << 32:
+        value >>= 32
+        bit += 32
+
+    if value >= 1 << 16:
+        value >>= 16
+        bit += 16
+
+    if value >= 1 << 8:
+        value >>= 8
+        bit += 8
+
+    if value >= 1 << 4:
+        value >>= 4
+        bit += 4
+
+    if value >= 1 << 2:
+        value >>= 2
+        bit += 2
+
+    if value >= 1 << 1:
+        value >>= 1
+        bit += 1
+
+    return bit
+
 # There doesn't seem to be any use for this...
 # def unpackArray(data, dataOffset, dataFormat):
 #     itemLength = struct.calcsize(dataFormat)
@@ -91,6 +129,13 @@ def test():
     ch = charFromSurrogates(0xD850, 0xDEEE)
     high, low = surrogatesFromChar(ch)
     print(f"ch = {ch:04X}, high = {high:04X}, low = {low:04X}")
+    print()
+
+    for n in range(0, 0x10, 2):
+        print(f"highBit(0x{n:04X}) = {highBit(n)}")
+
+    print(f"highBit(0x3FF) = {highBit(0x3FF)}")
+    print(f"highBit(0xFFFFFC00) = {highBit(0xFFFFFC00)}")
 
 if __name__ == "__main__":
     test()
