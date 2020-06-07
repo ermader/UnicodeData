@@ -11,7 +11,7 @@ from fontTools.misc import sstruct
 from ICUDataFile import ICUData
 from CharProps import getGeneralCategory
 from GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
-from Utilities import _object
+from Utilities import _object, isLead, isUnicodeNoncharacter
 
 # "extra" general categories
 GC_NONCHARACTER_CODEPOINT = GC_CATEFORY_COUNT
@@ -382,23 +382,15 @@ class CharNames(object):
 
         return cls._groups[start] if cls._groups[start].msb == groupMSB else None
 
-    @classmethod
-    def isUnicodeNoncharacter(cls, code):
-        return code >= 0xfdd0 and \
-         (code <= 0xfdef or (code & 0xfffe) == 0xfffe) and code <= 0x10ffff
-
-    @classmethod
-    def isLead(cls, code):
-        return (code & 0xfffffc00) == 0xd800
 
     @classmethod
     def getCharCat(cls, code):
-        if cls.isUnicodeNoncharacter(code):
+        if isUnicodeNoncharacter(code):
             return GC_NONCHARACTER_CODEPOINT
 
         cat = getGeneralCategory(code)
         if cat == GC_SURROGATE:
-            return GC_LEAD_SURROGATE if cls.isLead(code) else GC_TRAIL_SURROGATE
+            return GC_LEAD_SURROGATE if isLead(code) else GC_TRAIL_SURROGATE
 
         return cat
 
