@@ -20,16 +20,26 @@ _firstLead = 0xD800
 _firstTrail = 0xDC00
 _firstNonBMP = 0x10000
 _leadShift = 10
-_surrogateMask = 0xFFFFFC00
-_trailMask = 0xFFFFFFFF - _surrogateMask
+_surrogateMask = 0xFFFFF800
+_leadTrailMask = 0xFFFFFC00
+_trailMask = 0xFFFFFFFF - _leadTrailMask
 _surrogateOffset = (_firstLead << _leadShift) + _firstTrail - _firstNonBMP
 _leadOffset = _firstLead - (_firstNonBMP >> _leadShift)
 
-def isLead(code):
+def isSurrogate(code):
     return (code & _surrogateMask) == _firstLead
 
+def isSurrogateLead(code):
+    return (code & 0x400) == 0
+
+def isSurrogateTrail(code):
+    return (code & 0x400) != 0
+
+def isLead(code):
+    return (code & _leadTrailMask) == _firstLead
+
 def isTrail(code):
-    return (code & _surrogateMask) == _firstTrail
+    return (code & _leadTrailMask) == _firstTrail
 
 def charFromSurrogates(lead, trail):
     return (lead << _leadShift) + trail - _surrogateOffset

@@ -437,6 +437,13 @@ def isEmojiModifier(c):
 def isEmojiModifierBase(c):
     return getBinaryProp(c, UPROPS_2_EMOJI_MODIFIER_BASE, 2)
 
+def printEnumResults(results):
+    resultRanges = []
+    for valueRange, value in results:
+        resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {generalCategories[value]}")
+
+    print(", ".join(resultRanges))
+
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
     print(f"General Category of '3' is {generalCategories[getGeneralCategory(ord('3'))]}")
@@ -480,6 +487,11 @@ def test():
     print(f"'{chr(0x1F3C7)}' is emoji modifier base: {isEmojiModifierBase(0x1F3C7)}")
     print(f"'{chr(0x1F9B0)}' is emoji component: {isEmojiComponent(0x1F9B0)}")
     print(f"'{chr(0x1FA82)}' is extended pictograph: {isExtendedPictograph(0x1FA82)}")
+
+    print(f"General Category of ' ' is {generalCategories[getGeneralCategory(ord(' '))]}")
+    # gc = [(range, value) for range, value in propsTrie.enumerator(start=0x20, limit=0x80, valueFunction=lambda v: v & 0x1F)]
+    gc = [(range, value) for range, value in propsTrie.enumerator(start=0x1E900, limit=0x1E944, valueFunction=lambda v: v & 0x1F)]
+    printEnumResults(gc)
 
 if __name__ == "__main__":
     test()
