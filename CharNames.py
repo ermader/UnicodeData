@@ -206,7 +206,6 @@ class Group(object):
         startChar = self.msb << GROUP_SHIFT
         limitChar = startChar + LINES_PER_GROUP
         self.charRange = range(startChar, limitChar)
-        self.nameChoice = U_UNICODE_CHAR_NAME
 
         self.strings = []
         (dataOffset, offsets, lengths) = self.expandGroupLengths(icuData, groupStringsStart + offset)
@@ -226,13 +225,12 @@ class Group(object):
 
         return Tokens.expandString(string, nameChoice)
 
-    def __iter__(self):
+    def nameIterator(self, nameChoice):
         for code in self.charRange:
-            yield (code, self.expandName(code & GROUP_MASK, self.nameChoice))
+            yield (code, self.expandName(code & GROUP_MASK, nameChoice))
 
 class AlgorithmicRange(object):
     def __init__(self, icuData, offset):
-        self.nameChoice = U_UNICODE_CHAR_NAME
         rangeStart = offset
         rangeLimit = rangeStart + _rangeLength
         algRange = sstruct.unpack(_rangeFormat, icuData.getData(rangeStart, rangeLimit), _object())
@@ -320,9 +318,9 @@ class AlgorithmicRange(object):
     def charOffsetInRange(self, char):
         return char - self.charRange.start
 
-    def __iter__(self):
+    def nameIterator(self, nameChoice):
         for code in self.charRange:
-            yield (code, self.getName(code, self.nameChoice))
+            yield (code, self.getName(code, nameChoice))
 
 class CharNames(object):
     _icuData = ICUData()
@@ -420,32 +418,31 @@ class CharNames(object):
 
         return CharNames._getName(code, nameChoice)
 
-    def __init__(self, nameChoice=U_UNICODE_CHAR_NAME):
-        self.nameChoice = nameChoice
-
-    def __iter__(self):
-        charLimit = max(self._groups[-1].charRange.stop, self._algorithmicRanges[-1].charRange.stop)
+    @classmethod
+    def nameIterator(cls, nameChoice=U_UNICODE_CHAR_NAME):
+        charLimit = max(cls._groups[-1].charRange.stop, cls._algorithmicRanges[-1].charRange.stop)
         char = 0
         algRange = 0
         while char < charLimit:
-            group = self.getGroup(char)
-            if group is not None and char in group.charRange:
-                group.nameChoice = self.nameChoice
-                for (code, name) in group:
+            group = cls.getGroup(char)
+            if group and char in group.charRange:
+                # group.nameChoice = self.nameChoice
+                for (code, name) in group.nameIterator(nameChoice):
                     if name: yield (code, name)
                 char = group.charRange.stop
-            elif algRange < len(self._algorithmicRanges) and self._algorithmicRanges[algRange].charInRange(char):
-                algorithmicRange = self._algorithmicRanges[algRange]
-                algorithmicRange.nameChoice = self.nameChoice
-                for (code, name) in algorithmicRange:
+            elif algRange < len(cls._algorithmicRanges) and cls._algorithmicRanges[algRange].charInRange(char):
+                algorithmicRange = cls._algorithmicRanges[algRange]
+                # algorithmicRange.nameChoice = self.nameChoice
+                for (code, name) in algorithmicRange.nameIterator(nameChoice):
                     if name: yield (code, name)
                 char = algorithmicRange.charRange.stop
                 algRange += 1
             else:
                 char += LINES_PER_GROUP
 
-    def charFromName(self, theName):
-        for (code, name) in self:
+    @classmethod
+    def charFromName(cls, theName):
+        for (code, name) in cls.nameIterator():
             if name == theName:
                 return code
 
@@ -487,14 +484,14 @@ def test():
     print(f"getCharName('k', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('k'), U_EXTENDED_CHAR_NAME)}")
     print()
 
-    print(f'charFromName("DEVANAGARA LETTER KA") is {chr(CharNames().charFromName("DEVANAGARI LETTER KA"))}')
-    print(f'charFromName("HANGUL SYLLABLE GIM") is {chr(CharNames().charFromName("HANGUL SYLLABLE GIM"))}')
-    print(f'charFromName("HANGUL SYLLABLE CI") is {chr(CharNames().charFromName("HANGUL SYLLABLE CI"))}')
-    print(f'charFromName("CJK UNIFIED IDEOGRAPH-6F22") is {chr(CharNames().charFromName("CJK UNIFIED IDEOGRAPH-6F22"))}')
+    print(f'charFromName("DEVANAGARA LETTER KA") is {chr(CharNames.charFromName("DEVANAGARI LETTER KA"))}')
+    print(f'charFromName("HANGUL SYLLABLE GIM") is {chr(CharNames.charFromName("HANGUL SYLLABLE GIM"))}')
+    print(f'charFromName("HANGUL SYLLABLE CI") is {chr(CharNames.charFromName("HANGUL SYLLABLE CI"))}')
+    print(f'charFromName("CJK UNIFIED IDEOGRAPH-6F22") is {chr(CharNames.charFromName("CJK UNIFIED IDEOGRAPH-6F22"))}')
     print()
 
     allNames = []
-    for (code, name) in CharNames(U_CHAR_NAME_ALIAS):
+    for (code, name) in CharNames.nameIterator(U_CHAR_NAME_ALIAS):
         allNames.append(name)
         print(f'U+{code:04X}: "{name}"')
     print()
