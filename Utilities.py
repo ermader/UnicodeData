@@ -136,6 +136,8 @@ def test():
 
     print(f"highBit(0x3FF) = {highBit(0x3FF)}")
     print(f"highBit(0xFFFFFC00) = {highBit(0xFFFFFC00)}")
+    print(f"highBit(0x200000000) = {highBit(0x200000000)}")
+    print(f"highBit(0x123456789ABCDEF) = {highBit(0x123456789ABCDEF)}")
 
 if __name__ == "__main__":
     test()
