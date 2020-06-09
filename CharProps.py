@@ -488,8 +488,11 @@ def test():
     print(f"'{chr(0x1F9B0)}' is emoji component: {isEmojiComponent(0x1F9B0)}")
     print(f"'{chr(0x1FA82)}' is extended pictograph: {isExtendedPictograph(0x1FA82)}")
 
+    print()
     print(f"General Category of ' ' is {generalCategories[getGeneralCategory(ord(' '))]}")
-    # gc = [(range, value) for range, value in propsTrie.enumerator(start=0x20, limit=0x80, valueFunction=lambda v: v & 0x1F)]
+    gc = [(range, value) for range, value in propsTrie.enumerator(start=0x20, limit=0x80, valueFunction=lambda v: v & 0x1F)]
+    printEnumResults(gc)
+
     gc = [(range, value) for range, value in propsTrie.enumerator(start=0x1E900, limit=0x1E944, valueFunction=lambda v: v & 0x1F)]
     printEnumResults(gc)
 

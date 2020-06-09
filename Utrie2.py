@@ -111,7 +111,7 @@ class UTrie2(object):
 
             if c <= 0xFFFF:
                 if not isSurrogate(c):
-                    i2Block = c >> self.SHIFT_2
+                    i2Block = (c >> self.SHIFT_2) - 1
                 elif isSurrogateLead(c):
                     # Enumerate values for lead surrogate code points, not code units:
                     # This special block has half the normal length.
