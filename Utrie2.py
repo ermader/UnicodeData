@@ -111,7 +111,9 @@ class UTrie2(object):
 
             if c <= 0xFFFF:
                 if not isSurrogate(c):
-                    i2Block = (c >> self.SHIFT_2) - 1
+                    i2Block = (c >> self.SHIFT_2)
+                    if tempLimit > 0x10000:
+                        tempLimit = 0x10000
                 elif isSurrogateLead(c):
                     # Enumerate values for lead surrogate code points, not code units:
                     # This special block has half the normal length.
@@ -147,14 +149,17 @@ class UTrie2(object):
                 c += self.CP_PER_INDEX_1_ENTRY
             else:
                 # enumerate data blocks for one index-2 block
-                i2Start = (c >> self.SHIFT_2) & self.INDEX_2_MASK
-
-                if (c >> self.SHIFT_1) == (tempLimit >> self.SHIFT_1):
-                    i2Limit = (tempLimit >> self.SHIFT_2) & self.INDEX_2_MASK
+                if c <= 0xFFFF:
+                    i2Start = 0
+                    i2Limit = (tempLimit >> self.SHIFT_2) - i2Block
                 else:
-                    i2Limit = self.INDEX_2_BLOCK_LENGTH
+                    i2Start = (c >> self.SHIFT_2) & self.INDEX_2_MASK
+                    i2Limit = (tempLimit >> self.SHIFT_2) & self.INDEX_2_MASK
 
-                for i2 in range(i2Start, i2Limit+1):
+                    if (c >> self.SHIFT_1) != (tempLimit >> self.SHIFT_1):
+                        i2Limit = self.INDEX_2_BLOCK_LENGTH
+
+                for i2 in range(i2Start, i2Limit + 1):
                     block = self.index[i2Block + i2] << self.INDEX_SHIFT
 
                     if block == prevBlock and (c - prev) >= self.DATA_BLOCK_LENGTH:
@@ -174,6 +179,8 @@ class UTrie2(object):
                         c += self.DATA_BLOCK_LENGTH
                     else:
                         for j in range(self.DATA_BLOCK_LENGTH):
+                            if c >= tempLimit:
+                                break
                             value = valueFunction(self.index[block + j])
                             if value != prevValue:
                                 if prev < c: yield range(prev, c), prevValue

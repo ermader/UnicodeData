@@ -444,6 +444,27 @@ def printEnumResults(results):
 
     print(", ".join(resultRanges))
 
+def testEnum(start, limit):
+    print(f"Testing enumeration from {start:04X} to {limit:04X}:")
+    results = [(range, value) for range, value in propsTrie.enumerator(start=start, limit=limit, valueFunction=lambda v: v & 0x1F)]
+
+    passed = True
+    for valueRange, value in results:
+        lastLimit = valueRange.stop
+
+        for ch in valueRange:
+            gc = getGeneralCategory(ch)
+            if gc != value:
+                print(f"    {ch:04X}: got gc = {generalCategories[value]}, expected {generalCategories[gc]}")
+                passed = False
+
+    if lastLimit < limit:
+        print(f"    enumeration stopped early at {lastLimit:04X}")
+    elif lastLimit > limit:
+        print(f"    enumeration stopped late at {lastLimit:04X}")
+    elif passed: print("    passed!")
+
+
 def test():
     print(f"General Category of U+0012 is {generalCategories[getGeneralCategory(0x0012)]}")
     print(f"General Category of '3' is {generalCategories[getGeneralCategory(ord('3'))]}")
@@ -490,11 +511,20 @@ def test():
 
     print()
     print(f"General Category of ' ' is {generalCategories[getGeneralCategory(ord(' '))]}")
-    gc = [(range, value) for range, value in propsTrie.enumerator(start=0x20, limit=0x80, valueFunction=lambda v: v & 0x1F)]
-    printEnumResults(gc)
 
-    gc = [(range, value) for range, value in propsTrie.enumerator(start=0x1E900, limit=0x1E944, valueFunction=lambda v: v & 0x1F)]
-    printEnumResults(gc)
+    testEnum(0x0020, 0x007F)
+    print()
+
+    testEnum(0x0900, 0x0980)
+    print()
+
+    testEnum(0x1E900, 0x1E944)
+    print()
+
+    testEnum(0x10000, 0x1005D)
+    print()
+
+    testEnum(0xFF00, 0x1005F)
 
 if __name__ == "__main__":
     test()
