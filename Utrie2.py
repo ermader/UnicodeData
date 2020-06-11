@@ -178,9 +178,9 @@ class UTrie2(object):
 
                         c += self.DATA_BLOCK_LENGTH
                     else:
-                        for j in range(self.DATA_BLOCK_LENGTH):
-                            if c >= tempLimit:
-                                break
+                        jStart = c & self.DATA_MASK
+                        jLimit = min(self.DATA_BLOCK_LENGTH, jStart + tempLimit - c)
+                        for j in range(jStart, jLimit):
                             value = valueFunction(self.index[block + j])
                             if value != prevValue:
                                 if prev < c: yield range(prev, c), prevValue

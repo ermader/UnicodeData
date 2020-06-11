@@ -450,18 +450,23 @@ def testEnum(start, limit):
 
     passed = True
     for valueRange, value in results:
-        lastLimit = valueRange.stop
-
         for ch in valueRange:
             gc = getGeneralCategory(ch)
             if gc != value:
                 print(f"    {ch:04X}: got gc = {generalCategories[value]}, expected {generalCategories[gc]}")
                 passed = False
 
-    if lastLimit < limit:
-        print(f"    enumeration stopped early at {lastLimit:04X}")
-    elif lastLimit > limit:
-        print(f"    enumeration stopped late at {lastLimit:04X}")
+    (firstRange, _) = results[0]
+    (lastRange, _) = results[-1]
+    if firstRange.start < start:
+        print(f"    enumeration started early at {firstRange.start:0xX}")
+    elif firstRange.start > start:
+        print(f"    enumeration started late at {firstRange.start}")
+
+    if lastRange.stop < limit:
+        print(f"    enumeration stopped early at {lastRange.stop:04X}")
+    elif lastRange.stop > limit:
+        print(f"    enumeration stopped late at {lastRange.stop:04X}")
     elif passed: print("    passed!")
 
 
@@ -512,6 +517,8 @@ def test():
     print()
     print(f"General Category of ' ' is {generalCategories[getGeneralCategory(ord(' '))]}")
 
+    testEnum(0x25, 0x35)
+    testEnum(0x21, 0x7E)
     testEnum(0x0020, 0x007F)
     print()
 
@@ -521,6 +528,7 @@ def test():
     testEnum(0x1E900, 0x1E944)
     print()
 
+    testEnum(0x10005, 0x10015)
     testEnum(0x10000, 0x1005D)
     print()
 
