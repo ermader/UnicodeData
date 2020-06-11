@@ -13,12 +13,15 @@ propsVectorTrie = UTrie2(propsVectorsTrie_index, propsVectorsTrie_index_length, 
                          propsVectorsTrie_high_start, propsVectorTrie_high_value_index)
 
 
+def unicodePropertiesFromVecIndex(vecIndex, column):
+    return propsVectors[vecIndex + column]
+
 def getUnicodeProperties(c, column):
     if column > propsVectorColumns:
         return 0
 
     vecIndex = propsVectorTrie.get(c)
-    return propsVectors[vecIndex+column]
+    return unicodePropertiesFromVecIndex(vecIndex, column)
 
 UPROPS_CATEGORY_MASK = 0x1F
 UPROPS_NUMERIC_TYPE_VALUE_SHIFT = 6
@@ -34,9 +37,12 @@ UPROPS_NTV_FRACTION20_START = UPROPS_NTV_BASE60_START + 36  #
 UPROPS_NTV_FRACTION32_START = UPROPS_NTV_FRACTION20_START + 24
 UPROPS_NTV_RESERVED_START = UPROPS_NTV_FRACTION32_START + 16
 
+def generalCategoryFromProps(props):
+    return props & 0x1F
+
 def getGeneralCategory(c):
     props = propsTrie.get(c)
-    return props & 0x1F
+    return generalCategoryFromProps(props)
 
 def gcMask(gc):
     return 1 << gc
@@ -174,7 +180,7 @@ def isJavaIDPart(c):
 def digitValue(c):
     props = propsTrie.get(c)
     value = getNumericTypeValue(c) - UPROPS_NTV_DECIMAL_START
-    return value if value <=9 else -1
+    return value if value <= 9 else -1
 
 def getNumericType(c):
     props = propsTrie.get(c)
@@ -357,20 +363,22 @@ UPROPS_GCB_SHIFT = 5
 
 UPROPS_DT_MASK = 0x0000001f
 
-def getAge(c):
-    age = getUnicodeProperties(c, 0) >> UPROPS_AGE_SHIFT
+def ageFromProps(props):
+    age = props >> UPROPS_AGE_SHIFT
     return [age >> 4, age & 0xF, 0, 0]
+
+def getAge(c):
+    props = getUnicodeProperties(c, 0)
+    return ageFromProps(props)
 
 def mergeScriptCodeOrIndex(scriptX):
     return \
         ((scriptX & UPROPS_SCRIPT_HIGH_MASK) >> UPROPS_SCRIPT_HIGH_SHIFT) | \
         (scriptX & UPROPS_SCRIPT_LOW_MASK)
 
-def getScript(c):
-    if c > 0x10FFFF:
-        return USCRIPT_INVALID_CODE
-
-    scriptX = getUnicodeProperties(c, 0) & UPROPS_SCRIPT_X_MASK
+def scriptFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 0)
+    scriptX = props & UPROPS_SCRIPT_X_MASK
     codeOrIndex = mergeScriptCodeOrIndex(scriptX)
 
     if scriptX < UPROPS_SCRIPT_X_WITH_COMMON:
@@ -384,40 +392,72 @@ def getScript(c):
 
     return scriptExtensions[codeOrIndex]
 
+def getScript(c):
+    if c > 0x10FFFF:
+        return USCRIPT_INVALID_CODE
+
+    vecIndex = propsVectorTrie.get(c)
+
+    return scriptFromVecIndex(vecIndex)
+
+def blockFromProps(props):
+    return (props & UPROPS_BLOCK_MASK) >> UPROPS_BLOCK_SHIFT
+
 def getBlock(c):
     props = getUnicodeProperties(c, 0)
-    return (props & UPROPS_BLOCK_MASK) >> UPROPS_BLOCK_SHIFT
+    return blockFromProps(props)
+
+def eastAsianWidthFromProps(props):
+    return (props & UPROPS_EA_MASK) >> UPROPS_EA_SHIFT
 
 def getEastAsianWidth(c):
     props = getUnicodeProperties(c, 0)
-    return (props & UPROPS_EA_MASK) >> UPROPS_EA_SHIFT
+    return eastAsianWidthFromProps(props)
+
+def lineBreakFromProps(props):
+    return (props & UPROPS_LB_MASK) >> UPROPS_LB_SHIFT
 
 def getLineBreak(c):
     props = getUnicodeProperties(c, 2)
-    return (props & UPROPS_LB_MASK) >> UPROPS_LB_SHIFT
+    return lineBreakFromProps(props)
+
+def sentenceBreakFromProps(props):
+    return (props & UPROPS_SB_MASK) >> UPROPS_SB_SHIFT
 
 def getSentenceBreak(c):
     props = getUnicodeProperties(c, 2)
-    return (props & UPROPS_SB_MASK) >> UPROPS_SB_SHIFT
+    return sentenceBreakFromProps(props)
+
+def wordBreakFromProps(props):
+    return (props & UPROPS_WB_MASK) >> UPROPS_WB_SHIFT
 
 def getWordBreak(c):
     props = getUnicodeProperties(c, 2)
-    return (props & UPROPS_WB_MASK) >> UPROPS_WB_SHIFT
+    return wordBreakFromProps(props)
+
+def graphemeClusterBreakFromProps(props):
+    return (props & UPROPS_GCB_MASK) >> UPROPS_GCB_SHIFT
 
 def getGraphemeClusterBreak(c):
     props = getUnicodeProperties(c, 2)
-    return (props & UPROPS_GCB_MASK) >> UPROPS_GCB_SHIFT
+    return graphemeClusterBreakFromProps(props)
+
+def decompTypeFromProps(props):
+    return props & UPROPS_DT_MASK
 
 def getDecompType(c):
     props = getUnicodeProperties(c, 2)
-    return props & UPROPS_DT_MASK
+    return decompTypeFromProps(props)
+
+def binaryPropFromProps(props, propShift):
+    return (props & (1 << propShift)) != 0
 
 def getBinaryProp(c, propShift, column=1):
     if propShift >= UPROPS_BINARY_1_TOP:
         return None  # Or False?
 
     props = getUnicodeProperties(c, column)
-    return (props & (1 << propShift)) != 0
+    return binaryPropFromProps(props, propShift)
 
 def isExtendedPictograph(c):
     return getBinaryProp(c, UPROPS_2_EXTENDED_PICTOGRAPHIC, 2)
@@ -444,9 +484,32 @@ def printEnumResults(results):
 
     print(", ".join(resultRanges))
 
+def printScripts(scriptsDict):
+    scripts = []
+    for scriptCode, scriptRange in scriptsDict.items():
+        scripts.append(f"{scriptCode}: [{scriptRange.start:04X}, {scriptRange.stop:04X}]")
+
+    print(", ".join(scripts))
+
+from UnicodeSet import UnicodeSet
+def emumScripts(start, limit):
+    scriptDict = {}
+    print(f"Enumerating script codes from {start:04X} to {limit:04X}")
+    scriptList = propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=scriptFromVecIndex)
+
+    for scriptRange, scriptCode in scriptList:
+        scriptTag = scriptCodes[scriptCode]
+        if scriptTag in scriptDict:
+            scriptDict[scriptTag].addRange(scriptRange.start, scriptRange.stop - 1)
+        else:
+            scriptDict[scriptTag] = UnicodeSet(scriptRange)
+
+    for scriptTag, scriptSet in scriptDict.items():
+        print(f"    '{scriptTag}: {scriptSet}")
+
 def testEnum(start, limit):
     print(f"Testing enumeration from {start:04X} to {limit:04X}:")
-    results = [(range, value) for range, value in propsTrie.enumerator(start=start, limit=limit, valueFunction=lambda v: v & 0x1F)]
+    results = [(range, value) for range, value in propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)]
 
     passed = True
     for valueRange, value in results:
@@ -536,6 +599,9 @@ def test():
     print()
 
     testEnum(0xFF00, 0x1005F)
+    print()
+
+    emumScripts(0x0900, 0x0E00)
 
 if __name__ == "__main__":
     test()
