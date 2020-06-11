@@ -519,10 +519,13 @@ def test():
 
     testEnum(0x25, 0x35)
     testEnum(0x21, 0x7E)
-    testEnum(0x0020, 0x007F)
+    testEnum(0x0020, 0x0080)
     print()
 
     testEnum(0x0900, 0x0980)
+    print()
+
+    testEnum(0xD800, 0xE000)
     print()
 
     testEnum(0x1E900, 0x1E944)

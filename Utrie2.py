@@ -81,7 +81,7 @@ class UTrie2(object):
             return self.indexRaw(0, c)
 
         if c <= 0xFFFF:
-            offset = 0 if c > 0xDBFF else self.LSCP_INDEX_2_OFFSET - (0xD800 >> self.SHIFT_2)
+            offset = 0 if c >= 0xDC00 else self.LSCP_INDEX_2_OFFSET - (0xD800 >> self.SHIFT_2)
             return self.indexRaw(offset, c)
 
         if c >= 0x10FFFF:
@@ -122,7 +122,7 @@ class UTrie2(object):
                 else:
                     # Switch back to the normal part of the index-2 table.
                     # Enumerate the second half of the surrogates block.
-                    i2Block = 0xD800 >> self.SHIFT_2
+                    i2Block = 0xDC00 >> self.SHIFT_2
                     tempLimit = min(0xE000, limit)
             else:
                 # supplementary code point
@@ -152,6 +152,7 @@ class UTrie2(object):
                 if c <= 0xFFFF:
                     i2Start = 0
                     i2Limit = (tempLimit >> self.SHIFT_2) - i2Block
+                    if i2Limit < 0: i2Limit = 0
                 else:
                     i2Start = (c >> self.SHIFT_2) & self.INDEX_2_MASK
                     i2Limit = (tempLimit >> self.SHIFT_2) & self.INDEX_2_MASK
