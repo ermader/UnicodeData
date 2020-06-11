@@ -110,8 +110,11 @@ class UTrie2(object):
             tempLimit = min(c + self.CP_PER_INDEX_1_ENTRY, limit)
 
             if c <= 0xFFFF:
+                # We're in the BMP
                 if not isSurrogate(c):
                     i2Block = (c >> self.SHIFT_2)
+
+                    # if tempLimit is above the BMP, limit it to the BMP
                     if tempLimit > 0x10000:
                         tempLimit = 0x10000
                 elif isSurrogateLead(c):
@@ -150,8 +153,12 @@ class UTrie2(object):
             else:
                 # enumerate data blocks for one index-2 block
                 if c <= 0xFFFF:
+                    # We're in the BMP
                     i2Start = 0
                     i2Limit = (tempLimit >> self.SHIFT_2) - i2Block
+
+                    # if we're in the high surrogate range, i2Limit will be negative,
+                    # so we want to just do the high surroaget block
                     if i2Limit < 0: i2Limit = 0
                 else:
                     i2Start = (c >> self.SHIFT_2) & self.INDEX_2_MASK
