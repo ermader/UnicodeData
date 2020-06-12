@@ -500,7 +500,7 @@ def isEmojiModifierBase(c):
 def printEnumResults(results):
     resultRanges = []
     for valueRange, value in results:
-        resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {generalCategories[value]}")
+        resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {value}")
 
     print(", ".join(resultRanges))
 
@@ -639,10 +639,10 @@ def test():
 
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                                                                    valueFunction=binaryPropFromVecIndex, valueFunctionArgs=(UPROPS_2_EMOJI, 2))]
-    print(emojiList)
+    printEnumResults(emojiList)
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
-    print(fractionList)
+    printEnumResults(fractionList)
 
 if __name__ == "__main__":
     test()
