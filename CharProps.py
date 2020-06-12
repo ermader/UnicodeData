@@ -183,16 +183,22 @@ def digitValue(c):
     value = getNumericTypeValue(c) - UPROPS_NTV_DECIMAL_START
     return value if value <= 9 else -1
 
+def numericTypeFromProps(props):
+    return props & UPROPS_CATEGORY_MASK
+
 def getNumericType(c):
     props = propsTrie.get(c)
-    return props & UPROPS_CATEGORY_MASK
+    return numericTypeFromProps(props)
+
+def numericTypeValueFromProps(props):
+    return props >> UPROPS_NUMERIC_TYPE_VALUE_SHIFT
 
 def getNumericTypeValue(c):
     props = propsTrie.get(c)
     return props >> UPROPS_NUMERIC_TYPE_VALUE_SHIFT
 
-def getNumericValue(c):
-    ntv = getNumericTypeValue(c)
+def numericValueFromProps(props):
+    ntv = numericTypeValueFromProps(props)
 
     if ntv == UPROPS_NTV_NONE:
         return None
@@ -268,6 +274,10 @@ def getNumericValue(c):
         return numerator/denominator
 
     return None
+
+def getNumericValue(c):
+    props = propsTrie.get(c)
+    return numericValueFromProps(props)
 
 # Probably want to move these to a uprops class...
 # Values in vector word 0
@@ -630,6 +640,9 @@ def test():
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                  valueFunction=binaryPropsFromVecIndex, valueFunctionArgs=(UPROPS_2_EMOJI, 2))]
     print(emojiList)
+
+    fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
+    print(fractionList)
 
 if __name__ == "__main__":
     test()
