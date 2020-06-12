@@ -2,6 +2,7 @@
 from Utrie2 import UTrie2
 from CharPropsData import *
 from Scripts import *
+from Blocks import *
 from GeneralCategories import *
 from Characters import *
 
@@ -400,54 +401,62 @@ def getScript(c):
 
     return scriptFromVecIndex(vecIndex)
 
-def blockFromProps(props):
+def blockFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 0)
     return (props & UPROPS_BLOCK_MASK) >> UPROPS_BLOCK_SHIFT
 
 def getBlock(c):
-    props = getUnicodeProperties(c, 0)
-    return blockFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return blockFromVecIndex(vecIndex)
 
-def eastAsianWidthFromProps(props):
+def eastAsianWidthFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 0)
+
     return (props & UPROPS_EA_MASK) >> UPROPS_EA_SHIFT
 
 def getEastAsianWidth(c):
-    props = getUnicodeProperties(c, 0)
-    return eastAsianWidthFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return eastAsianWidthFromVecIndex(vecIndex)
 
-def lineBreakFromProps(props):
+def lineBreakFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 2)
     return (props & UPROPS_LB_MASK) >> UPROPS_LB_SHIFT
 
 def getLineBreak(c):
-    props = getUnicodeProperties(c, 2)
-    return lineBreakFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return lineBreakFromVecIndex(vecIndex)
 
-def sentenceBreakFromProps(props):
+def sentenceBreakFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 2)
     return (props & UPROPS_SB_MASK) >> UPROPS_SB_SHIFT
 
 def getSentenceBreak(c):
-    props = getUnicodeProperties(c, 2)
-    return sentenceBreakFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return sentenceBreakFromVecIndex(vecIndex)
 
-def wordBreakFromProps(props):
+def wordBreakFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 2)
     return (props & UPROPS_WB_MASK) >> UPROPS_WB_SHIFT
 
 def getWordBreak(c):
-    props = getUnicodeProperties(c, 2)
-    return wordBreakFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return wordBreakFromVecIndex(vecIndex)
 
-def graphemeClusterBreakFromProps(props):
+def graphemeClusterBreakFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 2)
     return (props & UPROPS_GCB_MASK) >> UPROPS_GCB_SHIFT
 
 def getGraphemeClusterBreak(c):
-    props = getUnicodeProperties(c, 2)
-    return graphemeClusterBreakFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return graphemeClusterBreakFromVecIndex(vecIndex)
 
-def decompTypeFromProps(props):
+def decompTypeFromVecIndex(vecIndex):
+    props = unicodePropertiesFromVecIndex(vecIndex, 2)
     return props & UPROPS_DT_MASK
 
 def getDecompType(c):
-    props = getUnicodeProperties(c, 2)
-    return decompTypeFromProps(props)
+    vecIndex = propsVectorTrie.get(c)
+    return decompTypeFromVecIndex(vecIndex)
 
 def binaryPropFromProps(props, propShift):
     return (props & (1 << propShift)) != 0
@@ -492,20 +501,30 @@ def printScripts(scriptsDict):
     print(", ".join(scripts))
 
 from UnicodeSet import UnicodeSet
+def printEnumList(enumList, codeMap):
+    enumDict = {}
+
+    for enumRange, enumCode in enumList:
+        enumTag  = codeMap[enumCode]
+        if enumTag in enumDict:
+            enumDict[enumTag].addRange(enumRange.start, enumRange.stop - 1)
+        else:
+            enumDict[enumTag] = UnicodeSet(enumRange)
+
+    for dictTag, dictSet in enumDict.items():
+        print(f"    '{dictTag}': {dictSet}")
+
 def emumScripts(start, limit):
-    scriptDict = {}
     print(f"Enumerating script codes from {start:04X} to {limit:04X}")
     scriptList = propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=scriptFromVecIndex)
 
-    for scriptRange, scriptCode in scriptList:
-        scriptTag = scriptCodes[scriptCode]
-        if scriptTag in scriptDict:
-            scriptDict[scriptTag].addRange(scriptRange.start, scriptRange.stop - 1)
-        else:
-            scriptDict[scriptTag] = UnicodeSet(scriptRange)
+    printEnumList(scriptList, scriptCodes)
 
-    for scriptTag, scriptSet in scriptDict.items():
-        print(f"    '{scriptTag}: {scriptSet}")
+def enumBlocks(start, limit):
+    print(f"Enumerating block codes from {start:04X} to {limit:04X}")
+    blockList = propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=blockFromVecIndex)
+
+    printEnumList(blockList, blockNames)
 
 def testEnum(start, limit):
     print(f"Testing enumeration from {start:04X} to {limit:04X}:")
@@ -602,6 +621,9 @@ def test():
     print()
 
     emumScripts(0x0900, 0x0E00)
+    print()
+
+    enumBlocks(0x0900, 0x0E00)
 
 if __name__ == "__main__":
     test()
