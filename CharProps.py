@@ -468,7 +468,7 @@ def getDecompType(c):
     vecIndex = propsVectorTrie.get(c)
     return decompTypeFromVecIndex(vecIndex)
 
-def binaryPropsFromVecIndex(vecIndex, propShift, column):
+def binaryPropFromVecIndex(vecIndex, propShift, column):
     props = unicodePropertiesFromVecIndex(vecIndex, column)
     return (props & (1 << propShift)) != 0
 
@@ -477,7 +477,7 @@ def getBinaryProp(c, propShift, column=1):
         return None  # Or False?
 
     vecIndex = propsVectorTrie.get(c)
-    return binaryPropsFromVecIndex(vecIndex, propShift, column)
+    return binaryPropFromVecIndex(vecIndex, propShift, column)
 
 def isExtendedPictograph(c):
     return getBinaryProp(c, UPROPS_2_EXTENDED_PICTOGRAPHIC, 2)
@@ -638,7 +638,7 @@ def test():
     print()
 
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
-                                 valueFunction=binaryPropsFromVecIndex, valueFunctionArgs=(UPROPS_2_EMOJI, 2))]
+                                                                                   valueFunction=binaryPropFromVecIndex, valueFunctionArgs=(UPROPS_2_EMOJI, 2))]
     print(emojiList)
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
