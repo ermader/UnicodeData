@@ -92,11 +92,11 @@ class UTrie2(object):
     def get(self, c):
         return self.index[self.indexFromCodePoint(self.indexLength, c)]
 
-    def enumerator(self, start=0, limit=0x110000, valueFunction=None):
+    def enumerator(self, start=0, limit=0x110000, valueFunction=None, valueFunctionArgs=()):
         if not valueFunction: valueFunction = lambda v: v
 
         # get the enumeration value that corresponds to an initial-value trie data entry
-        initialValue = valueFunction(self.initialValue)
+        initialValue = valueFunction(self.initialValue, *valueFunctionArgs)
 
         # set variables for previous range
         prevI2Block = -1
@@ -189,7 +189,7 @@ class UTrie2(object):
                         jStart = c & self.DATA_MASK
                         jLimit = min(self.DATA_BLOCK_LENGTH, jStart + tempLimit - c)
                         for j in range(jStart, jLimit):
-                            value = valueFunction(self.index[block + j])
+                            value = valueFunction(self.index[block + j], *valueFunctionArgs)
                             if value != prevValue:
                                 if prev < c: yield range(prev, c), prevValue
 
@@ -202,7 +202,7 @@ class UTrie2(object):
             c = limit  # could be higher if in the index2NullOffset
         elif c < limit:
             # c == highStart < limit
-            value = valueFunction(self.index[self.highValueIndex])
+            value = valueFunction(self.index[self.highValueIndex], *valueFunctionArgs)
             if value != prevValue:
                 if prev < c: yield range(prev, c), prevValue
 

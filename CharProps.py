@@ -458,15 +458,16 @@ def getDecompType(c):
     vecIndex = propsVectorTrie.get(c)
     return decompTypeFromVecIndex(vecIndex)
 
-def binaryPropFromProps(props, propShift):
+def binaryPropsFromVecIndex(vecIndex, propShift, column):
+    props = unicodePropertiesFromVecIndex(vecIndex, column)
     return (props & (1 << propShift)) != 0
 
 def getBinaryProp(c, propShift, column=1):
     if propShift >= UPROPS_BINARY_1_TOP:
         return None  # Or False?
 
-    props = getUnicodeProperties(c, column)
-    return binaryPropFromProps(props, propShift)
+    vecIndex = propsVectorTrie.get(c)
+    return binaryPropsFromVecIndex(vecIndex, propShift, column)
 
 def isExtendedPictograph(c):
     return getBinaryProp(c, UPROPS_2_EXTENDED_PICTOGRAPHIC, 2)
@@ -624,6 +625,11 @@ def test():
     print()
 
     enumBlocks(0x0900, 0x0E00)
+    print()
+
+    emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
+                                 valueFunction=binaryPropsFromVecIndex, valueFunctionArgs=(UPROPS_2_EMOJI, 2))]
+    print(emojiList)
 
 if __name__ == "__main__":
     test()
