@@ -638,7 +638,7 @@ def test():
     print()
 
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
-                                                                                   valueFunction=binaryPropFromVecIndex, valueFunctionArgs=(UPROPS_2_EMOJI, 2))]
+                                                                                   valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2)]
     printEnumResults(emojiList)
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
