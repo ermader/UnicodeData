@@ -229,3 +229,108 @@ class CPTrie(object):
             dataIndex = self.cpIndex(fastMax, c)
 
         return self.data[dataIndex]
+
+    def enumerator(self, start=0, limit=0x110000):
+        if start >= 0x110000 or start >= self.highStart:
+            return
+
+        prevI3Block = -1
+        prevBlock = -1
+        prev = start
+        nullValue = self.data[self.dataNullOffset]
+        prevValue = nullValue  # or 0?
+
+        c = start
+        while c < limit and c < self.highStart:
+            if c <= 0xFFFF and (self.type == UCPTRIE_TYPE_FAST or c <= UCPTRIE_SMALL_MAX):
+                i3Block = 0
+                i3Start = c >> UCPTRIE_FAST_SHIFT
+                i3BlockLength = UCPTRIE_BMP_INDEX_LENGTH if self.type == UCPTRIE_TYPE_FAST else UCPTRIE_SMALL_INDEX_LENGTH
+                dataBlockLength = UCPTRIE_FAST_DATA_BLOCK_LENGTH
+            else:
+                # use the multi-stage index
+                i1 = c >> UCPTRIE_SHIFT_1
+                if self.type == UCPTRIE_TYPE_FAST:
+                    assert 0xFFFF < c and c < self.highStart
+                    i1 += UCPTRIE_BMP_INDEX_LENGTH - UCPTRIE_OMITTED_BMP_INDEX_1_LENGTH
+                else:
+                    assert c < self.highStart and self.highStart > UCPTRIE_SMALL_LIMIT
+                    i1 += UCPTRIE_SMALL_INDEX_LENGTH
+
+                i3Block = self.index[self.index[i1] + ((c >> UCPTRIE_SHIFT_2) & UCPTRIE_INDEX_2_MASK)]
+                if i3Block == prevI3Block and (c - start) >= UCPTRIE_CP_PER_INDEX_2_ENTRY:
+                    # The index-3 block is the same as the previous one, and filled with value.
+                    assert (c & (UCPTRIE_CP_PER_INDEX_2_ENTRY - 1)) == 0
+                    c += UCPTRIE_CP_PER_INDEX_2_ENTRY
+                    continue
+
+                prevI3Block = i3Block
+                if i3Block == self.index3NullOffset:
+                    # This is the index-3 null block.
+                    if nullValue != prevValue:
+                        if prev < c: yield range(prev, c), prevValue
+                        prev = c
+                        prevValue = nullValue
+
+                    prevBlock = self.dataNullOffset
+                    c = (c + UCPTRIE_CP_PER_INDEX_2_ENTRY) & ~(UCPTRIE_CP_PER_INDEX_2_ENTRY - 1)
+                    continue
+
+                i3Start = (c >> UCPTRIE_SHIFT_3) & UCPTRIE_INDEX_3_MASK
+                i3BlockLength = UCPTRIE_INDEX_3_BLOCK_LENGTH
+                dataBlockLength = UCPTRIE_SMALL_DATA_BLOCK_LENGTH
+
+            # Enumerate data blocks for one index-3 block.
+            for i3 in range(i3Start, dataBlockLength):
+                if c >= limit: break
+                if (i3Block & 0x8000) == 0:
+                    block = self.index[i3Block + i3]
+                else:
+                    # 18-bit indexes stored in groups of 9 entries per 8 indexes.
+                    group = (i3Block & 0x7FFF) + (i3 & ~7) + (i3 >> 3)
+                    gi = i3 & 7
+                    block = (self.index[group] << (2 + (2 * gi))) & 0x30000
+                    block |= self.index[group + gi + 1]  # C++ code indexes by group++ in previous line
+
+                if block == prevBlock and (c - start) >= dataBlockLength:
+                    # The block is the same as the previous one, and filled with value.
+                    assert (c & (dataBlockLength - 1)) == 0
+                    c += dataBlockLength
+                else:
+                    dataMask = dataBlockLength - 1
+                    prevBlock = block
+                    if block == self.dataNullOffset:
+                        # This is the data null block.
+                        if nullValue != prevValue:
+                            if prev < c: yield range(prev, c), prevValue
+                            prev = c
+                            prevValue = nullValue
+
+                        c = (c + dataBlockLength) & ~dataMask
+                    else:
+                        di = block + (c & dataMask)
+                        value = self.data[di]
+                        if prevValue != value:
+                            if prev < c: yield range(prev, c), prevValue
+
+                    c += 1
+                    di += 1
+                    while c < limit and (c & dataMask) != 0:
+                        value = self.data[di]
+                        if value != prevValue:
+                            if prev < c: yield range(prev, c), prevValue
+                            prev = c
+                            prevValue = value
+                        c += 1
+                        di += 1
+
+        if c > limit:
+            c = limit
+        elif c < limit:
+            di = len(self.data) - UCPTRIE_HIGH_VALUE_NEG_DATA_OFFSET
+            highValue = self.data[di]
+            if highValue != prevValue:
+                if prev < c: yield range(prev, c), prevValue
+
+        # deliver last range
+        if prev < c: yield range(prev, c), prevValue

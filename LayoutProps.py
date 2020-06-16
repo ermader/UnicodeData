@@ -64,11 +64,22 @@ def getInSC(c):
 def getVO(c):
     return voTrie.get(c)
 
+def printEnumResults(results):
+    resultRanges = []
+    for valueRange, value in results:
+        resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {LayoutTypes.inpcNames[value]}")
+
+    print(", ".join(resultRanges))
+
 def test():
     print(f"getInPC(0x0901) is {LayoutTypes.inpcNames[getInPC(0x0901)]}")
     print(f"getInPC(0x0915) is {LayoutTypes.inpcNames[getInPC(0x0915)]}")
     print(f"getInPC(0x0B55) is {LayoutTypes.inpcNames[getInPC(0x0B55)]}")
     print(f"getInSC('0') is {LayoutTypes.inscNames[getInSC(ord('0'))]}")
+    print()
+
+    inPCList = [(pcRange, pcValue) for pcRange, pcValue in inpcTrie.enumerator(start=0x0900, limit=0x0980)]
+    printEnumResults(inPCList)
 
 if __name__ == "__main__":
     test()
