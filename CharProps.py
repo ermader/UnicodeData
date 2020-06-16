@@ -644,5 +644,9 @@ def test():
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
     printEnumResults(fractionList)
 
+    hexDigitList = [(hdRange, hdValue) for hdRange, hdValue in propsVectorTrie.enumerator(start=0x0020, limit=0x0080,
+                                                                                          valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1)]
+    printEnumResults(hexDigitList)
+
 if __name__ == "__main__":
     test()

@@ -102,7 +102,7 @@ class UTrie2(object):
         prevI2Block = -1
         prevBlock = -1
         prev = start
-        prevValue = 0
+        prevValue = valueFunction(0, **valueFunctionArgs)
 
         # enumerate index-2 blocks
         c = start
