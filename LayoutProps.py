@@ -75,5 +75,7 @@ def test():
     inPCList = [(pcRange, pcValue) for pcRange, pcValue in inpcTrie.enumerator(start=0x0900, limit=0x0980)]
     EnumeratorTests.printEnumResults(inPCList, lambda v: LayoutTypes.inpcNames[v])
 
+    EnumeratorTests.testEnum(inpcTrie.enumerator, start=0x0900, limit=0x0E00, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames)
+
 if __name__ == "__main__":
     test()

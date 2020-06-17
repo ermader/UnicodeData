@@ -312,6 +312,8 @@ class CPTrie(object):
                         value = self.data[di]
                         if prevValue != value:
                             if prev < c: yield range(prev, c), prevValue
+                            prev = c
+                            prevValue = value
 
                     c += 1
                     di += 1

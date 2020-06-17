@@ -538,9 +538,10 @@ def enumBlocks(start, limit):
 
     printEnumList(blockList, blockNames)
 
-def testEnum(start, limit):
-    EnumeratorTests.testEnum(enumerator=propsTrie.enumerator, start=start, limit=limit, \
-                             valueFunction=generalCategoryFromProps, expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
+def gcEnumTest(start, limit):
+    gcEnumerator = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
+    EnumeratorTests.testEnum(enumerator=gcEnumerator, start=start, limit=limit, \
+                             expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
 
 
 def test():
@@ -590,25 +591,25 @@ def test():
     print()
     print(f"General Category of ' ' is {generalCategories[getGeneralCategory(ord(' '))]}")
 
-    testEnum(start=0x25, limit=0x35)
-    testEnum(start=0x21, limit=0x7E)
-    testEnum(start=0x0020, limit=0x0080)
+    gcEnumTest(start=0x25, limit=0x35)
+    gcEnumTest(start=0x21, limit=0x7E)
+    gcEnumTest(start=0x0020, limit=0x0080)
     print()
 
-    testEnum(start=0x0900, limit=0x0980)
+    gcEnumTest(start=0x0900, limit=0x0980)
     print()
 
-    testEnum(start=0xD800, limit=0xE000)
+    gcEnumTest(start=0xD800, limit=0xE000)
     print()
 
-    testEnum(start=0x1E900, limit=0x1E944)
+    gcEnumTest(start=0x1E900, limit=0x1E944)
     print()
 
-    testEnum(start=0x10005, limit=0x10015)
-    testEnum(start=0x10000, limit=0x1005D)
+    gcEnumTest(start=0x10005, limit=0x10015)
+    gcEnumTest(start=0x10000, limit=0x1005D)
     print()
 
-    testEnum(start=0xFF00, limit=0x1005F)
+    gcEnumTest(start=0xFF00, limit=0x1005F)
     print()
 
     emumScripts(0x0900, 0x0E00)
@@ -620,8 +621,8 @@ def test():
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                                                                    valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2)]
     printEnumResults(emojiList)
-    EnumeratorTests.testEnum(lambda start, limit, valueFunction: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=valueFunction, propShift=UPROPS_2_EMOJI, column=2), \
-                             start=0x1F600, limit=0x1F680, valueFunction=binaryPropFromVecIndex, expectedFunction=isEmoji)
+    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
+                             start=0x1F600, limit=0x1F680, expectedFunction=isEmoji)
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
     printEnumResults(fractionList)
@@ -629,8 +630,8 @@ def test():
     hexDigitList = [(hdRange, hdValue) for hdRange, hdValue in propsVectorTrie.enumerator(start=0x0020, limit=0x0080,
                                                                                           valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1)]
     printEnumResults(hexDigitList)
-    EnumeratorTests.testEnum(lambda start, limit, valueFunction: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=valueFunction, propShift=UPROPS_HEX_DIGIT, column=1), \
-                             start=0x0020, limit=0x0080, valueFunction=binaryPropFromVecIndex, expectedFunction=lambda c: getBinaryProp(c, UPROPS_HEX_DIGIT))
+    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1), \
+                             start=0x0020, limit=0x0080, expectedFunction=lambda c: getBinaryProp(c, UPROPS_HEX_DIGIT))
 
 if __name__ == "__main__":
     test()

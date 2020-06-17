@@ -15,11 +15,11 @@ def printEnumResults(results, valueFunction=None):
 
     print(", ".join(resultRanges))
 
-def testEnum(enumerator, start, limit, valueFunction, expectedFunction, valueMapper=None):
+def testEnum(enumerator, start, limit, expectedFunction, valueMapper=None):
     if not valueMapper: valueMapper = lambda v: v
 
     print(f"Testing enumeration from {start:04X} to {limit:04X}:")
-    results = [(range, value) for range, value in enumerator(start=start, limit=limit, valueFunction=valueFunction)]
+    results = [(range, value) for range, value in enumerator(start=start, limit=limit)]
 
     passed = True
     for valueRange, value in results:
