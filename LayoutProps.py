@@ -10,6 +10,7 @@ from ICUDataFile import ICUData
 import struct
 from CPTrie import CPTrie
 import LayoutTypes
+import EnumeratorTests
 
 # Layout indexes indices
 # Element 0 stores the length of the indexes[] array.
@@ -64,13 +65,6 @@ def getInSC(c):
 def getVO(c):
     return voTrie.get(c)
 
-def printEnumResults(results):
-    resultRanges = []
-    for valueRange, value in results:
-        resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {LayoutTypes.inpcNames[value]}")
-
-    print(", ".join(resultRanges))
-
 def test():
     print(f"getInPC(0x0901) is {LayoutTypes.inpcNames[getInPC(0x0901)]}")
     print(f"getInPC(0x0915) is {LayoutTypes.inpcNames[getInPC(0x0915)]}")
@@ -79,7 +73,7 @@ def test():
     print()
 
     inPCList = [(pcRange, pcValue) for pcRange, pcValue in inpcTrie.enumerator(start=0x0900, limit=0x0980)]
-    printEnumResults(inPCList)
+    EnumeratorTests.printEnumResults(inPCList, lambda v: LayoutTypes.inpcNames[v])
 
 if __name__ == "__main__":
     test()

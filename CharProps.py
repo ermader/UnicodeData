@@ -5,6 +5,7 @@ from Scripts import *
 from Blocks import *
 from GeneralCategories import *
 from Characters import *
+import EnumeratorTests
 
 
 propsTrie = UTrie2(propsTrie_index, propsTrie_index_length, propsTrie_index_2_null_offset, propsTrie_data_null_offset, \
@@ -538,29 +539,8 @@ def enumBlocks(start, limit):
     printEnumList(blockList, blockNames)
 
 def testEnum(start, limit):
-    print(f"Testing enumeration from {start:04X} to {limit:04X}:")
-    results = [(range, value) for range, value in propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)]
-
-    passed = True
-    for valueRange, value in results:
-        for ch in valueRange:
-            gc = getGeneralCategory(ch)
-            if gc != value:
-                print(f"    {ch:04X}: got gc = {generalCategories[value]}, expected {generalCategories[gc]}")
-                passed = False
-
-    (firstRange, _) = results[0]
-    (lastRange, _) = results[-1]
-    if firstRange.start < start:
-        print(f"    enumeration started early at {firstRange.start:0xX}")
-    elif firstRange.start > start:
-        print(f"    enumeration started late at {firstRange.start}")
-
-    if lastRange.stop < limit:
-        print(f"    enumeration stopped early at {lastRange.stop:04X}")
-    elif lastRange.stop > limit:
-        print(f"    enumeration stopped late at {lastRange.stop:04X}")
-    elif passed: print("    passed!")
+    EnumeratorTests.testEnum(enumerator=propsTrie.enumerator, start=start, limit=limit, \
+                             valueFunction=generalCategoryFromProps, expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
 
 
 def test():
@@ -610,25 +590,25 @@ def test():
     print()
     print(f"General Category of ' ' is {generalCategories[getGeneralCategory(ord(' '))]}")
 
-    testEnum(0x25, 0x35)
-    testEnum(0x21, 0x7E)
-    testEnum(0x0020, 0x0080)
+    testEnum(start=0x25, limit=0x35)
+    testEnum(start=0x21, limit=0x7E)
+    testEnum(start=0x0020, limit=0x0080)
     print()
 
-    testEnum(0x0900, 0x0980)
+    testEnum(start=0x0900, limit=0x0980)
     print()
 
-    testEnum(0xD800, 0xE000)
+    testEnum(start=0xD800, limit=0xE000)
     print()
 
-    testEnum(0x1E900, 0x1E944)
+    testEnum(start=0x1E900, limit=0x1E944)
     print()
 
-    testEnum(0x10005, 0x10015)
-    testEnum(0x10000, 0x1005D)
+    testEnum(start=0x10005, limit=0x10015)
+    testEnum(start=0x10000, limit=0x1005D)
     print()
 
-    testEnum(0xFF00, 0x1005F)
+    testEnum(start=0xFF00, limit=0x1005F)
     print()
 
     emumScripts(0x0900, 0x0E00)
@@ -640,6 +620,8 @@ def test():
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                                                                    valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2)]
     printEnumResults(emojiList)
+    EnumeratorTests.testEnum(lambda start, limit, valueFunction: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=valueFunction, propShift=UPROPS_2_EMOJI, column=2), \
+                             start=0x1F600, limit=0x1F680, valueFunction=binaryPropFromVecIndex, expectedFunction=isEmoji)
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
     printEnumResults(fractionList)
@@ -647,6 +629,8 @@ def test():
     hexDigitList = [(hdRange, hdValue) for hdRange, hdValue in propsVectorTrie.enumerator(start=0x0020, limit=0x0080,
                                                                                           valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1)]
     printEnumResults(hexDigitList)
+    EnumeratorTests.testEnum(lambda start, limit, valueFunction: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=valueFunction, propShift=UPROPS_HEX_DIGIT, column=1), \
+                             start=0x0020, limit=0x0080, valueFunction=binaryPropFromVecIndex, expectedFunction=lambda c: getBinaryProp(c, UPROPS_HEX_DIGIT))
 
 if __name__ == "__main__":
     test()
