@@ -26,7 +26,7 @@ def testEnum(enumerator, start, limit, expectedFunction, valueMapper=None):
         for ch in valueRange:
             expectedValue = expectedFunction(ch)
             if expectedValue != value:
-                print(f"    {ch:04X}: got gc = {valueMapper(value)}, expected {valueMapper(expectedValue)}")
+                print(f"    {ch:04X}: got value = {valueMapper(value)}, expected {valueMapper(expectedValue)}")
                 passed = False
 
     (firstRange, _) = results[0]
