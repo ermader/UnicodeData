@@ -315,16 +315,16 @@ class CPTrie(object):
                             prev = c
                             prevValue = value
 
-                    c += 1
-                    di += 1
-                    while c < limit and (c & dataMask) != 0:
-                        value = self.data[di]
-                        if value != prevValue:
-                            if prev < c: yield range(prev, c), prevValue
-                            prev = c
-                            prevValue = value
                         c += 1
                         di += 1
+                        while c < limit and (c & dataMask) != 0:
+                            value = self.data[di]
+                            if value != prevValue:
+                                if prev < c: yield range(prev, c), prevValue
+                                prev = c
+                                prevValue = value
+                            c += 1
+                            di += 1
 
         if c > limit:
             c = limit

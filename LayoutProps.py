@@ -75,9 +75,16 @@ def test():
 
     inPCList = [(pcRange, pcValue) for pcRange, pcValue in inpcTrie.enumerator(start=0x0900, limit=0x0980)]
     EnumeratorTests.printEnumResults(inPCList, lambda v: LayoutTypes.inpcNames[v])
+    print()
 
-    EnumeratorTests.testEnum(inpcTrie.enumerator, start=0x0900, limit=0x0E00, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
-    EnumeratorTests.testEnum(inscTrie.enumerator, start=0x0900, limit=0x0E00, expectedFunction=getInSC, valueMapper=lambda v: LayoutTypes.inscNames[v])
+    EnumeratorTests.testEnum("inPC", inpcTrie.enumerator, start=0x0025, limit=0x0035, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
+    EnumeratorTests.testEnum("inPC", inpcTrie.enumerator, start=0x0021, limit=0x007E, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
+    EnumeratorTests.testEnum("inPC", inpcTrie.enumerator, start=0x0900, limit=0x0E00, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
+    EnumeratorTests.testEnum("inPC", inpcTrie.enumerator, start=0xFF00, limit=0x1005F, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
+    EnumeratorTests.testEnum("inPC", inpcTrie.enumerator, start=0x10005, limit=0x10015, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
+    print()
+
+    EnumeratorTests.testEnum("inSC", inscTrie.enumerator, start=0x0900, limit=0x0E00, expectedFunction=getInSC, valueMapper=lambda v: LayoutTypes.inscNames[v])
 
 if __name__ == "__main__":
     test()

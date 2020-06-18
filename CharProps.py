@@ -540,7 +540,7 @@ def enumBlocks(start, limit):
 
 def gcEnumTest(start, limit):
     gcEnumerator = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
-    EnumeratorTests.testEnum(enumerator=gcEnumerator, start=start, limit=limit, \
+    EnumeratorTests.testEnum(name="General Category", enumerator=gcEnumerator, start=start, limit=limit, \
                              expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
 
 
@@ -621,7 +621,7 @@ def test():
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                                                                    valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2)]
     printEnumResults(emojiList)
-    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
+    EnumeratorTests.testEnum("Emoji", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
                              start=0x1F600, limit=0x1F680, expectedFunction=isEmoji)
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
@@ -630,7 +630,7 @@ def test():
     hexDigitList = [(hdRange, hdValue) for hdRange, hdValue in propsVectorTrie.enumerator(start=0x0020, limit=0x0080,
                                                                                           valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1)]
     printEnumResults(hexDigitList)
-    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1), \
+    EnumeratorTests.testEnum("Hex Digit", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1), \
                              start=0x0020, limit=0x0080, expectedFunction=lambda c: getBinaryProp(c, UPROPS_HEX_DIGIT))
 
 if __name__ == "__main__":
