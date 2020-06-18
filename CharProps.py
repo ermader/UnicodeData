@@ -512,7 +512,7 @@ def enumBlocks(start, limit):
 
 def gcEnumTest(start, limit):
     gcEnumerator = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
-    EnumeratorTests.testEnum(name="General Category", enumerator=gcEnumerator, start=start, limit=limit, \
+    EnumeratorTests.testEnum(name="general category", enumerator=gcEnumerator, start=start, limit=limit, \
                              expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
 
 
