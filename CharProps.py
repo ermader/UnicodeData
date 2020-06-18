@@ -605,7 +605,7 @@ def test():
                                                                                           valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1)]
     EnumeratorTests.printEnumResults(hexDigitList)
 
-    EnumeratorTests.testEnum("Hex Digit", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1), \
+    EnumeratorTests.testEnum("is hex digit", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1), \
                              start=0x0020, limit=0x0080, expectedFunction=lambda c: getBinaryProp(c, UPROPS_HEX_DIGIT))
 
 if __name__ == "__main__":
