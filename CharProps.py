@@ -593,7 +593,7 @@ def test():
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                                                                    valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2)]
     EnumeratorTests.printEnumResults(emojiList)
-    EnumeratorTests.testEnum("Emoji", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
+    EnumeratorTests.testEnum("is emoji", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
                              start=0x1F600, limit=0x1F680, expectedFunction=isEmoji)
     print()
 
