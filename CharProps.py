@@ -498,45 +498,17 @@ def isEmojiModifier(c):
 def isEmojiModifierBase(c):
     return getBinaryProp(c, UPROPS_2_EMOJI_MODIFIER_BASE, 2)
 
-def printEnumResults(results):
-    resultRanges = []
-    for valueRange, value in results:
-        resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {value}")
-
-    print(", ".join(resultRanges))
-
-def printScripts(scriptsDict):
-    scripts = []
-    for scriptCode, scriptRange in scriptsDict.items():
-        scripts.append(f"{scriptCode}: [{scriptRange.start:04X}, {scriptRange.stop:04X}]")
-
-    print(", ".join(scripts))
-
-from UnicodeSet import UnicodeSet
-def printEnumList(enumList, codeMap):
-    enumDict = {}
-
-    for enumRange, enumCode in enumList:
-        enumTag  = codeMap[enumCode]
-        if enumTag in enumDict:
-            enumDict[enumTag].addRange(enumRange.start, enumRange.stop - 1)
-        else:
-            enumDict[enumTag] = UnicodeSet(enumRange)
-
-    for dictTag, dictSet in enumDict.items():
-        print(f"    '{dictTag}': {dictSet}")
-
 def emumScripts(start, limit):
     print(f"Enumerating script codes from {start:04X} to {limit:04X}")
     scriptList = propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=scriptFromVecIndex)
 
-    printEnumList(scriptList, scriptCodes)
+    EnumeratorTests.printEnumList(enumList=scriptList, valueFunction=lambda s: scriptCodes[s])
 
 def enumBlocks(start, limit):
     print(f"Enumerating block codes from {start:04X} to {limit:04X}")
     blockList = propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=blockFromVecIndex)
 
-    printEnumList(blockList, blockNames)
+    EnumeratorTests.printEnumList(enumList=blockList, valueFunction=lambda b: blockNames[b])
 
 def gcEnumTest(start, limit):
     gcEnumerator = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
@@ -620,16 +592,19 @@ def test():
 
     emojiList = [(eRange, eValue) for eRange, eValue in propsVectorTrie.enumerator(start=0x1F600, limit=0x1F680, \
                                                                                    valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2)]
-    printEnumResults(emojiList)
+    EnumeratorTests.printEnumResults(emojiList)
     EnumeratorTests.testEnum("Emoji", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
                              start=0x1F600, limit=0x1F680, expectedFunction=isEmoji)
+    print()
 
     fractionList = [(fRange, fValue) for fRange, fValue in propsTrie.enumerator(start=0x00BC, limit=0x00BF, valueFunction=numericValueFromProps)]
-    printEnumResults(fractionList)
+    EnumeratorTests.printEnumResults(fractionList)
+    print()
 
     hexDigitList = [(hdRange, hdValue) for hdRange, hdValue in propsVectorTrie.enumerator(start=0x0020, limit=0x0080,
                                                                                           valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1)]
-    printEnumResults(hexDigitList)
+    EnumeratorTests.printEnumResults(hexDigitList)
+
     EnumeratorTests.testEnum("Hex Digit", lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_HEX_DIGIT, column=1), \
                              start=0x0020, limit=0x0080, expectedFunction=lambda c: getBinaryProp(c, UPROPS_HEX_DIGIT))
 

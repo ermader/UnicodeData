@@ -6,6 +6,8 @@ Created on June 17, 2020
 @author Eric Mader
 """
 
+from UnicodeSet import UnicodeSet
+
 def printEnumResults(results, valueFunction=None):
     if not valueFunction: valueFunction = lambda v: v
 
@@ -14,6 +16,21 @@ def printEnumResults(results, valueFunction=None):
         resultRanges.append(f"[{valueRange.start:04X}, {valueRange.stop:04X}]: {valueFunction(value)}")
 
     print(", ".join(resultRanges))
+
+def printEnumList(enumList, valueFunction=None):
+    if not valueFunction: valueFunction = lambda v: v
+
+    enumDict = {}
+
+    for enumRange, enumCode in enumList:
+        enumTag  = valueFunction(enumCode)
+        if enumTag in enumDict:
+            enumDict[enumTag].addRange(enumRange.start, enumRange.stop - 1)
+        else:
+            enumDict[enumTag] = UnicodeSet(enumRange)
+
+    for dictTag, dictSet in enumDict.items():
+        print(f"    '{dictTag}': {dictSet}")
 
 def testEnum(name, enumerator, start, limit, expectedFunction, valueMapper=None):
     if not valueMapper: valueMapper = lambda v: v
