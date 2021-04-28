@@ -7,11 +7,12 @@ Created on May 12, 2020
 """
 
 import struct
+import pkg_resources
 from fontTools.misc import sstruct
 from Utilities import _object
 
 _dataFileName = "icudt67l"  # Needs to change if we change the data file...
-_dataFilePath = f"Data/{_dataFileName}.dat"
+_dataFilePath = pkg_resources.resource_filename("UnicodeData", f"Data/{_dataFileName}.dat")
 _namePrefix = f"{_dataFileName}/"
 _namePrefixLen = len(_namePrefix)
 
