@@ -12,14 +12,14 @@ propsTrie = UTrie2(propsTrie_index, propsTrie_index_length, propsTrie_index_2_nu
                    propsTrie_high_start, propsTrie_high_value_index)
 
 propsVectorTrie = UTrie2(propsVectorsTrie_index, propsVectorsTrie_index_length, propsVectorsTrie_index_2_null_offset, propsVectorsTrie_data_null_offset, \
-                         propsVectorsTrie_high_start, propsVectorTrie_high_value_index)
+                         propsVectorsTrie_high_start, propsVectorsTrie_high_value_index)
 
 
 def unicodePropertiesFromVecIndex(vecIndex, column):
     return propsVectors[vecIndex + column]
 
 def getUnicodeProperties(c, column):
-    if column > propsVectorColumns:
+    if column > propsVectorsColumns:
         return 0
 
     vecIndex = propsVectorTrie.get(c)

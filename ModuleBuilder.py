@@ -49,10 +49,11 @@ class ModuleBuilder(object):
 
     def arrayToPython(self, arrayName):
         array = self.getArrayDeclaration(arrayName)
-        final = ""
-        if array.startswith("\n"):
-            array = array[:-1].replace("\n", "\n    ")
-            final = "\n"
+        final = "\n" if "\n" in array else ""
+        if array.endswith("\n"):
+            array = array[:-1]
+        if final:
+            array = array.replace("\n", "\n    ")
 
         self.outputLines.append(f"{arrayName} = [{array}{final}]\n")
 

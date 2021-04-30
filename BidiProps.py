@@ -116,14 +116,14 @@ def getJoiningType(c):
     return (props & UBIDI_JT_MASK) >> UBIDI_JT_SHIFT
 
 def getJoiningGroup(c):
-    start = bidi_props_indexes[UBIDI_IX_JG_START]
-    limit = bidi_props_indexes[UBIDI_IX_JG_LIMIT]
+    start = ubidi_props_indexes[UBIDI_IX_JG_START]
+    limit = ubidi_props_indexes[UBIDI_IX_JG_LIMIT]
 
     if c in range(start, limit):
         return ubidi_props_jgArray[c - start]
 
-    start = bidi_props_indexes[UBIDI_IX_JG_START2]
-    limit = bidi_props_indexes[UBIDI_IX_JG_LIMIT2]
+    start = ubidi_props_indexes[UBIDI_IX_JG_START2]
+    limit = ubidi_props_indexes[UBIDI_IX_JG_LIMIT2]
 
     if c in range(start, limit):
         return ubidi_props_jgArray2[c - start]
