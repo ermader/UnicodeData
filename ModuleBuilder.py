@@ -30,8 +30,9 @@ class ModuleBuilder(object):
         self.outputLines.append('"""\n')
 
 
-    def getConstantDeclaration(self, name):
-        pattern = name + r"=([0-9]+);"
+    def getScalarDeclaration(self, name):
+        # pattern = name + r"=([0-9]+);"
+        pattern = name + r"=(.+);"
         return re.findall(pattern, self.source)[0]
 
     def getArrayDeclaration(self, arrayName):
@@ -42,8 +43,8 @@ class ModuleBuilder(object):
         pattern = name + r"=\{\n(.+?)\n\};"
         return re.findall(pattern, self.source, re.DOTALL)[0]
 
-    def constantToPython(self, name):
-        declaration = self.getConstantDeclaration(name)
+    def scalarToPython(self, name):
+        declaration = self.getScalarDeclaration(name)
         self.outputLines.append(f"{name} = {declaration}\n")
 
     def arrayToPython(self, arrayName):
@@ -97,7 +98,7 @@ def test():
     charPropsBuilder.arrayToPython("propsVectorsTrie_index")
     charPropsBuilder.trieValuesFromTrieDeclaration("propsVectorsTrie", "propsVectorsTrie")
     charPropsBuilder.arrayToPython("propsVectors")
-    charPropsBuilder.constantToPython("propsVectorsColumns")
+    charPropsBuilder.scalarToPython("propsVectorsColumns")
     charPropsBuilder.arrayToPython("scriptExtensions")
     charPropsBuilder.writeFile()
 
