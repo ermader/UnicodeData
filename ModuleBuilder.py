@@ -82,7 +82,7 @@ class ModuleBuilder(object):
         moduleFile.write(contents)
         moduleFile.close()
 
-def test():
+def build():
     bidiPropBuilder = ModuleBuilder("/Users/emader/icu/icu/icu4c/source", "common/ubidi_props_data.h", "test", "BidiPropsData.py")
     bidiPropBuilder.arrayToPython("ubidi_props_indexes")
     bidiPropBuilder.arrayToPython("ubidi_props_trieIndex")
@@ -102,5 +102,13 @@ def test():
     charPropsBuilder.arrayToPython("scriptExtensions")
     charPropsBuilder.writeFile()
 
+    casePropsBuilder = ModuleBuilder("/Users/emader/icu/icu/icu4c/source", "common/ucase_props_data.h", "test", "CasePropsData.py")
+    casePropsBuilder.arrayToPython("ucase_props_indexes")
+    casePropsBuilder.arrayToPython("ucase_props_trieIndex")
+    casePropsBuilder.arrayToPython("ucase_props_exceptions")
+    casePropsBuilder.arrayToPython("ucase_props_unfold")
+    casePropsBuilder.trieValuesFromPropsDeclaration("ucase_props_singleton", "ucase_props_trie")
+    casePropsBuilder.writeFile()
+
 if __name__ == "__main__":
-    test()
+    build()
