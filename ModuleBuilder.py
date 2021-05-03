@@ -84,7 +84,10 @@ class ModuleBuilder(object):
         moduleFile.close()
 
 def build():
-    bidiPropBuilder = ModuleBuilder("/Users/emader/icu/icu/icu4c/source", "common/ubidi_props_data.h", "test", "BidiPropsData.py")
+    icuSource = "/Users/emader/Downloads/icu69/icu4c/source"
+    testDir = "test"
+
+    bidiPropBuilder = ModuleBuilder(icuSource, "common/ubidi_props_data.h", testDir, "BidiPropsData.py")
     bidiPropBuilder.arrayToPython("ubidi_props_indexes")
     bidiPropBuilder.arrayToPython("ubidi_props_trieIndex")
     bidiPropBuilder.arrayToPython("ubidi_props_mirrors")
@@ -93,7 +96,7 @@ def build():
     bidiPropBuilder.trieValuesFromPropsDeclaration("ubidi_props_singleton", "ubidi_props_trie")
     bidiPropBuilder.writeFile()
 
-    charPropsBuilder = ModuleBuilder("/Users/emader/icu/icu/icu4c/source", "common/uchar_props_data.h", "test", "CharPropsData.py")
+    charPropsBuilder = ModuleBuilder(icuSource, "common/uchar_props_data.h", testDir, "CharPropsData.py")
     charPropsBuilder.arrayToPython("propsTrie_index")
     charPropsBuilder.trieValuesFromTrieDeclaration("propsTrie", "propsTrie")
     charPropsBuilder.arrayToPython("propsVectorsTrie_index")
@@ -103,7 +106,7 @@ def build():
     charPropsBuilder.arrayToPython("scriptExtensions")
     charPropsBuilder.writeFile()
 
-    casePropsBuilder = ModuleBuilder("/Users/emader/icu/icu/icu4c/source", "common/ucase_props_data.h", "test", "CasePropsData.py")
+    casePropsBuilder = ModuleBuilder(icuSource, "common/ucase_props_data.h", testDir, "CasePropsData.py")
     casePropsBuilder.arrayToPython("ucase_props_indexes")
     casePropsBuilder.arrayToPython("ucase_props_trieIndex")
     casePropsBuilder.arrayToPython("ucase_props_exceptions")

@@ -103,7 +103,7 @@ def test():
         ibc = BidiProps.isBidiControl(cp)
         im = BidiProps.isMirrored(cp)
         dt = DecompositionType.decompositionTypeNames[CharProps.getDecompType(cp)]
-        uc =CaseProps.toFullUpper(cp)
+        uc = CaseProps.toFullUpper(cp)
         lc = CaseProps.toFullLower(cp)
         tc = CaseProps.toFullTitle(cp)
         inpc = LayoutTypes.inpcNames[LayoutProps.getInPC(cp)]

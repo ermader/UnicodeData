@@ -261,7 +261,12 @@ def toUpperOrTitle(c, upperNotTitle):
 
         if (excWord & UCASE_EXC_CONDITIONAL_SPECIAL) != 0:
             # this is where to handle locale exceptions...
-            pass
+            if c == 0x0587:
+                # See ICU-13416:
+                # և ligature ech-yiwn
+                # uppercases to ԵՒ=ech+yiwn by default and in Western Armenian,
+                # but to ԵՎ=ech+vew in Eastern Armenian.
+                return "ԵՒ" if upperNotTitle else "Եւ"
 
         elif hasSlot(excWord, UCASE_EXC_FULL_MAPPINGS):
             (full, offset) = getSlotValue(excWord, UCASE_EXC_FULL_MAPPINGS, exceptionIndex)
@@ -341,6 +346,10 @@ def test():
     print(f"toTitle('Г') is '{chr(toTitle(ord('Г')))}'")
     print(f"toTitle('г') is '{chr(toTitle(ord('г')))}'")
     print(f"toFullTitle('{chr(0x1E98)}') is '{toFullTitle(0x1E98)}'")
+
+    print()
+    print(f"toFullUpper('{chr(0x0587)}') is '{toFullUpper(0x0587)}'")
+    print(f"toFullTitle('{chr(0x0587)}') is '{toFullTitle(0x0587)}'")
 
 
 
