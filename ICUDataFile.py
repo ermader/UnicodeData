@@ -11,11 +11,7 @@ import pkg_resources
 from fontTools.misc import sstruct
 from Utilities import _object
 
-_dataFileName = "icudt69l"  # Needs to change if we change the data file...
-_dataFilePath = pkg_resources.resource_filename("UnicodeData", f"Data/{_dataFileName}.dat")
-_namePrefix = f"{_dataFileName}/"
-_namePrefixLen = len(_namePrefix)
-
+_dataFilePath = pkg_resources.resource_filename("UnicodeData", f"Data/icudata.dat")
 
 dataHeaderFormat = """
 # MappedData header
@@ -54,8 +50,9 @@ class ICUData(object):
 
     @classmethod
     def getName(cls, offset):
-        name = cls.getString(offset)  # Maybe check to be sure name starts with prefix?
-        return name[_namePrefixLen:]
+        name = cls.getString(offset)  # Maybe check the prefix?
+        prefixOffset = name.index("/")
+        return name[prefixOffset+1:]
 
     @classmethod
     def getDataOffset(cls, name):

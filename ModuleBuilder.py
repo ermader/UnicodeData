@@ -92,6 +92,7 @@ class ModuleBuilder(object):
 
 def build():
     icuSource = "/Users/emader/Downloads/icu69/icu4c/source"
+    icuBuild = "/Users/emader/Downloads/icu69/icu4c-build"
     testDir = "test"
 
     bidiPropBuilder = ModuleBuilder(icuSource, "common/ubidi_props_data.h", testDir, "BidiPropsData.py")
@@ -127,12 +128,20 @@ def build():
     icuVersionShort = re.findall(r'#define U_ICU_VERSION_SHORT "([0-9]+)"', uvData)[0]
     print(f"ICU version = {icuVersion}, short version = {icuVersionShort}")
 
+    # copy the icu data file from the icu build directory to the test directory
+    icuDataFile = open(os.path.join(icuBuild, f"data/out/icudt{icuVersionShort}l.dat"), "rb")
+    icuDataFileCopy = open(os.path.join(testDir, icudata.dat), "wb")
+    icuDataFileCopy.write(icuDataFile.read())
+    icuDataFile.close()
+    icuDataFileCopy.close()
+
     ppFile = open(os.path.join(icuSource, "data/unidata/ppucd.txt"))
     ppData = ppFile.read()
     ucdVersion = re.findall(r"ucd;([0-9.]+)", ppData)[0]
 
     ucdVersionFile = open(os.path.join(testDir, "UnicodeVersion.py"), "w")
-    ucdVersionFile.write(f'unicodeVersion = "{ucdVersion}"')
+    ucdVersionFile.write(f'unicodeVersion = "{ucdVersion}\n"')
+    ucdVersionFile.write(f'icuDataFileName = "{dataFileName}"\n')
     ucdVersionFile.close()
 
 if __name__ == "__main__":
