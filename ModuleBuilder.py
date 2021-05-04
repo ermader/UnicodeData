@@ -121,5 +121,19 @@ def build():
     casePropsBuilder.trieValuesFromPropsDeclaration("ucase_props_singleton", "ucase_props_trie")
     casePropsBuilder.writeFile()
 
+    uverFile = open(os.path.join(icuSource, "common/unicode/uvernum.h"))
+    uvData = uverFile.read()
+    icuVersion = re.findall(r'#define U_ICU_VERSION "([0-9.]+)"', uvData)[0]
+    icuVersionShort = re.findall(r'#define U_ICU_VERSION_SHORT "([0-9]+)"', uvData)[0]
+    print(f"ICU version = {icuVersion}, short version = {icuVersionShort}")
+
+    ppFile = open(os.path.join(icuSource, "data/unidata/ppucd.txt"))
+    ppData = ppFile.read()
+    ucdVersion = re.findall(r"ucd;([0-9.]+)", ppData)[0]
+
+    ucdVersionFile = open(os.path.join(testDir, "UnicodeVersion.py"), "w")
+    ucdVersionFile.write(f'unicodeVersion = "{ucdVersion}"')
+    ucdVersionFile.close()
+
 if __name__ == "__main__":
     build()

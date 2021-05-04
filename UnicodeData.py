@@ -12,6 +12,7 @@ from pathlib import Path
 from timeit import default_timer as timer
 #import shelve
 
+from UnicodeVersion import unicodeVersion
 from CharacterData import CharacterData
 from UnicodeSet import UnicodeSet
 
@@ -91,7 +92,6 @@ class UnicodeCharacterData(object):
         if len(cls.characterData) > 0:
             return cls.characterData
 
-        unicodeVersion = "13.0.0"
         startTime = timer()
         download = urlopen(f"https://www.unicode.org/Public/{unicodeVersion}/ucdxml/ucd.all.grouped.zip")
         tf = tempfile.TemporaryFile()
