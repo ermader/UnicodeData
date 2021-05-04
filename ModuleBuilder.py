@@ -83,6 +83,13 @@ class ModuleBuilder(object):
         moduleFile.write(contents)
         moduleFile.close()
 
+#
+# ICU version number is in common/unicode/uvernum.h: e.g. #define U_ICU_VERSION_SHORT "69"
+# ICU data file is in data/out in ICU build directory: e.g. data/out/icudt69l.dat. i.e. icudt + U_ICU_VERSION_SHORT + ("l" if littleEndian else "b") + .dat
+# Unicode data version is in data/unidata/ppucd.txt: e.g. ucd;13.0.0
+# Unicode data file is at https://www.unicode.org/Public/: e.g. https://www.unicode.org/Public/13.0.0
+#
+
 def build():
     icuSource = "/Users/emader/Downloads/icu69/icu4c/source"
     testDir = "test"

@@ -4,6 +4,9 @@ Created on Apr 13, 2020
 @author: emader
 '''
 
+import tempfile
+import zipfile
+from urllib.request import urlopen
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 from timeit import default_timer as timer
@@ -88,9 +91,21 @@ class UnicodeCharacterData(object):
         if len(cls.characterData) > 0:
             return cls.characterData
 
+        unicodeVersion = "13.0.0"
         startTime = timer()
-        source = Path("Data/ucd.all.grouped.xml")
-        tree = ElementTree.parse(source)
+        download = urlopen(f"https://www.unicode.org/Public/{unicodeVersion}/ucdxml/ucd.all.grouped.zip")
+        tf = tempfile.TemporaryFile()
+        tf.write(download.read())
+        tf.seek(0)
+        zf = zipfile.ZipFile(tf)
+        ucdFile = zf.open("ucd.all.grouped.xml")
+
+        tree = ElementTree.parse(ucdFile)
+
+        ucdFile.close()
+        zf.close()
+        download.close()
+
         root = tree.getroot()
         ucdNameSpace = root.tag[1:-4]  # remove initial "{" and final "}ucd"
         nameSpaces = {"ucd": ucdNameSpace}
@@ -105,7 +120,7 @@ class UnicodeCharacterData(object):
                 cls.characterData[codePoint] = characterData
 
         endTime = timer()
-        print(f"  Reading {source.name} took {endTime - startTime} seconds.")
+        print(f"  Downloading, unzipping, reading {download.url} took {endTime - startTime} seconds.")
 
     def __init__(self):
         UnicodeCharacterData._populateCharacterData()
