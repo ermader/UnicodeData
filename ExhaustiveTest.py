@@ -159,7 +159,7 @@ def test():
         doBinary2Tests(cp, characterData)
 
     end = timer()
-    print(f"  Test took {end - start} seconds.")
+    print(f"  Test took {round(end - start,2)} seconds.")
 
 if __name__ == "__main__":
     test()

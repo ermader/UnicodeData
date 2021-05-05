@@ -120,7 +120,7 @@ class UnicodeCharacterData(object):
                 cls.characterData[codePoint] = characterData
 
         endTime = timer()
-        print(f"  Downloading, unzipping, reading {download.url} took {endTime - startTime} seconds.")
+        print(f"  Downloading, unzipping, reading {download.url} took {round(endTime - startTime, 2)} seconds.")
 
     def __init__(self):
         UnicodeCharacterData._populateCharacterData()

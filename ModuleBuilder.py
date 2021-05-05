@@ -9,6 +9,75 @@ Created on April 26, 2021
 from datetime import datetime
 import os
 import re
+from sys import argv, exit, stderr
+from FontDocTools.ArgumentIterator import ArgumentIterator
+
+class ModuleBuilderArgs:
+    def __init__(self):
+        self._icuSourceDir = None
+        self._outputDir = None
+        self._icuBuildDir = None
+
+    @property
+    def icuSourceDir(self):
+        return self._icuSourceDir
+
+    @property
+    def icuBuildDir(self):
+        return self._icuBuildDir
+
+    @property
+    def outputDir(self):
+        return self._outputDir
+
+    @classmethod
+    def forArguments(cls, argumentList):
+        args = ModuleBuilderArgs()
+        args.processArguments(argumentList)
+        return args
+
+    def processArguments(self, argumentList):
+        arguments = ArgumentIterator(argumentList)
+        argumentsSeen = {}
+
+        for argument in arguments:
+            if argument in argumentsSeen:
+                raise ValueError("Duplicate option “" + argument + "”.")
+            argumentsSeen[argument] = True
+
+            self.processArgument(argument, arguments)
+
+        self.completeInit()
+
+    def processArgument(self, argument, arguments):
+        if argument == "--sourceDir":
+            self._icuSourceDir = arguments.nextExtra("ICU Source Directory")
+        elif argument == "--buildDir":
+            self._icuBuildDir = arguments.nextExtra("ICU Build Directory")
+        elif argument == "--outputDir":
+            self._outputDir = arguments.nextExtra("Output Directory")
+        else:
+            raise ValueError(f"Unrecognized option “{argument}”.")
+
+    def completeInit(self):
+        """\
+        Complete initialization of a shaping spec after some values have
+        been set from the argument list.
+        Check that required data has been provided and fill in defaults for others.
+        Raise ValueError if required options are missing, or invalid option
+        combinations are detected.
+        """
+
+        if not self._icuSourceDir:
+            raise ValueError("Missing “--sourceDir” option.")
+
+        if not self._icuBuildDir:
+            raise ValueError("Missing “--buildDir” option.")
+
+        if not self._outputDir:
+            raise ValueError("Missing “--outputDir” option.")
+
+
 
 class ModuleBuilder(object):
     def __init__(self, icuDirectory, cSourcePath, outDirectory, moduleName):
@@ -91,9 +160,22 @@ class ModuleBuilder(object):
 #
 
 def build():
-    icuSource = "/Users/emader/Downloads/icu69/icu4c/source"
-    icuBuild = "/Users/emader/Downloads/icu69/icu4c-build"
-    testDir = "test"
+    argumentList = argv
+    args = None
+    programName = os.path.basename(argumentList.pop(0))
+    if len(argumentList) == 0:
+        print(__doc__, file=stderr)
+        exit(1)
+
+    try:
+        moduleBuilderArgs = ModuleBuilderArgs.forArguments(argumentList)
+    except ValueError as error:
+        print(programName + ": " + str(error), file=stderr)
+        exit(1)
+
+    icuSource = moduleBuilderArgs.icuSourceDir
+    icuBuild = moduleBuilderArgs.icuBuildDir
+    testDir = moduleBuilderArgs.outputDir
 
     bidiPropBuilder = ModuleBuilder(icuSource, "common/ubidi_props_data.h", testDir, "BidiPropsData.py")
     bidiPropBuilder.arrayToPython("ubidi_props_indexes")
@@ -130,7 +212,7 @@ def build():
 
     # copy the icu data file from the icu build directory to the test directory
     icuDataFile = open(os.path.join(icuBuild, f"data/out/icudt{icuVersionShort}l.dat"), "rb")
-    icuDataFileCopy = open(os.path.join(testDir, icudata.dat), "wb")
+    icuDataFileCopy = open(os.path.join(testDir, "icudata.dat"), "wb")
     icuDataFileCopy.write(icuDataFile.read())
     icuDataFile.close()
     icuDataFileCopy.close()
@@ -140,8 +222,7 @@ def build():
     ucdVersion = re.findall(r"ucd;([0-9.]+)", ppData)[0]
 
     ucdVersionFile = open(os.path.join(testDir, "UnicodeVersion.py"), "w")
-    ucdVersionFile.write(f'unicodeVersion = "{ucdVersion}\n"')
-    ucdVersionFile.write(f'icuDataFileName = "{dataFileName}"\n')
+    ucdVersionFile.write(f'unicodeVersion = "{ucdVersion}"\n')
     ucdVersionFile.close()
 
 if __name__ == "__main__":
