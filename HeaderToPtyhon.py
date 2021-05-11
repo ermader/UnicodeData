@@ -100,12 +100,11 @@ def test():
                     print(f"{name} = {value}  # {comment}")
                 else:
                     print(f"{name} = {value}")
-        elif token == "enum":
-            # need to handle "typdef enum name {"
+        elif token == "enum" or (token == "typedef" and re.search(r"typedef\s+enum\s*\w*\s*\{", line)):
             nextValue = 0
             while (elc := nextLine(headerFile)):
                 eline, comment = elc
-                if eline == "};": break  # should handle "} name ;" too...
+                if re.search(r"\}\s*\w*\s*;", eline): break  # should handle "} name ;" too...
                 # if not eline:
                 #     print()
                 #     continue
@@ -126,9 +125,9 @@ def test():
                     print(f"{name} = {value}")
 
                 if re.fullmatch(r"[0-9]+", value):
-                    nextValue = int(value)
+                    nextValue = int(value) + 1
                 elif re.fullmatch(r"0[xX][0-9a-fA-F]+", value):
-                    nextValue = int(value, 16)
+                    nextValue = int(value, 16) + 1
                 else:
                     nextValue = f"({value}) + 1"
         # print(line)
