@@ -131,7 +131,9 @@ def test():
                 #
                 # e.g.:
                 # U_EXTENDED_CHAR_NAME = U_UNICODE_CHAR_NAME+2,
-                # U_CHAR_NAME_Alias
+                # U_CHAR_NAME_ALIAS
+                #
+                # (Might have to use eval() to make this work...)
                 #
                 if value != prevName:
                     if re.fullmatch(r"[0-9]+", value):
