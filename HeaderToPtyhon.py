@@ -102,10 +102,11 @@ def test():
                     print(f"{name} = {value}")
         elif token == "enum" or (token == "typedef" and re.search(r"typedef\s+enum\s*\w*\s*\{", line)):
             nextValue = 0
+            variables = {}
             prevName = None
             while (elc := nextLine(headerFile)):
                 eline, comment = elc
-                if re.search(r"\}\s*\w*\s*;", eline): break  # should handle "} name ;" too...
+                if re.search(r"\}\s*\w*\s*;", eline): break
                 # if not eline:
                 #     print()
                 #     continue
@@ -118,7 +119,7 @@ def test():
                 # an id followed by optional = value followed by optional comma
                 name, value = re.findall(r"(\w+)(?:\s*=\s*([^,]+))?(?:,|\s)?", eline)[0]
                 if not value:
-                    value = str(nextValue) if type(nextValue) == type(0) else nextValue
+                    value = str(nextValue)
 
                 if comment:
                     print(f"{name} = {value}  # {comment}")
@@ -135,13 +136,17 @@ def test():
                 #
                 # (Might have to use eval() to make this work...)
                 #
-                if value != prevName:
-                    if re.fullmatch(r"[0-9]+", value):
-                        nextValue = int(value) + 1
-                    elif re.fullmatch(r"0[xX][0-9a-fA-F]+", value):
-                        nextValue = int(value, 16) + 1
-                    else:
-                        nextValue = f"({value}) + 1"
+                # if value != prevName:
+
+                if re.fullmatch(r"[0-9]+", value):
+                    intValue = int(value)
+                elif re.fullmatch(r"0[xX][0-9a-fA-F]+", value):
+                    intValue = int(value, 16)
+                else:
+                    intValue = eval(value, variables)
+
+                variables[name] = intValue
+                nextValue = intValue + 1
 
                 prevName = name
         # print(line)
