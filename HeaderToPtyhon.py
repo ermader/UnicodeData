@@ -126,24 +126,7 @@ def test():
                 else:
                     print(f"{name} = {value}")
 
-                #
-                # Maybe keep all the names and check for value as an expression
-                # involving any previous names...
-                #
-                # e.g.:
-                # U_EXTENDED_CHAR_NAME = U_UNICODE_CHAR_NAME+2,
-                # U_CHAR_NAME_ALIAS
-                #
-                # (Might have to use eval() to make this work...)
-                #
-                # if value != prevName:
-
-                if re.fullmatch(r"[0-9]+", value):
-                    intValue = int(value)
-                elif re.fullmatch(r"0[xX][0-9a-fA-F]+", value):
-                    intValue = int(value, 16)
-                else:
-                    intValue = eval(value, variables)
+                intValue = eval(value, variables)
 
                 variables[name] = intValue
                 nextValue = intValue + 1
