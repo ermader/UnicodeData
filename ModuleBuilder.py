@@ -11,6 +11,7 @@ import os
 import re
 from sys import argv, exit, stderr
 from FontDocTools.ArgumentIterator import ArgumentIterator
+from HeaderToPtyhon import HeaderFile
 
 class ModuleBuilderArgs:
     def __init__(self):
@@ -203,6 +204,10 @@ def build():
     casePropsBuilder.arrayToPython("ucase_props_unfold")
     casePropsBuilder.trieValuesFromPropsDeclaration("ucase_props_singleton", "ucase_props_trie")
     casePropsBuilder.writeFile()
+
+    uprops_h = HeaderFile(icuSource, "common/uprops.h", testDir)
+    uprops_h.translate()
+    uprops_h.writeFile()
 
     uverFile = open(os.path.join(icuSource, "common/unicode/uvernum.h"))
     uvData = uverFile.read()
