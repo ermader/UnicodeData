@@ -209,6 +209,18 @@ def build():
     uprops_h.translate()
     uprops_h.writeFile()
 
+    ucase_h = HeaderFile(icuSource, "common/ucase.h", testDir)
+    ucase_h.translate()
+    ucase_h.writeFile()
+
+    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", testDir)
+    uchar_h.translate()
+    uchar_h.writeFile()
+
+    uscript_h = HeaderFile(icuSource, "common/unicode/uscript.h", testDir)
+    uscript_h.translate()
+    uscript_h.writeFile()
+
     uverFile = open(os.path.join(icuSource, "common/unicode/uvernum.h"))
     uvData = uverFile.read()
     icuVersion = re.findall(r'#define U_ICU_VERSION "([0-9.]+)"', uvData)[0]
