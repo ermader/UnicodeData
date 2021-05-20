@@ -87,6 +87,7 @@ class ModuleBuilderArgs:
 #    #defines with "{...}"
 #    handle definitions with things like U_MASK() - maybe allow adding Ptyhon code during build...
 #    handle definitions that use casts and / or take list of #defines to ignore
+#    dictionaries from enum and comments.
 #    cut in use of generated headers
 #
 
