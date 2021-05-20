@@ -78,7 +78,17 @@ class ModuleBuilderArgs:
         if not self._outputDir:
             raise ValueError("Missing “--outputDir” option.")
 
-
+#
+# TODO:
+#    use shtil.copy() to copy ICU data file
+#    use pathlib
+#    compile regular expressions
+#    include blank ines, comments before declarations
+#    #defines with "{...}"
+#    handle definitions with things like U_MASK() - maybe allow adding Ptyhon code during build...
+#    handle definitions that use casts and / or take list of #defines to ignore
+#    cut in use of generated headers
+#
 
 class ModuleBuilder(object):
     def __init__(self, icuDirectory, cSourcePath, outDirectory, moduleName):
