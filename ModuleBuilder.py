@@ -83,9 +83,9 @@ class ModuleBuilderArgs:
 #
 # TODO:
 #    include blank lines, comments before declarations
-#    #defines with "{...}"
+#    #defines with "{...}"?
 #    handle definitions with things like U_MASK() - maybe allow adding Ptyhon code during build...
-#    handle definitions that use casts and / or take list of #defines to ignore
+#    handle definitions that use casts?
 #    dictionaries from enum and comments.
 #    script to move generated, copied files into position
 #    cut in use of generated headers
@@ -220,11 +220,11 @@ def build():
     uprops_h.translate()
     uprops_h.writeFile()
 
-    ucase_h = HeaderFile(icuSource, "common/ucase.h", testDir)
+    ucase_h = HeaderFile(icuSource, "common/ucase.h", testDir, ignore=["UCASECONTEXT_INITIALIZER"])
     ucase_h.translate()
     ucase_h.writeFile()
 
-    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", testDir)
+    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", testDir, ignore=["U_NO_NUMERIC_VALUE"])
     uchar_h.translate()
     uchar_h.writeFile()
 

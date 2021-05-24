@@ -20,10 +20,12 @@ endOfEnumRE = re.compile(r"\}\s*\w*\s*;")  # } name ;  with optional name
 enumEntryRE = re.compile(r"(\w+)(?:\s*=\s*([^,]+))?(?:,|\s)?")  # id = value,  with optional value and comma
 
 class HeaderFile(object):
-    def __init__(self, icuDirectory, cSourcePath, outDirectory):
+    def __init__(self, icuDirectory, cSourcePath, outDirectory, ignore=[]):
         sourcePath = icuDirectory / cSourcePath
         os.makedirs(outDirectory, exist_ok=True)
         self.sourceFile = open(sourcePath)
+
+        self.ignore = ignore
 
         self.outputLines = ['"""/']
 
@@ -109,7 +111,10 @@ class HeaderFile(object):
             if token == "#define":
                 # optional argument list, optional value
                 name, value = macroDefineRE.findall(line)[0]
-                # should check if value is { xxx }...
+
+                if name in self.ignore: continue
+
+                # maybe check if value is { xxx }...
                 if value and not "(" in name:
                     if comment:
                         self.outputLines.append(f"{name} = {value}  # {comment}")
