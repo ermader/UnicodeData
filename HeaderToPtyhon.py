@@ -15,7 +15,7 @@ firstTokenRE = re.compile(r"([^\s]+)")  # first token on a line
 cCommentRE = re.compile(r"/\*\*?(.+?)\*/")  # a /*...*/ comment
 eolCommentRE = re.compile(r"//\s*([^$]+)$")  # //... to end of line comment
 macroDefineRE = re.compile(r"#define (\w+(?:\(\w+(?:,\s*\w+)?\))?)(?:\s+(.+))?")  # #define with optional arguments and optional value
-typedefEnumRE = re.compile(r"typedef\s+enum\s*\w*\s*\{")
+typedefEnumRE = re.compile(r"typedef\s+enum\s*\w*\s*\{?")
 endOfEnumRE = re.compile(r"\}\s*\w*\s*;")  # } name ;  with optional name
 enumEntryRE = re.compile(r"(\w+)(?:\s*=\s*([^,]+))?(?:,|\s)?")  # id = value,  with optional value and comma
 
@@ -129,6 +129,7 @@ class HeaderFile(object):
                 prevName = None
                 while (elc := self.nextLine()):
                     eline, comment = elc
+                    if eline.startswith("{"): continue
                     if endOfEnumRE.search(eline): break
 
                     name, value = enumEntryRE.findall(eline)[0]

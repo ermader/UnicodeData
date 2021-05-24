@@ -84,7 +84,6 @@ class ModuleBuilderArgs:
 # TODO:
 #    include blank lines, comments before declarations
 #    #defines with "{...}"?
-#    handle definitions with things like U_MASK() - maybe allow adding Ptyhon code during build...
 #    handle definitions that use casts?
 #    dictionaries from enum and comments.
 #    script to move generated, copied files into position
