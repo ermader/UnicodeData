@@ -224,7 +224,7 @@ def build():
     ucase_h.translate()
     ucase_h.writeFile()
 
-    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", testDir, ignore=["U_NO_NUMERIC_VALUE"])
+    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", testDir, extraCode=["def U_MASK(x): return 1<<x\n"], ignore=["U_NO_NUMERIC_VALUE"])
     uchar_h.translate()
     uchar_h.writeFile()
 
