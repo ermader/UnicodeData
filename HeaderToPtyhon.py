@@ -123,7 +123,7 @@ class HeaderFile(object):
                         self.outputLines.append(f"{name} = {value}  # {comment}")
                     else:
                         self.outputLines.append(f"{name} = {value}")
-            elif token == "enum" or (token == "typedef" and typedefEnumRE.search(line)):
+            elif token == "enum" or (token == "typedef" and typedefEnumRE.fullmatch(line)):
                 nextValue = 0
                 variables = {}
                 prevName = None
