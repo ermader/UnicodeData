@@ -14,6 +14,7 @@ import shutil
 from pathlib import Path
 from FontDocTools.ArgumentIterator import ArgumentIterator
 from HeaderToPtyhon import HeaderFile
+from UCDReader import UCDReader
 
 class ModuleBuilderArgs:
     def __init__(self):
@@ -241,13 +242,18 @@ def build():
     # copy the icu data file from the icu build directory to the test directory
     shutil.copy(icuBuild / f"data/out/icudt{icuVersionShort}l.dat", testDir / "icudata.dat")
 
-    ppFile = open(icuSource / "data/unidata/ppucd.txt")
-    ppData = ppFile.read()
-    ppFile.close()
-    ucdVersion = re.findall(r"ucd;([0-9.]+)", ppData)[0]
+    # ppFile = open(icuSource / "data/unidata/ppucd.txt")
+    # ppData = ppFile.read()
+    # ppFile.close()
+    #
+    # ucdVersion = re.findall(r"ucd;([0-9.]+)", ppData)[0]
+
+    ucdReader = UCDReader(icuSource, testDir)
+    ucdReader.generateDictionaries()
+    ucdReader.writeFile()
 
     ucdVersionFile = open(testDir / "UnicodeVersion.py", "w")
-    ucdVersionFile.write(f'unicodeVersion = "{ucdVersion}"\n')
+    ucdVersionFile.write(f'unicodeVersion = "{ucdReader.ucdVersion}"\n')
     ucdVersionFile.close()
 
 if __name__ == "__main__":
