@@ -86,7 +86,6 @@ class ModuleBuilderArgs:
 #    include blank lines, comments before declarations
 #    #defines with "{...}"?
 #    handle definitions that use casts?
-#    dictionaries from enum and comments.
 #    script to move generated, copied files into position
 #    cut in use of generated headers
 #
