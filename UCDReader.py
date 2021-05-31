@@ -15,14 +15,14 @@ class UCDReader(object):
         self.ucdVersion = None
 
         #
-        # The default mapping from long name to ICU enum value
+        # The default mapping from long name to ICU enum name
         # doesn't always work, usually because Unicode has renamed
-        # them since the ICU enum value was made @stable. These mappings
+        # them since the ICU enum name was made @stable. These mappings
         # capture those cases.
         #
         # (The "right" way to fix this is to capture the short names from the
         # comments when processing the enums and keep a mapping from short names
-        # to ICU enum values.)
+        # to ICU enum names.)
         #
         self.bcMapings = {
             "Arabic_Letter": "RIGHT_TO_LEFT_ARABIC",

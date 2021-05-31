@@ -1,9 +1,11 @@
 
 from Utrie2 import UTrie2
 from CharPropsData import *
-from Scripts import *
-from Blocks import *
-from GeneralCategories import *
+from uprops_h import *
+from uscript_h import *
+from UCDTypeDictionaries import generalCategoryNames as generalCategories
+from UCDTypeDictionaries import scriptNames as scriptCodes
+from UCDTypeDictionaries import blockNames
 from Characters import *
 import EnumeratorTests
 
@@ -24,20 +26,6 @@ def getUnicodeProperties(c, column):
 
     vecIndex = propsVectorTrie.get(c)
     return unicodePropertiesFromVecIndex(vecIndex, column)
-
-UPROPS_CATEGORY_MASK = 0x1F
-UPROPS_NUMERIC_TYPE_VALUE_SHIFT = 6
-
-UPROPS_NTV_NONE = 0  # no numeric value
-UPROPS_NTV_DECIMAL_START = 1  # Decimal digits 0 - 9
-UPROPS_NTV_DIGIT_START = 11  # Other digits
-UPROPS_NTV_NUMERIC_START = 21  # Small integers nv = 0..154
-UPROPS_NTV_FRACTION_START = 0xb0  # Fractions: ((ntv>>4)-12) / ((ntv&0xf)+1) = -1..17 / 1..16
-UPROPS_NTV_LARGE_START = 0x1e0  # Large integers: ((ntv>>5)-14) * 10^((ntv&0x1f)+2) = (1..9)*(10^2..10^33)
-UPROPS_NTV_BASE60_START = 0x300  # Sexagesimal numbers: ((ntv>>2)-0xbf) * 60^((ntv&3)+1) = (1..9)*(60^1..60^4)
-UPROPS_NTV_FRACTION20_START = UPROPS_NTV_BASE60_START + 36  #
-UPROPS_NTV_FRACTION32_START = UPROPS_NTV_FRACTION20_START + 24
-UPROPS_NTV_RESERVED_START = UPROPS_NTV_FRACTION32_START + 16
 
 def generalCategoryFromProps(props):
     return props & 0x1F
@@ -185,7 +173,7 @@ def digitValue(c):
     return value if value <= 9 else -1
 
 def numericTypeFromProps(props):
-    return props & UPROPS_CATEGORY_MASK
+    return props & 0x1F
 
 def getNumericType(c):
     props = propsTrie.get(c)
@@ -279,101 +267,6 @@ def numericValueFromProps(props):
 def getNumericValue(c):
     props = propsTrie.get(c)
     return numericValueFromProps(props)
-
-# Probably want to move these to a uprops class...
-# Values in vector word 0
-# derived age: one nibble each for major and minor version numbers
-UPROPS_AGE_MASK = 0xff000000
-UPROPS_AGE_SHIFT = 24
-
-# Script_Extensions: mask includes Script
-UPROPS_SCRIPT_X_MASK = 0x00f000ff
-UPROPS_SCRIPT_X_SHIFT = 22
-
-# The UScriptCode or Script_Extensions index is split across two bit fields.
-# (Starting with Unicode 13/ICU 66/2019 due to more varied Script_Extensions.)
-# Shift the high bits right by 12 to assemble the full value.
-UPROPS_SCRIPT_HIGH_MASK  = 0x00300000
-UPROPS_SCRIPT_HIGH_SHIFT = 12
-UPROPS_MAX_SCRIPT = 0x3ff
-
-UPROPS_EA_MASK = 0x000e0000
-UPROPS_EA_SHIFT = 17
-
-UPROPS_BLOCK_MASK = 0x0001ff00
-UPROPS_BLOCK_SHIFT = 8
-
-UPROPS_SCRIPT_LOW_MASK = 0x000000ff
-
-# UPROPS_SCRIPT_X_WITH_COMMON must be the lowest value that involves Script_Extensions.
-UPROPS_SCRIPT_X_WITH_COMMON = 0x400000
-UPROPS_SCRIPT_X_WITH_INHERITED = 0x800000
-UPROPS_SCRIPT_X_WITH_OTHER = 0xc00000
-
-# Flags in vector word 1
-UPROPS_WHITE_SPACE = 0
-UPROPS_DASH = 1
-UPROPS_HYPHEN = 2
-UPROPS_QUOTATION_MARK = 3
-UPROPS_TERMINAL_PUNCTUATION = 4
-UPROPS_MATH = 5
-UPROPS_HEX_DIGIT = 6
-UPROPS_ASCII_HEX_DIGIT = 7
-UPROPS_ALPHABETIC = 8
-UPROPS_IDEOGRAPHIC = 9
-UPROPS_DIACRITIC = 10
-UPROPS_EXTENDER = 11
-UPROPS_NONCHARACTER_CODE_POINT = 12
-UPROPS_GRAPHEME_EXTEND = 13
-UPROPS_GRAPHEME_LINK = 14
-UPROPS_IDS_BINARY_OPERATOR = 15
-UPROPS_IDS_TRINARY_OPERATOR = 16
-UPROPS_RADICAL = 17
-UPROPS_UNIFIED_IDEOGRAPH = 18
-UPROPS_DEFAULT_IGNORABLE_CODE_POINT = 19
-UPROPS_DEPRECATED = 20
-UPROPS_LOGICAL_ORDER_EXCEPTION = 21
-UPROPS_XID_START = 22
-UPROPS_XID_CONTINUE = 23
-UPROPS_ID_START = 24                            #  ICU 2.6, uprops format version 3.2
-UPROPS_ID_CONTINUE = 25
-UPROPS_GRAPHEME_BASE = 26
-UPROPS_S_TERM = 27                              #  new in ICU 3.0 and Unicode 4.0.1
-UPROPS_VARIATION_SELECTOR = 28
-UPROPS_PATTERN_SYNTAX = 29                      #  new in ICU 3.4 and Unicode 4.1
-UPROPS_PATTERN_WHITE_SPACE = 30
-UPROPS_PREPENDED_CONCATENATION_MARK = 31            # new in ICU 60 and Unicode 10
-UPROPS_BINARY_1_TOP = 32                        #  ==32 - full!
-
-# Properties in vector word 2
-# Bits
-# 31..26   http://www.unicode.org/reports/tr51/#Emoji_Properties
-# 25..20   Line Break
-# 19..15   Sentence Break
-# 14..10   Word Break
-#  9.. 5   Grapheme Cluster Break
-#  4.. 0   Decomposition Type
-
-UPROPS_2_EXTENDED_PICTOGRAPHIC = 26
-UPROPS_2_EMOJI_COMPONENT = 27
-UPROPS_2_EMOJI = 28
-UPROPS_2_EMOJI_PRESENTATION = 29
-UPROPS_2_EMOJI_MODIFIER = 30
-UPROPS_2_EMOJI_MODIFIER_BASE = 31
-
-UPROPS_LB_MASK = 0x03f00000
-UPROPS_LB_SHIFT = 20
-
-UPROPS_SB_MASK = 0x000f8000
-UPROPS_SB_SHIFT = 15
-
-UPROPS_WB_MASK = 0x00007c00
-UPROPS_WB_SHIFT = 10
-
-UPROPS_GCB_MASK = 0x000003e0
-UPROPS_GCB_SHIFT = 5
-
-UPROPS_DT_MASK = 0x0000001f
 
 def ageFromProps(props):
     age = props >> UPROPS_AGE_SHIFT
