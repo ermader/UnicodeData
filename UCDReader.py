@@ -29,7 +29,7 @@ class UCDReader(object):
             "Common_Separator": "COMMON_NUMBER_SEPARATOR",
             "European_Separator": "EUROPEAN_NUMBER_SEPARATOR",
             "European_Terminator": "EUROPEAN_NUMBER_TERMINATOR",
-            "Nonspacing_Mark": "NON_SPACING_MARK",
+            "Nonspacing_Mark": "DIR_NON_SPACING_MARK",
             "Paragraph_Separator": "BLOCK_SEPARATOR",
             "White_Space": "WHITE_SPACE_NEUTRAL"
         }
@@ -105,25 +105,28 @@ class UCDReader(object):
             "Zxxx": "UNWRITTEN_LANGUAGES",
         }
 
+        lowerShortName = lambda sn: sn.lower()
+        copyShortName = lambda sn: sn
+        spacesInShortName = lambda sn: sn.replace("_", " ")
 
         self.prefix = {
-            "bc": ("U", "bidiClass", self.bcMapings),
-            "blk": ("UBLOCK", "block", self.blkMappings),
-            "dt": ("U_DT", "decompositionType", {}),
-            "ea": ("U_EA", "eastAsianWidth", {}),
-            "gc": ("U", "generalCategory", self.gcMappings),
-            "GCB": ("U_GCB", "graphemeClusterBreak", self.gcbMappings),
-            "hst": ("U_HST", "hangulSyllableType", {}),
-            "InPC": ("U_INPC", "indicPositionalCategory", {}),
-            "InSC": ("U_INSC", "indicSyllabicCategory", {}),
-            "jg": ("U_JG", "joiningGroup", {}),
-            "jt": ("U_JT", "joiningType", {}),
-            "lb": ("U_LB", "lineBreak", {}),
-            "nt": ("U_NT", "numberType", {}),
-            "SB": ("U_SB", "sentenceBreak", {}),
-            "sc": ("USCRIPT", "script", self.scriptMappings),
-            "vo": ("U_VO", "verticalOrientation", {}),
-            "WB": ("U_WB", "wordBreak", {})
+            "bc": ("U", "bidiClass", self.bcMapings, spacesInShortName),
+            "blk": ("UBLOCK", "block", self.blkMappings, spacesInShortName),
+            "dt": ("U_DT", "decompositionType", {}, lowerShortName),
+            "ea": ("U_EA", "eastAsianWidth", {}, spacesInShortName),
+            "gc": ("U", "generalCategory", self.gcMappings, spacesInShortName),
+            "GCB": ("U_GCB", "graphemeClusterBreak", self.gcbMappings, spacesInShortName),
+            "hst": ("U_HST", "hangulSyllableType", {}, spacesInShortName),
+            "InPC": ("U_INPC", "indicPositionalCategory", {}, copyShortName),
+            "InSC": ("U_INSC", "indicSyllabicCategory", {}, copyShortName),
+            "jg": ("U_JG", "joiningGroup", {}, spacesInShortName),
+            "jt": ("U_JT", "joiningType", {}, spacesInShortName),
+            "lb": ("U_LB", "lineBreak", {}, spacesInShortName),
+            "nt": ("U_NT", "numberType", {}, spacesInShortName),
+            "SB": ("U_SB", "sentenceBreak", {}, spacesInShortName),
+            "sc": ("USCRIPT", "script", self.scriptMappings, spacesInShortName),
+            "vo": ("U_VO", "verticalOrientation", {}, spacesInShortName),
+            "WB": ("U_WB", "wordBreak", {}, spacesInShortName)
         }
 
         self.lines = {}
@@ -168,7 +171,9 @@ class UCDReader(object):
                         if not key:
                             key = longName.upper()
 
-                        self.lines[type].append(f"    {typePrefix[0]}_{key}: \"{shortName.replace('_', ' ')}\"")
+                        value = typePrefix[3](shortName)
+
+                        self.lines[type].append(f"    {typePrefix[0]}_{key}: \"{value}\"")
 
     def writeFile(self):
         self.file.close()

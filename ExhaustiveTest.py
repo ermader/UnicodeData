@@ -5,15 +5,23 @@ import CharProps
 import BidiProps
 import CaseProps
 import LayoutProps
-import Scripts
-import Blocks
-import EastAsianWidth
-import GeneralCategories
-import JoiningTypesAndGroups
-import CharDirection
-import Boundaries
-import DecompositionType
-import LayoutTypes
+from UCDTypeDictionaries import scriptNames as scriptCodes
+from UCDTypeDictionaries import generalCategoryNames as generalCategories
+from UCDTypeDictionaries import joiningTypeNames as joiningTypes
+from UCDTypeDictionaries import joiningGroupNames as joiningGroups
+from UCDTypeDictionaries import indicPositionalCategoryNames as inpcNames
+from UCDTypeDictionaries import indicSyllabicCategoryNames as inscNames
+from UCDTypeDictionaries import verticalOrientationNames as voNames
+from UCDTypeDictionaries import bidiClassNames, blockNames, eastAsianWidthNames, decompositionTypeNames, graphemeClusterBreakNames, lineBreakNames, sentenceBreakNames
+# import Scripts
+# import Blocks
+# import EastAsianWidth
+# import GeneralCategories
+# import JoiningTypesAndGroups
+# import CharDirection
+# import Boundaries
+# import DecompositionType
+# import LayoutTypes
 from CharNames import CharNames
 from Normalizer2 import Normalizer2
 
@@ -87,28 +95,28 @@ def test():
 
     start = timer()
     for (cp, characterData) in ucd.characterData.items():
-        sc = Scripts.scriptCodes[CharProps.getScript(cp)]
-        gc = GeneralCategories.generalCategories[CharProps.getGeneralCategory(cp)]
-        cd = CharDirection.bidiClassNames[BidiProps.getCharDirection(cp)]
-        jt = JoiningTypesAndGroups.joiningTypes[BidiProps.getJoiningType(cp)]
-        jg = JoiningTypesAndGroups.joiningGroups[BidiProps.getJoiningGroup(cp)]
-        bc = Blocks.blockNames[CharProps.getBlock(cp)]
-        aw = EastAsianWidth.eastAsianWidthNames[CharProps.getEastAsianWidth(cp)]
-        lb = Boundaries.lineBreakNames[CharProps.getLineBreak(cp)]
-        sb = Boundaries.sentenceBreakNames[CharProps.getSentenceBreak(cp)]
-        gcb = Boundaries.graphemeClusterBreakNames[CharProps.getGraphemeClusterBreak(cp)]
+        sc = scriptCodes[CharProps.getScript(cp)]
+        gc = generalCategories[CharProps.getGeneralCategory(cp)]
+        cd = bidiClassNames[BidiProps.getCharDirection(cp)]
+        jt = joiningTypes[BidiProps.getJoiningType(cp)]
+        jg = joiningGroups[BidiProps.getJoiningGroup(cp)]
+        bc = blockNames[CharProps.getBlock(cp)]
+        aw = eastAsianWidthNames[CharProps.getEastAsianWidth(cp)]
+        lb = lineBreakNames[CharProps.getLineBreak(cp)]
+        sb = sentenceBreakNames[CharProps.getSentenceBreak(cp)]
+        gcb = graphemeClusterBreakNames[CharProps.getGraphemeClusterBreak(cp)]
         bmg = BidiProps.getMirror(cp)
         bpb = BidiProps.getPairedBracket(cp)
         ijc = BidiProps.isJoinControl(cp)
         ibc = BidiProps.isBidiControl(cp)
         im = BidiProps.isMirrored(cp)
-        dt = DecompositionType.decompositionTypeNames[CharProps.getDecompType(cp)]
+        dt = decompositionTypeNames[CharProps.getDecompType(cp)]
         uc = CaseProps.toFullUpper(cp)
         lc = CaseProps.toFullLower(cp)
         tc = CaseProps.toFullTitle(cp)
-        inpc = LayoutTypes.inpcNames[LayoutProps.getInPC(cp)]
-        insc = LayoutTypes.inscNames[LayoutProps.getInSC(cp)]
-        vo = LayoutTypes.voNames[LayoutProps.getVO(cp)]
+        inpc = inpcNames[LayoutProps.getInPC(cp)]
+        insc = inscNames[LayoutProps.getInSC(cp)]
+        vo = voNames[LayoutProps.getVO(cp)]
         nfc = normNFC.getRawDecomposition(cp)
         nfkc = normNFKC.getRawDecomposition(cp)
         nfkc_cf = normNFKC_CF.getRawDecomposition(cp)
