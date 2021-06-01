@@ -30,6 +30,7 @@ class UCDReader(object):
             "European_Separator": "EUROPEAN_NUMBER_SEPARATOR",
             "European_Terminator": "EUROPEAN_NUMBER_TERMINATOR",
             "Nonspacing_Mark": "NON_SPACING_MARK",
+            "Paragraph_Separator": "BLOCK_SEPARATOR",
             "White_Space": "WHITE_SPACE_NEUTRAL"
         }
 

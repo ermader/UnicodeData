@@ -8,8 +8,10 @@ Created on May 1, 2020
 
 from BidiPropsData import *
 from Utrie2 import UTrie2
-from CharDirection import *
-from JoiningTypesAndGroups import *
+from uchar_h import *
+from UCDTypeDictionaries import bidiClassNames
+from UCDTypeDictionaries import joiningTypeNames as joiningTypes
+from UCDTypeDictionaries import joiningGroupNames as joiningGroups
 from Utilities import arithmeticShift
 
 #indices into the indexes array
