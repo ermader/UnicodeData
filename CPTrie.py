@@ -7,7 +7,11 @@ Created on May 14, 2020
 """
 import struct
 from fontTools.misc import sstruct
-from Utilities import _object
+
+if __package__:
+    from .Utilities import _object
+else:
+    from Utilities import _object
 
 UCPTRIE_SIG = 0x54726933  # "Tri3"
 

@@ -6,7 +6,10 @@ Created on Apr 28, 2020
 @author Eric Mader
 """
 
-from Utilities import isSurrogate, isSurrogateLead, isSurrogateTrail
+if __package__:
+    from .Utilities import isSurrogate, isSurrogateLead, isSurrogateTrail
+else:
+    from Utilities import isSurrogate, isSurrogateLead, isSurrogateTrail
 
 class UTrie2(object):
     SHIFT_1 = 6 + 5

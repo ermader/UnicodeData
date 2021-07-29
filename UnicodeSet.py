@@ -6,7 +6,10 @@ A simplified version of the UnicodeSet class from ICU.
 @author: emader
 '''
 
-from Utilities import listOFCodes
+if __package__:
+    from .Utilities import listOFCodes
+else:
+    from Utilities import listOFCodes
 
 UNICODE_SET_HIGH = 0x0110000
 """A value greater than all Unicode code points."""

@@ -6,12 +6,29 @@ Created on May 15, 2020
 @author Eric Mader
 """
 
+# if __name__ == "__main__" and __package__ is None:
+#     from sys import path as sys_path
+#     from pathlib import Path
+#     __package__ = "UnicodeData"
+#     _parent = str(Path(__file__).parent.parent)
+#     for _path in sys_path:
+#         if _path.startswith(_parent):
+#             print(_path)
+#     # sys_path.append(Path(__file__).parent)
+
 import struct
 from fontTools.misc import sstruct
-from ICUDataFile import ICUData
-from CharProps import getGeneralCategory
-from GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
-from Utilities import _object, isLead, isUnicodeNoncharacter
+
+if __package__:
+    from .ICUDataFile import ICUData
+    from .CharProps import getGeneralCategory
+    from .GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
+    from .Utilities import _object, isLead, isUnicodeNoncharacter
+else:
+    from ICUDataFile import ICUData
+    from CharProps import getGeneralCategory
+    from GeneralCategories import GC_SURROGATE, GC_CATEFORY_COUNT
+    from Utilities import _object, isLead, isUnicodeNoncharacter
 
 # "extra" general categories
 GC_NONCHARACTER_CODEPOINT = GC_CATEFORY_COUNT

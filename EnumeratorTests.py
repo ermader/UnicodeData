@@ -6,7 +6,10 @@ Created on June 17, 2020
 @author Eric Mader
 """
 
-from UnicodeSet import UnicodeSet
+if __package__:
+    from .UnicodeSet import UnicodeSet
+else:
+    from UnicodeSet import UnicodeSet
 
 def printEnumResults(results, valueFunction=None):
     if not valueFunction: valueFunction = lambda v: v

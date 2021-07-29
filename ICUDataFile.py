@@ -9,7 +9,12 @@ Created on May 12, 2020
 import struct
 import pkg_resources
 from fontTools.misc import sstruct
-from Utilities import _object
+
+if __package__:
+    from .Utilities import _object
+else:
+    from Utilities import _object
+
 
 _dataFilePath = pkg_resources.resource_filename("UnicodeData", f"Data/icudata.dat")
 
