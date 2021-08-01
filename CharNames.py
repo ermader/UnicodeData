@@ -458,60 +458,11 @@ class CharNames(object):
                 char += LINES_PER_GROUP
 
     @classmethod
-    def charFromName(cls, theName):
-        for (code, name) in cls.nameIterator():
+    def charFromName(cls, theName, nameChoice=U_UNICODE_CHAR_NAME):
+        for (code, name) in cls.nameIterator(nameChoice):
             if name == theName:
                 return code
 
         return 0xFFFFFFFF
 
 CharNames.populateData()
-
-def test():
-    print(f"getCharName('{chr(0x00AF)}') = {CharNames.getCharName(0x00AF)}")
-
-    print(f"getCharName('K') = {CharNames.getCharName(ord('K'))}")
-    print(f"getCharName('k') = {CharNames.getCharName(ord('k'))}")
-
-    print(f"getCharName('{chr(0x0901)}') = {CharNames.getCharName(0x0901)}")
-    print(f"getCharName('क') = {CharNames.getCharName(ord('क'))}")
-
-    print(f"getCharName('{chr(0x33E0)}') = {CharNames.getCharName(0x33E0)}")
-    print(f"getCharName('{chr(0x33F0)}') = {CharNames.getCharName(0x33F0)}")
-
-    print(f"getCharName('漢') = {CharNames.getCharName(ord('漢'))}")
-    print(f"getCharName('{chr(0xD55C)}') = {CharNames.getCharName(0xD55C)}")
-    print(f"getCharName('{chr(0xAD84)}') = {CharNames.getCharName(0xAD84)}")
-    print(f"getCharName('{chr(0xC5B4)}') = {CharNames.getCharName(0xC5B4)}")
-    print(f"getCharName('{chr(0xCA8D)}') = {CharNames.getCharName(0xCA8D)}")
-
-    print(f"getCharName(0x17020) = {CharNames.getCharName(0x17020)}")
-    print()
-
-    print(f"getCharName('{chr(0x01A2)}') = {CharNames.getCharName(0x01A2)}")
-    print(f"getCharName('{chr(0x01A2)}', U_CHAR_NAME_ALIAS) = {CharNames.getCharName(0x01A2, U_CHAR_NAME_ALIAS)}")
-    print(f"getCharName('{chr(0x01A3)}') = {CharNames.getCharName(0x01A3)}")
-    print(f"getCharName('{chr(0x01A3)}', U_CHAR_NAME_ALIAS) = {CharNames.getCharName(0x01A3, U_CHAR_NAME_ALIAS)}")
-    print(f"getCharName('[', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('['), U_EXTENDED_CHAR_NAME)}")
-    print(f"getCharName(']', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord(']'), U_EXTENDED_CHAR_NAME)}")
-
-    print(f"getCharName('{chr(0x00AF)}', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(0x00AF, U_EXTENDED_CHAR_NAME)}")
-
-    print(f"getCharName('K', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('K'), U_EXTENDED_CHAR_NAME)}")
-    print(f"getCharName('k', U_EXTENDED_CHAR_NAME) = {CharNames.getCharName(ord('k'), U_EXTENDED_CHAR_NAME)}")
-    print()
-
-    print(f'charFromName("DEVANAGARA LETTER KA") is {chr(CharNames.charFromName("DEVANAGARI LETTER KA"))}')
-    print(f'charFromName("HANGUL SYLLABLE GIM") is {chr(CharNames.charFromName("HANGUL SYLLABLE GIM"))}')
-    print(f'charFromName("HANGUL SYLLABLE CI") is {chr(CharNames.charFromName("HANGUL SYLLABLE CI"))}')
-    print(f'charFromName("CJK UNIFIED IDEOGRAPH-6F22") is {chr(CharNames.charFromName("CJK UNIFIED IDEOGRAPH-6F22"))}')
-    print()
-
-    allNames = []
-    for (code, name) in CharNames.nameIterator(U_CHAR_NAME_ALIAS):
-        allNames.append(name)
-        print(f'U+{code:04X}: "{name}"')
-    print()
-
-if __name__ == "__main__":
-    test()
