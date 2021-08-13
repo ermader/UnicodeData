@@ -11,8 +11,8 @@ import struct
 if __package__:
     from .ICUDataFile import ICUData
     from .CPTrie import CPTrie
-    from . import LayoutTypes
-    from . import EnumeratorTests
+    from UnicodeData import LayoutTypes
+    from UnicodeData import EnumeratorTests
 else:
     from ICUDataFile import ICUData
     from CPTrie import CPTrie

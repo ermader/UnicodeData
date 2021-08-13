@@ -6,7 +6,7 @@ Indic properties.
 @author: emader
 '''
 
-from UCDProperties import UCDProperties
+from .UCDProperties import UCDProperties
 
 class IndicProperties(UCDProperties):
     def __init__(self, char, group):

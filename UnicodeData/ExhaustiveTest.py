@@ -1,6 +1,6 @@
 from timeit import default_timer as timer
 
-from UnicodeData import UnicodeCharacterData, CharacterData
+from UnicodeData import UnicodeCharacterData
 import CharProps
 import BidiProps
 import CaseProps

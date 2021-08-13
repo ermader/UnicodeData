@@ -6,8 +6,6 @@ Build the unicode_data.db file.
 @author: emader
 '''
 
-import UnicodeData
-
 # The shelve method ends up taking as much time as parsing the .xml file.
 # So, we should either leave well enough alone, or look at an optimized trie of some sort.
 

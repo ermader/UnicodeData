@@ -1,0 +1,168 @@
+"""
+Test for UnicodeData.CharProps
+
+Created on August 12, 2021
+
+@author Eric Mader
+"""
+
+import pytest
+
+from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCategories
+from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
+from UnicodeData.UCDTypeDictionaries import blockNames
+from UnicodeData.CharProps import getGeneralCategory, getScript, getNumericValue
+
+gcTests = [
+    (chr(0x0012), "Cc"),
+    ("3", "Nd"),
+    ("(", "Ps"),
+    (")", "Pe"),
+    ("A", "Lu"),
+    ("a", "Ll"),
+    (chr(0x0644), "Lo"),  # ARABIC LETTER LAM
+    (chr(0x0915), "Lo"),  # DEVANAGARI LETTER KA
+    (chr(0x3010), "Ps"),  # LEFT BLACK LENTICULAR BRACKET
+    (chr(0x3011), "Pe")   # RIGHT BLACK LENTICULAR BRACKET
+]
+
+@pytest.mark.parametrize("char, expectedGC", gcTests)
+def test_getGeneralCatrgory(char, expectedGC):
+    assert generalCategories[getGeneralCategory(ord(char))] == expectedGC
+
+scriptTests = [
+    ("A", 'Latn'),
+    (chr(0x00C1), 'Latn'),
+    (chr(0x0391), 'Grek'),
+    (chr(0x0410), 'Cyrl'),
+    (chr(0x0644), 'Arab'),
+    (chr(0x0915), 'Deva'),
+    (chr(0x0485), 'Zinh'),
+    (chr(0x1E900), 'Adlm')
+]
+
+@pytest.mark.parametrize("char, expectedScript", scriptTests)
+def test_getScript(char, expectedScript):
+    assert scriptCodes[getScript(ord(char))] == expectedScript
+
+numericValueTests = [
+    ("0", 0),
+    ("1", 1),
+    ("2", 2),
+    ("3", 3),
+    ("4", 4),
+    ("5", 5),
+    ("6", 6),
+    ("7", 7),
+    ("8", 8),
+    ("9", 9),
+    (chr(0x00BC), 1/4),  # VULGAR FRACTION ONE QUARTER
+    (chr(0x00BD), 1/2),  # VULGAR FRACTION ONE HALF
+    (chr(0x00BE), 3/4),  # VULGAR FRACTION THREE QUARTERS
+    (chr(0x0660), 0),  # ARABIC-INDIC DIGIT ZERO
+    (chr(0x0661), 1),  # ARABIC-INDIC DIGIT ONE
+    (chr(0x0662), 2),  # ARABIC-INDIC DIGIT TWO
+    (chr(0x0663), 3),  # ARABIC-INDIC DIGIT THREE
+    (chr(0x0664), 4),  # ARABIC-INDIC DIGIT FOUR
+    (chr(0x0665), 5),  # ARABIC-INDIC DIGIT FIVE
+    (chr(0x0666), 6),  # ARABIC-INDIC DIGIT SIX
+    (chr(0x0667), 7),  # ARABIC-INDIC DIGIT SEVEN
+    (chr(0x0668), 8),  # ARABIC-INDIC DIGIT EIGHT
+    (chr(0x0669), 9),  # ARABIC-INDIC DIGIT NINE
+    (chr(0x0966), 0),  # DEVANAGARI DIGIT ZERO
+    (chr(0x0967), 1),
+    (chr(0x0968), 2),
+    (chr(0x0969), 3),
+    (chr(0x096A), 4),
+    (chr(0x096B), 5),
+    (chr(0x096C), 6),
+    (chr(0x096D), 7),
+    (chr(0x096E), 8),
+    (chr(0x096F), 9),
+
+    (chr(0x09F4), 1/16),  # BENGALI CURRENCY NUMERATOR ONE
+    (chr(0x09F5), 1/8),   # BENGALI CURRENCY NUMERATOR TWO
+    (chr(0x09F6), 3/16),  # BENGALI CURRENCY NUMERATOR THREE
+    (chr(0x09F7), 1/4),   # BENGALI CURRENCY NUMERATOR FOUR
+    (chr(0x09F8), 3/4),   # BENGALI CURRENCY NUMERATOR ONE LESS THAN THE DENOMINATOR
+    (chr(0x09F9), 16),    # BENGALI CURRENCY DENOMINATOR SIXTEEN
+
+    (chr(0x0BE6), 0),     # TAMIL DIGIT 0
+    (chr(0x0BE7), 1),
+    (chr(0x0BE8), 2),
+    (chr(0x0BE9), 3),
+    (chr(0x0BEA), 4),
+    (chr(0x0BEB), 5),
+    (chr(0x0BEC), 6),
+    (chr(0x0BED), 7),
+    (chr(0x0BEE), 8),
+    (chr(0x0BEF), 9),
+    (chr(0x0BF0), 10),   # TAMIL NUMBER TEN
+    (chr(0x0BF1), 100),  # TAMIL NUMBER ONE HUNDRED
+    (chr(0x0BF2), 1000), # TAMIL NUMBER ONE THOUSAND
+
+    (chr(0x4E00), 1),    # CJK IDEOGRAPHIC (1)
+    (chr(0x4E8C), 2),    # CJK IDEOGRAPHIC (2)
+    (chr(0x4E09), 3),    # CJK IDEOGRAPHIC (3)
+    (chr(0x56DB), 4),    # CJK IDEOGRAPHIC (4)
+    (chr(0x4E94), 5),    # CJK IDEOGRAPHIC (5)
+    (chr(0x516D), 6),    # CJK IDEOGRAPHIC (6)
+    (chr(0x4E03), 7),    # CJK IDEOGRAPHIC (7)
+    (chr(0x516B), 8),    # CJK IDEOGRAPHIC (8)
+    (chr(0x4E5D), 9),    # CJK IDEOGRAPHIC (9)
+    (chr(0x5341), 10),   # CJK IDEOGRAPHIC (10)
+    (chr(0x767E), 100),  # CJK IDEOGRAPHIC (100)
+    (chr(0x5343), 1_000), # CJK IDEOGRAPHIC (1000)
+    (chr(0x4E07), 10_000),# CJK IDEOGRAPHIC (10,000)
+    (chr(0x5104), 100_000_000),  # CJK IDEOGRAPHIC (100,000,000)
+
+    (chr(0x1ED01), 1),   # OTTOMAN SIYAQ NUMBER ONE
+    (chr(0x1ED02), 2),
+    (chr(0x1ED03), 3),
+    (chr(0x1ED04), 4),
+    (chr(0x1ED05), 5),
+    (chr(0x1ED06), 6),
+    (chr(0x1ED07), 7),
+    (chr(0x1ED08), 8),
+    (chr(0x1ED09), 9),
+    (chr(0x1ED0A), 10),  # OTTOMAN SIYAQ NUMBER TEN
+    (chr(0x1ED0B), 20),
+    (chr(0x1ED0C), 30),
+    (chr(0x1ED0D), 40),
+    (chr(0x1ED0E), 50),
+    (chr(0x1ED0F), 60),
+    (chr(0x1ED10), 70),
+    (chr(0x1ED11), 80),
+    (chr(0x1ED12), 90),
+    (chr(0x1ED13), 100), # OTTOMAN SIYAQ NUMBER ONE HUNDRED
+    (chr(0x1ED14), 200),
+    (chr(0x1ED15), 300),
+    (chr(0x1ED16), 400),
+    (chr(0x1ED17), 500),
+    (chr(0x1ED18), 600),
+    (chr(0x1ED19), 700),
+    (chr(0x1ED1A), 800),
+    (chr(0x1ED1B), 900),
+    (chr(0x1ED1C), 1_000),  # OTTOMAN SIYAQ NUMBER ONE THOUSAND
+    (chr(0x1ED1D), 2_000),
+    (chr(0x1ED1E), 3_000),
+    (chr(0x1ED1F), 4_000),
+    (chr(0x1ED20), 5_000),
+    (chr(0x1ED21), 6_000),
+    (chr(0x1ED22), 7_000),
+    (chr(0x1ED23), 8_000),
+    (chr(0x1ED24), 9_000),
+    (chr(0x1ED25), 10_000),  # OTTOMAN SIYAQ NUMBER TEN THOUSAND
+    (chr(0x1ED26), 20_000),
+    (chr(0x1ED27), 30_000),
+    (chr(0x1ED28), 40_000),
+    (chr(0x1ED29), 50_000),
+    (chr(0x1ED2A), 60_000),
+    (chr(0x1ED2B), 70_000),
+    (chr(0x1ED2C), 80_000),
+    (chr(0x1ED2D), 90_000),
+]
+
+@pytest.mark.parametrize("char, expectedNumericValue", numericValueTests)
+def test_getNumericValue(char, expectedNumericValue):
+    assert getNumericValue(ord(char)) == expectedNumericValue

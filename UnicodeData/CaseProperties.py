@@ -6,7 +6,7 @@ Case properties properties.
 @author: emader
 '''
 
-from UCDProperties import UCDProperties
+from .UCDProperties import UCDProperties
 
 class CaseProperties(UCDProperties):
     def __init__(self, char, group):

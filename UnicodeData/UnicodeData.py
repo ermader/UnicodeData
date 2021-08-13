@@ -12,9 +12,9 @@ from pathlib import Path
 from timeit import default_timer as timer
 #import shelve
 
-from UnicodeVersion import unicodeVersion
-from CharacterData import CharacterData
-from UnicodeSet import UnicodeSet
+from .UnicodeVersion import unicodeVersion
+from .CharacterData import CharacterData
+from .UnicodeSet import UnicodeSet
 
 _characterData = {}
 

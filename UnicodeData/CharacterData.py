@@ -4,12 +4,12 @@ Created on Apr 14, 2020
 @author: emader
 '''
 
-from UCDProperties import UCDProperties
-from BidiProperties import BidiProperties
-from DecompProperties import DecompProperties
-from CaseProperties import CaseProperties
-from IndicProperties import IndicProperties
-from BinaryProperties import BinaryProperties
+from .UCDProperties import UCDProperties
+from .BidiProperties import BidiProperties
+from .DecompProperties import DecompProperties
+from .CaseProperties import CaseProperties
+from .IndicProperties import IndicProperties
+from .BinaryProperties import BinaryProperties
 
 class CharacterData(UCDProperties):
     def __init__(self, char, group):

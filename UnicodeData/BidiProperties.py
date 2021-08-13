@@ -6,7 +6,7 @@ Bidirectional properties.
 @author: emader
 '''
 
-from UCDProperties import UCDProperties
+from .UCDProperties import UCDProperties
 
 class BidiProperties(UCDProperties):
     """Bidirectional properties from the UCD file."""

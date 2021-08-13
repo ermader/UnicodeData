@@ -6,7 +6,7 @@ Various binary properties.
 @author: Eric Mader
 '''
 
-from UCDProperties import UCDProperties
+from .UCDProperties import UCDProperties
 
 propsList = [
     ("whitespace", "WSpace"),

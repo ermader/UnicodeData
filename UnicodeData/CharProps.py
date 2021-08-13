@@ -1,25 +1,13 @@
 
-if __package__:
-    from .Utrie2 import UTrie2
-    from .CharPropsData import *
-    from .uprops_h import *
-    from .uscript_h import *
-    from .UCDTypeDictionaries import generalCategoryNames as generalCategories
-    from .UCDTypeDictionaries import scriptNames as scriptCodes
-    from .UCDTypeDictionaries import blockNames
-    from .Characters import *
-    from . import EnumeratorTests
-else:
-    from Utrie2 import UTrie2
-    from CharPropsData import *
-    from uprops_h import *
-    from uscript_h import *
-    from UCDTypeDictionaries import generalCategoryNames as generalCategories
-    from UCDTypeDictionaries import scriptNames as scriptCodes
-    from UCDTypeDictionaries import blockNames
-    from Characters import *
-    import EnumeratorTests
-
+from .Utrie2 import UTrie2
+from .CharPropsData import *
+from .uprops_h import *
+from .uscript_h import *
+from .UCDTypeDictionaries import generalCategoryNames as generalCategories
+from .UCDTypeDictionaries import scriptNames as scriptCodes
+from .UCDTypeDictionaries import blockNames
+from .Characters import *
+from UnicodeData import EnumeratorTests
 
 propsTrie = UTrie2(propsTrie_index, propsTrie_index_length, propsTrie_index_2_null_offset, propsTrie_data_null_offset, \
                    propsTrie_high_start, propsTrie_high_value_index)

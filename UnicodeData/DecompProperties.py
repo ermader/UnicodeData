@@ -6,7 +6,7 @@ Character Decomposition properties
 @author: emader
 '''
 
-from UCDProperties import UCDProperties
+from .UCDProperties import UCDProperties
 
 class DecompProperties(UCDProperties):
     def dmToString(self, dm, doPoundSign=False):
