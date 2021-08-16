@@ -11,7 +11,8 @@ import pytest
 from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCategories
 from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
 from UnicodeData.UCDTypeDictionaries import blockNames
-from UnicodeData.CharProps import getGeneralCategory, getScript, getNumericValue
+from UnicodeData.UnicodeSet import UnicodeSet
+from UnicodeData.CharProps import getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic
 
 gcTests = [
     (chr(0x0012), "Cc"),
@@ -163,6 +164,37 @@ numericValueTests = [
     (chr(0x1ED2D), 90_000),
 ]
 
+# The fact that we have to skip any characters past 0x4E00 makes this test
+# a bit suspicious. We should probably either drop it, or make another list...
 @pytest.mark.parametrize("char, expectedNumericValue", numericValueTests)
 def test_getNumericValue(char, expectedNumericValue):
     assert getNumericValue(ord(char)) == expectedNumericValue
+
+@pytest.mark.parametrize("char, expectedValue", numericValueTests)
+def test_digitValue(char, expectedValue):
+    charCode = ord(char)
+    actualValue = digitValue(charCode)
+    if charCode < 0x4E00 and expectedValue in [x for x in range(10)]:
+        assert expectedValue == actualValue
+    else:
+        assert actualValue == -1
+
+alphaRanges = [
+    UnicodeSet(range(ord("A"), ord("Z"))),
+    UnicodeSet(range(ord("a"), ord("z"))),
+    UnicodeSet(range(0x0391, 0x03FF)) - UnicodeSet(0x3A2) - UnicodeSet(0x03F6),  # Greek letters
+    UnicodeSet(range(0x0400, 0x04FF)) - UnicodeSet(range(0x0482, 0x048A)),  # Cyrillic letters
+    UnicodeSet(range(0x05D0, 0x05EA)),  # Hebrew Letters
+    UnicodeSet(range(0x0620, 0x064B)) | UnicodeSet(range(0x066E, 0x0670)) | UnicodeSet(range(0x0671, 0x06D4)) | UnicodeSet(0x06D5) | UnicodeSet(range(0x6FA, 0x06FD)), # Arabic Letters
+    UnicodeSet(range(0x0905, 0x093A)) | UnicodeSet(range(0x0958, 0x0962)) | UnicodeSet(range(0x0972, 0x0980)),  # Devanagari letters
+    UnicodeSet(range(0x3041, 0x3097)),  # Hiragana letters
+    UnicodeSet(range(0x30A1, 0x30FB)),  # Katakana letters
+    UnicodeSet(range(0x3131, 0x318F)),  # Hangul letters
+    UnicodeSet(range(0x10280, 0x1029D)),  # Lycian letters
+    UnicodeSet(range(0x1E900, 0x1E943)),  # Adlam letters
+]
+
+@pytest.mark.parametrize("uset", alphaRanges)
+def test_isAlphabetic(uset):
+    for ch in uset:
+        assert isAlphabetic(ch)
