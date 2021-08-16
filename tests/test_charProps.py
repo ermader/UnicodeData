@@ -12,7 +12,7 @@ from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCateg
 from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
 from UnicodeData.UCDTypeDictionaries import blockNames
 from UnicodeData.UnicodeSet import UnicodeSet
-from UnicodeData.CharProps import getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic
+from UnicodeData.CharProps import getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic, isUWhiteSpace, isHexDigit
 
 gcTests = [
     (chr(0x0012), "Cc"),
@@ -180,8 +180,8 @@ def test_digitValue(char, expectedValue):
         assert actualValue == -1
 
 alphaRanges = [
-    UnicodeSet(range(ord("A"), ord("Z"))),
-    UnicodeSet(range(ord("a"), ord("z"))),
+    UnicodeSet(range(ord("A"), ord("Z") + 1)),
+    UnicodeSet(range(ord("a"), ord("z") + 1)),
     UnicodeSet(range(0x0391, 0x03FF)) - UnicodeSet(0x3A2) - UnicodeSet(0x03F6),  # Greek letters
     UnicodeSet(range(0x0400, 0x04FF)) - UnicodeSet(range(0x0482, 0x048A)),  # Cyrillic letters
     UnicodeSet(range(0x05D0, 0x05EA)),  # Hebrew Letters
@@ -198,3 +198,23 @@ alphaRanges = [
 def test_isAlphabetic(uset):
     for ch in uset:
         assert isAlphabetic(ch)
+
+whitespaceChars = [0x0020, 0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000]
+
+@pytest.mark.parametrize("charCode", whitespaceChars)
+def test_isUWhiteSpace(charCode):
+    assert isUWhiteSpace(charCode)
+
+hexDigits = [
+    UnicodeSet(range(ord("0"), ord("9") + 1)),
+    UnicodeSet(range(ord("A"), ord("F") + 1)),
+    UnicodeSet(range(ord("a"), ord("f") + 1)),
+    UnicodeSet(range(0xFF10, 0xFF1A)),  # Fullwidth digits
+    UnicodeSet(range(0xFF21, 0xFF27)),  # fullwidth uppercase letters A-F
+    UnicodeSet(range(0xFF41, 0xFF47)),  # fullwidth lowercase letters a-f
+]
+
+@pytest.mark.parametrize("uset", hexDigits)
+def test_isHexDigit(uset):
+    for charCode in uset:
+        assert isHexDigit(charCode)
