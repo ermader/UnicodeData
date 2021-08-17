@@ -11,8 +11,33 @@ import pytest
 from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCategories
 from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
 from UnicodeData.UCDTypeDictionaries import blockNames
+from UnicodeData.uprops_h import *
 from UnicodeData.UnicodeSet import UnicodeSet
-from UnicodeData.CharProps import getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic, isUWhiteSpace, isHexDigit
+from UnicodeData.CharProps import getBlock, getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic, isUWhiteSpace, isHexDigit, isEmoji, \
+    blockFromVecIndex, binaryPropFromVecIndex, generalCategoryFromProps, propsTrie, propsVectorTrie, scriptFromVecIndex
+
+import EnumeratorTests
+
+def unicodeSetAssertion(uset, assertion):
+    for ch in uset:
+        assert assertion(ch), f"'{chr(ch)}' fails {assertion.__name__}."
+
+def gcEnumTest(start, limit):
+    gcEnumerator = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
+    EnumeratorTests.testEnum(enumerator=gcEnumerator, start=start, limit=limit, \
+                             expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
+
+def blockEnumTest(start, limit):
+    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=blockFromVecIndex), \
+                             start=start, limit=limit, expectedFunction=getBlock, valueMapper=lambda v: blockNames[v])
+
+def emojiEnumTest(start, limit):
+    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
+                             start=start, limit=limit, expectedFunction=isEmoji)
+
+def scriptEnumTest(start, limit):
+    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=scriptFromVecIndex), \
+                             start=start, limit=limit, expectedFunction=getScript, valueMapper=lambda v: scriptCodes[v])
 
 gcTests = [
     (chr(0x0012), "Cc"),
@@ -196,14 +221,21 @@ alphaRanges = [
 
 @pytest.mark.parametrize("uset", alphaRanges)
 def test_isAlphabetic(uset):
-    for ch in uset:
-        assert isAlphabetic(ch)
+    unicodeSetAssertion(uset, isAlphabetic)
 
-whitespaceChars = [0x0020, 0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000]
+whitespaceChars = [
+    UnicodeSet(0x0020),
+    UnicodeSet(0x00A0),
+    UnicodeSet(0x1680),
+    UnicodeSet(range(0x2000, 0x200B)),
+    UnicodeSet(0x202F),
+    UnicodeSet(0x205F),
+    UnicodeSet(0x3000),
+]
 
-@pytest.mark.parametrize("charCode", whitespaceChars)
-def test_isUWhiteSpace(charCode):
-    assert isUWhiteSpace(charCode)
+@pytest.mark.parametrize("uset", whitespaceChars)
+def test_isUWhiteSpace(uset):
+    unicodeSetAssertion(uset, isUWhiteSpace)
 
 hexDigits = [
     UnicodeSet(range(ord("0"), ord("9") + 1)),
@@ -216,5 +248,36 @@ hexDigits = [
 
 @pytest.mark.parametrize("uset", hexDigits)
 def test_isHexDigit(uset):
-    for charCode in uset:
-        assert isHexDigit(charCode)
+    unicodeSetAssertion(uset, isHexDigit)
+
+def test_gcEumeration():
+    gcEnumTest(start=0x25, limit=0x35)
+    gcEnumTest(start=0x21, limit=0x7E)
+    gcEnumTest(start=0x0020, limit=0x0080)
+
+    gcEnumTest(start=0x0900, limit=0x0980)
+
+    gcEnumTest(start=0xD800, limit=0xE000)
+
+    gcEnumTest(start=0x1E900, limit=0x1E944)
+
+def test_isEmojiEnum():
+    emojiEnumTest(start=0x1F600, limit=0x1F680)
+
+def test_enumBlocks():
+    blockEnumTest(start=0x0300, limit=0x0400)
+    blockEnumTest(start=0x0400, limit=0x0540)
+    blockEnumTest(start=0x05D0, limit=0x0600)
+    blockEnumTest(start=0x0600, limit=0x0700)
+    blockEnumTest(start=0x0900, limit=0x0E00)
+    blockEnumTest(start=0x1E900, limit=0x1E960)
+
+def test_enumScripts():
+    scriptEnumTest(start=0x0300, limit=0x0400)
+    scriptEnumTest(start=0x0400, limit=0x0540)
+    scriptEnumTest(start=0x05D0, limit=0x0600)
+    scriptEnumTest(start=0x0600, limit=0x0700)
+    scriptEnumTest(start=0x0900, limit=0x0E00)
+    scriptEnumTest(start=0x0900, limit=0x0E00)
+    scriptEnumTest(start=0x1E900, limit=0x1E960)
+
