@@ -13,7 +13,8 @@ from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
 from UnicodeData.UCDTypeDictionaries import blockNames
 from UnicodeData.uprops_h import *
 from UnicodeData.UnicodeSet import UnicodeSet
-from UnicodeData.CharProps import getBlock, getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic, isUWhiteSpace, isHexDigit, isEmoji, \
+from UnicodeData.CharProps import getAge, getBlock, getGeneralCategory, getScript, getNumericValue, digitValue, isAlphabetic, isUWhiteSpace, isHexDigit, \
+    isEmoji, isEmojiModifier, isEmojiModifierBase, isEmojiComponent, isEmojiPresentation, isExtendedPictograph, \
     blockFromVecIndex, binaryPropFromVecIndex, generalCategoryFromProps, propsTrie, propsVectorTrie, scriptFromVecIndex
 
 import EnumeratorTests
@@ -249,6 +250,26 @@ hexDigits = [
 @pytest.mark.parametrize("uset", hexDigits)
 def test_isHexDigit(uset):
     unicodeSetAssertion(uset, isHexDigit)
+
+ageTests = [
+    (chr(0x0218), [3, 0, 0, 0]),
+    (chr(0x0220), [3, 2, 0, 0]),
+    (chr(0x0234), [4, 0, 0, 0]),
+    (chr(0x0237), [4, 1, 0, 0]),
+    (chr(0x0242), [5, 0, 0, 0]),
+]
+
+@pytest.mark.parametrize("char, expectedAge", ageTests)
+def test_getAge(char, expectedAge):
+    assert getAge(ord(char)) == expectedAge
+
+def test_isEmoji():
+    assert isEmoji(0x1F600)
+    assert isEmojiPresentation(0x231B)
+    assert isEmojiModifier(0x1F3FB)
+    assert isEmojiModifierBase(0x1F3C7)
+    assert isEmojiComponent(0x1F9B0)
+    assert isExtendedPictograph(0x1FA82)
 
 def test_gcEumeration():
     gcEnumTest(start=0x25, limit=0x35)
