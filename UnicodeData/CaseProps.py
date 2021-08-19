@@ -6,9 +6,9 @@ Created on May 8, 2020
 @author Eric Mader
 """
 
-from CasePropsData import *
-from Utrie2 import UTrie2
-from Utilities import arithmeticShift
+from .CasePropsData import *
+from .Utrie2 import UTrie2
+from .Utilities import arithmeticShift
 
 # Indexes into ucase_props_indexes
 UCASE_IX_INDEX_TOP = 0
@@ -312,46 +312,3 @@ def toFullTitle(c):
 
 casePropsTrie = UTrie2(ucase_props_trieIndex, ucase_props_trie_index_length, ucase_props_trie_index_2_null_offset, \
                        ucase_props_trie_data_null_offset, ucase_props_trie_high_start, ucase_props_trie_high_value_index)
-
-def test():
-    print(f"toLower('A') is '{chr(toLower(ord('A')))}'")
-    print(f"toLower('a') is '{chr(toLower(ord('a')))}'")
-    print(f"toLower('{chr(0x0130)}') is '{chr(toLower(0x0130))}'")
-    print(f"toFullLower('{chr(0x0130)}') is '{toFullLower(0x0130)}'")
-    print(f"toLower('{chr(0x0131)}') is '{chr(toLower(0x0131))}'")
-    print(f"toLower('Г') is '{chr(toLower(ord('Г')))}'")
-    print(f"toLower('г') is '{chr(toLower(ord('г')))}'")
-    print()
-
-    print(f"toUpper('A') is '{chr(toUpper(ord('A')))}'")
-    print(f"toUpper('a') is '{chr(toUpper(ord('a')))}'")
-    print(f"toFullUpper('k') is '{toFullUpper(ord('k'))}'")
-    print(f"toUpper('{chr(0x00DF)}') is '{chr(toUpper(0x00DF))}'")
-    print(f"toFullUpper('{chr(0x00DF)}') is '{toFullUpper(0x00DF)}'")
-    print(f"toFullUpper('{chr(0x0130)}') is '{toFullUpper(0x0130)}'")
-    print(f"toUpper('{chr(0x0131)}') is '{chr(toUpper(0x0131))}'")
-    print(f"toFullUpper('{chr(0x0149)}') is '{toFullUpper(0x0149)}'")
-    print(f"toUpper('Г') is '{chr(toUpper(ord('Г')))}'")
-    print(f"toUpper('г') is '{chr(toUpper(ord('г')))}'")
-    print(f"toFullUpper('{chr(0x1E98)}') is '{toFullUpper(0x1E98)}'")
-    print()
-
-    print(f"toTitle('A') is '{chr(toTitle(ord('A')))}'")
-    print(f"toTitle('a') is '{chr(toTitle(ord('a')))}'")
-    print(f"toFullTitle('k') is '{toFullTitle(ord('k'))}'")
-    print(f"toFullTitle('{chr(0x00DF)}') is '{toFullTitle(0x00DF)}'")
-    print(f"toTitle('{chr(0x0130)}') is '{chr(toTitle(0x0130))}'")
-    print(f"toTitle('{chr(0x0131)}') is '{chr(toTitle(0x0131))}'")
-    print(f"toFullTitle('{chr(0x0149)}') is '{toFullTitle(0x0149)}'")
-    print(f"toTitle('Г') is '{chr(toTitle(ord('Г')))}'")
-    print(f"toTitle('г') is '{chr(toTitle(ord('г')))}'")
-    print(f"toFullTitle('{chr(0x1E98)}') is '{toFullTitle(0x1E98)}'")
-
-    print()
-    print(f"toFullUpper('{chr(0x0587)}') is '{toFullUpper(0x0587)}'")
-    print(f"toFullTitle('{chr(0x0587)}') is '{toFullTitle(0x0587)}'")
-
-
-
-if __name__ == "__main__":
-    test()
