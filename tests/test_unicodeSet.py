@@ -87,7 +87,7 @@ def _expectPairs(set, expectedPairs, expectedSize):
     count = set.size()
     assert pairs == expectedPairs, f"expected {expectedPairs}, {expectedSize} = got {pairs}, {count}"
 
-def testAddRemove():
+def test_addRemove():
     tt = UnicodeSet(range(ord('a'), ord('z') + 1))
     _expectPairs(tt, "az", 26)
 
@@ -121,7 +121,7 @@ def testAddRemove():
     tt.add(ord('q'))
     _expectPairs(tt, "acpq", 5)
 
-def testIndexOf():
+def test_indexOf():
     # [a-cx-y3578]
     set = UnicodeSet(range(ord('a'), ord('c') + 1))
     set.addRange(ord('x'), ord('y'))
@@ -133,7 +133,7 @@ def testIndexOf():
         c = set.charAt(i)
         assert set.indexOf(c) == i, f"charAt({i} = {c:c} => indexOf() = {set.indexOf(c)}"
 
-def testExhaustive():
+def test_exhaustive():
     LIMIT = 128
 
     for i in range(LIMIT):
@@ -146,3 +146,11 @@ def testExhaustive():
             _testRetain(i, j)
             _testRemove(i, j)
 
+def test_operators():
+    s1 = UnicodeSet(range(0x0915, 0x0941))
+    s2 = UnicodeSet(range(0x0920, 0x0951))
+
+    assert (s1 | s2) == UnicodeSet(range(0x0915, 0x0951)), f"s1 | s2 = {s1|s2}"
+    assert (s1 & s2) == UnicodeSet(range(0x0920, 0x0941)), f"s1 & s2 = {s1&s2}"
+    assert (s1 - s2) == UnicodeSet(range(0x0915, 0x0920)), f"s1 - s2 = {s1-s2}"
+    assert (s1 ^ s2) == UnicodeSet(range(0x0915, 0x0920)) | UnicodeSet(range(0x0941, 0x0951)), f"s1 ^ s2 = {s1^s2}"
