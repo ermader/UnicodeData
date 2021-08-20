@@ -1,12 +1,13 @@
 '''
 Created on Apr 18, 2020
+Converted to pytest on August 20, 2021
 
 A subset of usettest.cpp from ICU.
 
 @author: emader
 '''
 
-from UnicodeSet import UnicodeSet
+from UnicodeData.UnicodeSet import UnicodeSet
 
 def _setFromBits(bits):
     s = UnicodeSet()
@@ -52,8 +53,7 @@ def _testAdd(bits1, bits2):
     s1.addAll(s2)
     totalBits = _bitsFromSet(s1)
 
-    if totalBits != (bits1 | bits2):
-        print(f"  FAIL - {totalBits:08X} != {bits1|bits2:08X}")
+    assert totalBits == (bits1 | bits2), f"{totalBits:08X} != {bits1|bits2:08X}"
 
 def _testRetain(bits1, bits2):
     s1 = _setFromBits(bits1)
@@ -62,9 +62,7 @@ def _testRetain(bits1, bits2):
     s1.retainAll(s2)
     retainBits = _bitsFromSet(s1)
 
-    if retainBits != (bits1 & bits2):
-        print(f"  FAIL - {retainBits:08X} != {bits1:08X} & {bits2:08X}")
-    pass
+    assert retainBits == (bits1 & bits2), f"{retainBits:08X} != {bits1:08X} & {bits2:08X}"
 
 def _testRemove(bits1, bits2):
     s1 = _setFromBits(bits1)
@@ -73,8 +71,7 @@ def _testRemove(bits1, bits2):
     s1.removeAll(s2)
     removeBits = _bitsFromSet(s1)
 
-    if removeBits != (bits1 & (~bits2 & 0xFFFFFFFF)):
-        print(f"  FAIL = {removeBits:08X} != {bits1:08X} & ~{bits2:08X}")
+    assert removeBits == (bits1 & (~bits2 & 0xFFFFFFFF)), f"{removeBits:08X} != {bits1:08X} & ~{bits2:08X}"
 
 def _testXor(bits1, bits2):
     s1 = _setFromBits(bits1)
@@ -83,19 +80,12 @@ def _testXor(bits1, bits2):
     s1.complementAll(s2)
     complimentBits = _bitsFromSet(s1)
 
-    if complimentBits != (bits1 ^ bits2):
-        print(f"  FAIL - {complimentBits:08X} != {bits1 ^ bits2:08X}")
+    assert complimentBits == (bits1 ^ bits2), f"{complimentBits:08X} != {bits1 ^ bits2:08X}"
 
 def _expectPairs(set, expectedPairs, expectedSize):
     pairs = _getPairs(set)
     count = set.size()
-    msg = f'  expect pairs "{expectedPairs}", size {expectedSize}: '
-    if pairs != expectedPairs:
-        msg += f'FAIL - got "{pairs}", size {count}.'
-    else:
-        msg += "PASS."
-
-    print(msg)
+    assert pairs == expectedPairs, f"expected {expectedPairs}, {expectedSize} = got {pairs}, {count}"
 
 def testAddRemove():
     tt = UnicodeSet(range(ord('a'), ord('z') + 1))
@@ -141,8 +131,7 @@ def testIndexOf():
 
     for i in range(set.size()):
         c = set.charAt(i)
-        if set.indexOf(c) != i:
-            print(f"  FAIL - charAt({i}) = {c:c} => indexOf() = {set.indexOf(c)}")
+        assert set.indexOf(c) == i, f"charAt({i} = {c:c} => indexOf() = {set.indexOf(c)}"
 
 def testExhaustive():
     LIMIT = 128
@@ -157,41 +146,3 @@ def testExhaustive():
             _testRetain(i, j)
             _testRemove(i, j)
 
-        if i % 5 == 0:
-            print(".", end="")
-
-    print()
-
-if __name__ == "__main__":
-    us = UnicodeSet(0x0915)
-    print(f"us = UnicodeSet(0x0915): {us}")
-
-    us.add(0x0916)
-    print(f"us.add(0x0916): {us}")
-
-    us.add(0x0918)
-    print(f"us.add(0x0918): {us}")
-
-    us.add(0x0917)
-    print(f"us.add(0x0917): {us}")
-
-    us.add(0x0914)
-    print(f"us.add(0x0914): {us}")
-
-    us.addRange(0x0920, 0x0925)
-    print(f"us.addRange(0x0920, 0x0925): {us}")
-
-    us.addRange(0x0916, 0x0926)
-    print(f"us.addRange(0x0916, 0x0926): {us}")
-
-    print (f"0x0915 in us: {0x915 in us}")
-    print (f"range(0x0915, 0x0917) in us: {range(0x0915, 0x0917) in us}")
-
-    print("\nTestAddRemove:")
-    testAddRemove()
-
-    print("\nTestIndexOf:")
-    testIndexOf()
-
-    print("\nTestExhaustive:")
-    testExhaustive()
