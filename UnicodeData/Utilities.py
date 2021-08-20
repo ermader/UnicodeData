@@ -110,44 +110,6 @@ def highBit(value):
 #     arrayLimit = arrayOffset + (itemCount * itemLength)
 #     return struct.unpack(f"{itemCount}{dataFormat}", data[arrayOffset:arrayLimit])
 
-def listOFCodes(codes):
+def listOfCodes(codes):
     codeList = [f"{code:04X}" for code in codes]
     return ", ".join(codeList)
-
-def test():
-    print("isLead test:")
-    failures = []
-    for code in range(_firstLead, _firstTrail):
-        if not isLead(code):
-            failures.append(code)
-    if len(failures) == 0:
-        print("    Passed!")
-    else:
-        print(f"    Failed: [{listOFCodes(failures)}]")
-
-    print("isTrail test:")
-    failures = []
-    for code in range(_firstTrail, 0xE000):
-        if not isTrail(code):
-            failures.append(code)
-    if len(failures) == 0:
-        print("    Passed!")
-    else:
-        print(f"    Failed: [{listOFCodes(failures)}]")
-    print()
-
-    ch = charFromSurrogates(0xD850, 0xDEEE)
-    high, low = surrogatesFromChar(ch)
-    print(f"ch = {ch:04X}, high = {high:04X}, low = {low:04X}")
-    print()
-
-    for n in range(0, 0x10, 2):
-        print(f"highBit(0x{n:04X}) = {highBit(n)}")
-
-    print(f"highBit(0x3FF) = {highBit(0x3FF)}")
-    print(f"highBit(0xFFFFFC00) = {highBit(0xFFFFFC00)}")
-    print(f"highBit(0x200000000) = {highBit(0x200000000)}")
-    print(f"highBit(0x123456789ABCDEF) = {highBit(0x123456789ABCDEF)}")
-
-if __name__ == "__main__":
-    test()
