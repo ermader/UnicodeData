@@ -231,11 +231,3 @@ joiningGroups = {
     U_JG_HANIFI_ROHINGYA_PA: "Hanifi Rohingya Pa"
 }
 
-def fixup():
-    for (code, name) in joiningGroups.items():
-        symbol = f"U_{name}"
-        newName = name[3:].title().replace("_", " ")
-        print(f'    {symbol}: "{newName}",')
-
-if __name__ == "__main__":
-    fixup()

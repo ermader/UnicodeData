@@ -1097,12 +1097,3 @@ blockNames = {
     UBLOCK_YEZIDI: "Yezidi",
 }
 
-
-def fixup():
-    for (code, name) in blockNames.items():
-        symbol = f"UBLOCK_{name}"
-        newName = name.title().replace("_", " ")
-        print(f'    {symbol}: "{newName}",')
-
-if __name__ == "__main__":
-    fixup()
