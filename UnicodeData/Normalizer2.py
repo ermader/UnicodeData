@@ -7,10 +7,10 @@ Created on June 2, 2020
 """
 
 import struct
-from Norm2NFCData import *
-from ICUDataFile import ICUData
-from CPTrie import CPTrie
-from Utilities import isLead, charFromSurrogates
+from .Norm2NFCData import *
+from .ICUDataFile import ICUData
+from .CPTrie import CPTrie
+from .Utilities import isLead, charFromSurrogates
 
 # Fixed norm16 values.
 MIN_YES_YES_WITH_CC = 0xfe02
@@ -239,7 +239,7 @@ class Normalizer2(object):
         return s
 
 
-    def getDecomosition(self, c):
+    def getDecomposition(self, c):
         decomposition = ""
         norm16 = self.getNorm16(c)
         if c < self.minDecompNoCP or self.isMaybeOrNonZeroCC(norm16):
@@ -311,54 +311,6 @@ class Normalizer2(object):
 
         return decomposition
 
-
-def stringToCharList(decomp):
-    if not decomp: return None
-
-    chars = [c for c in decomp]
-    charList = ", ".join(chars)
-    return f"[{charList}]"
-
-def decompToCharList(norm, c):
-    return stringToCharList(norm.getDecomosition(c))
-
-def rawDecompToCharList(norm, c):
-    return stringToCharList(norm.getRawDecomposition(c))
-
-def test():
-    nfcTrie = Normalizer2.createFromHardCodedData()
-    nfkcTrie = Normalizer2.createFromFileData("nfkc")
-    nfkc_cfTrie = Normalizer2.createFromFileData("nfkc_cf")
-
-    charList = [0x0041, 0x0061, 0x00A0, 0x00A8, 0x00AD, 0x00BE, 0x00C0, 0x00E0, 0x0178, 0x1EA6, 0x3307, 0x6569, 0xCA8D, 0xFA6C]
-
-    print("NFC:")
-    for ch in charList:
-        print(f"getDecomposition('{chr(ch)}') is {decompToCharList(nfcTrie, ch)}")
-    print()
-
-    for ch in charList:
-        print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(nfcTrie, ch)}")
-    print()
-
-    print("NFKC:")
-    for ch in charList:
-        print(f"getDecomposition('{chr(ch)}') is {decompToCharList(nfkcTrie, ch)}")
-    print()
-
-    for ch in charList:
-        print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(nfkcTrie, ch)}")
-    print()
-
-    print("NFKC_CF:")
-    for ch in charList:
-        print(f"getDecomposition('{chr(ch)}') is {decompToCharList(nfkc_cfTrie, ch)}")
-    print()
-
-    for ch in charList:
-        print(f"getRawDecomposition('{chr(ch)}') is {rawDecompToCharList(nfkc_cfTrie, ch)}")
-
-
-if __name__ == "__main__":
-    test()
-
+nfcTrie = Normalizer2.createFromHardCodedData()
+nfkcTrie = Normalizer2.createFromFileData("nfkc")
+nfkc_cfTrie = Normalizer2.createFromFileData("nfkc_cf")
