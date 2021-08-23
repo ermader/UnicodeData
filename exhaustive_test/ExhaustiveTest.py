@@ -1,33 +1,24 @@
 from timeit import default_timer as timer
 
-from UnicodeData import UnicodeCharacterData
-import CharProps
-import BidiProps
-import CaseProps
-import LayoutProps
-from UCDTypeDictionaries import scriptNames as scriptCodes
-from UCDTypeDictionaries import generalCategoryNames as generalCategories
-from UCDTypeDictionaries import joiningTypeNames as joiningTypes
-from UCDTypeDictionaries import joiningGroupNames as joiningGroups
-from UCDTypeDictionaries import indicPositionalCategoryNames as inpcNames
-from UCDTypeDictionaries import indicSyllabicCategoryNames as inscNames
-from UCDTypeDictionaries import verticalOrientationNames as voNames
-from UCDTypeDictionaries import bidiClassNames, blockNames, eastAsianWidthNames, decompositionTypeNames, graphemeClusterBreakNames, lineBreakNames, sentenceBreakNames
-# import Scripts
-# import Blocks
-# import EastAsianWidth
-# import GeneralCategories
-# import JoiningTypesAndGroups
-# import CharDirection
-# import Boundaries
-# import DecompositionType
-# import LayoutTypes
-from CharNames import CharNames
-from Normalizer2 import Normalizer2
+from UnicodeCharacterData import UnicodeCharacterData
+from UnicodeData import CharProps
+from UnicodeData import BidiProps
+from UnicodeData import CaseProps
+from UnicodeData import LayoutProps
+from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
+from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCategories
+from UnicodeData.UCDTypeDictionaries import joiningTypeNames as joiningTypes
+from UnicodeData.UCDTypeDictionaries import joiningGroupNames as joiningGroups
+from UnicodeData. UCDTypeDictionaries import indicPositionalCategoryNames as inpcNames
+from UnicodeData.UCDTypeDictionaries import indicSyllabicCategoryNames as inscNames
+from UnicodeData.UCDTypeDictionaries import verticalOrientationNames as voNames
+from UnicodeData.UCDTypeDictionaries import bidiClassNames, blockNames, eastAsianWidthNames, decompositionTypeNames, graphemeClusterBreakNames, lineBreakNames, sentenceBreakNames
+from  UnicodeData.CharNames import CharNames
+from  UnicodeData.Normalizer2 import Normalizer2
+from UnicodeData.Normalizer2 import nfcTrie, nfkcTrie, nfkc_cfTrie
 
 def doTest(cp, got, expected, name):
-    if got != expected:
-        print(f"    Code point {cp:04X} returned {name} {got}, expected {expected}")
+    assert got == expected, f"Code point {cp:04X} returned {name} {got}, expected {expected}"
 
 binaryTestList = [
     (CharProps.UPROPS_WHITE_SPACE, "whitespace"),
@@ -85,11 +76,8 @@ def doBinary2Tests(cp, charData):
         expected = getattr(charData, field)
         doTest(cp, got, expected, field)
 
-def test():
+def test_exhaustive():
     ucd = UnicodeCharacterData()
-    normNFC = Normalizer2.createFromHardCodedData()
-    normNFKC = Normalizer2.createFromFileData("nfkc")
-    normNFKC_CF = Normalizer2.createFromFileData("nfkc_cf")
 
     print("  Starting exhaustive test:")
 
@@ -117,9 +105,9 @@ def test():
         inpc = inpcNames[LayoutProps.getInPC(cp)]
         insc = inscNames[LayoutProps.getInSC(cp)]
         vo = voNames[LayoutProps.getVO(cp)]
-        nfc = normNFC.getRawDecomposition(cp)
-        nfkc = normNFKC.getRawDecomposition(cp)
-        nfkc_cf = normNFKC_CF.getRawDecomposition(cp)
+        nfc = nfcTrie.getRawDecomposition(cp)
+        nfkc = nfkcTrie.getRawDecomposition(cp)
+        nfkc_cf = nfkc_cfTrie.getRawDecomposition(cp)
         name = CharNames.getCharName(cp)
 
         doTest(cp, sc, characterData.script, "script code")
@@ -168,6 +156,3 @@ def test():
 
     end = timer()
     print(f"  Test took {round(end - start,2)} seconds.")
-
-if __name__ == "__main__":
-    test()
