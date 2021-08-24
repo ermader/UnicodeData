@@ -8,7 +8,6 @@ from .UCDTypeDictionaries import scriptNames as scriptCodes
 from .UCDTypeDictionaries import blockNames
 from .Characters import *
 from .GeneralCategories import *
-from UnicodeData import EnumeratorTests
 
 propsTrie = UTrie2(propsTrie_index, propsTrie_index_length, propsTrie_index_2_null_offset, propsTrie_data_null_offset, \
                    propsTrie_high_start, propsTrie_high_value_index)

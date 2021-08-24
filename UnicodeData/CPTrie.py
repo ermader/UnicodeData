@@ -8,10 +8,7 @@ Created on May 14, 2020
 import struct
 from fontTools.misc import sstruct
 
-if __package__:
-    from .Utilities import _object
-else:
-    from Utilities import _object
+from .Utilities import _object
 
 UCPTRIE_SIG = 0x54726933  # "Tri3"
 

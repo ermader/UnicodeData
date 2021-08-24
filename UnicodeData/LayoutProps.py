@@ -8,16 +8,9 @@ Created on My 13, 2020
 
 import struct
 
-if __package__:
-    from .ICUDataFile import ICUData
-    from .CPTrie import CPTrie
-    from UnicodeData import LayoutTypes
-    from UnicodeData import EnumeratorTests
-else:
-    from ICUDataFile import ICUData
-    from CPTrie import CPTrie
-    import LayoutTypes
-    import EnumeratorTests
+from .ICUDataFile import ICUData
+from .CPTrie import CPTrie
+from . import LayoutTypes
 
 # Layout indexes indices
 # Element 0 stores the length of the indexes[] array.
