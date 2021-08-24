@@ -12,7 +12,7 @@ from pathlib import Path
 
 def install():
     sourcePath = Path(argv[1])  # Might want an actuall argument scanner?
-    destPath = Path(".")
+    destPath = Path("UnicodeData")
 
     for pythonFile in sourcePath.glob("*.py"):
         shutil.copy2(pythonFile, destPath)

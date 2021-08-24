@@ -153,21 +153,3 @@ class HeaderFile(object):
         headerFile = open(self.headerPath, "w")
         headerFile.write(contents)
         headerFile.close()
-
-#
-# Making the translation "pretty" is a secondary goal - it just needs
-# to be functional. i.e. don't worry about comments and blank lines.
-#
-# (Maybe have a way to get comments from lines that only have a comment)
-#
-
-def test():
-    icuSource = Path("/Users/emader/Downloads/icu69/icu4c/source")
-    testDir = Path("test")
-    uprops_h = HeaderFile(icuSource, "common/uprops.h", testDir)
-    uprops_h.translate()
-    uprops_h.writeFile()
-
-
-if __name__ == "__main__":
-    test()

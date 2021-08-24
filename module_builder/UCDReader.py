@@ -145,7 +145,7 @@ class UCDReader(object):
         self.prefixLines.append('"""\n')
 
         self.prefixLines.append("from .uchar_h import *")
-        self.prefixLines.append("from .uscript_h import *")
+        self.prefixLines.append("from .uscript_h import *\n")
 
 
         self.file = open(ppucdPath, newline="")
@@ -189,16 +189,3 @@ class UCDReader(object):
 
         outFile.close()
 
-
-def test():
-    icuSource = Path("/Users/emader/Downloads/icu69/icu4c/source")
-    testDir = Path("test")
-
-    ucdReader = UCDReader(icuSource, testDir)
-    ucdReader.generateDictionaries()
-    ucdReader.writeFile()
-
-    print(f"UCD version = {ucdReader.ucdVersion}")
-
-if __name__ == "__main__":
-    test()
