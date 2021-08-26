@@ -18,6 +18,7 @@ def install():
         shutil.copy2(pythonFile, destPath)
 
     shutil.copy2(sourcePath / "icudata.dat", destPath / "Data")
+    shutil.copy2(sourcePath / "LICENSE", destPath / "Data")
 
 if __name__ == "__main__":
     install()

@@ -184,9 +184,9 @@ def build():
 
     icuSource = Path(moduleBuilderArgs.icuSourceDir)
     icuBuild = Path(moduleBuilderArgs.icuBuildDir)
-    testDir = Path(moduleBuilderArgs.outputDir)
+    outDir = Path(moduleBuilderArgs.outputDir)
 
-    bidiPropBuilder = ModuleBuilder(icuSource, "common/ubidi_props_data.h", testDir, "BidiPropsData.py")
+    bidiPropBuilder = ModuleBuilder(icuSource, "common/ubidi_props_data.h", outDir, "BidiPropsData.py")
     bidiPropBuilder.arrayToPython("ubidi_props_indexes")
     bidiPropBuilder.arrayToPython("ubidi_props_trieIndex")
     bidiPropBuilder.arrayToPython("ubidi_props_mirrors")
@@ -195,7 +195,7 @@ def build():
     bidiPropBuilder.trieValuesFromPropsDeclaration("ubidi_props_singleton", "ubidi_props_trie")
     bidiPropBuilder.writeFile()
 
-    charPropsBuilder = ModuleBuilder(icuSource, "common/uchar_props_data.h", testDir, "CharPropsData.py")
+    charPropsBuilder = ModuleBuilder(icuSource, "common/uchar_props_data.h", outDir, "CharPropsData.py")
     charPropsBuilder.arrayToPython("propsTrie_index")
     charPropsBuilder.trieValuesFromTrieDeclaration("propsTrie", "propsTrie")
     charPropsBuilder.arrayToPython("propsVectorsTrie_index")
@@ -205,7 +205,7 @@ def build():
     charPropsBuilder.arrayToPython("scriptExtensions")
     charPropsBuilder.writeFile()
 
-    casePropsBuilder = ModuleBuilder(icuSource, "common/ucase_props_data.h", testDir, "CasePropsData.py")
+    casePropsBuilder = ModuleBuilder(icuSource, "common/ucase_props_data.h", outDir, "CasePropsData.py")
     casePropsBuilder.arrayToPython("ucase_props_indexes")
     casePropsBuilder.arrayToPython("ucase_props_trieIndex")
     casePropsBuilder.arrayToPython("ucase_props_exceptions")
@@ -213,19 +213,19 @@ def build():
     casePropsBuilder.trieValuesFromPropsDeclaration("ucase_props_singleton", "ucase_props_trie")
     casePropsBuilder.writeFile()
 
-    uprops_h = HeaderFile(icuSource, "common/uprops.h", testDir)
+    uprops_h = HeaderFile(icuSource, "common/uprops.h", outDir)
     uprops_h.translate()
     uprops_h.writeFile()
 
-    ucase_h = HeaderFile(icuSource, "common/ucase.h", testDir, ignore=["UCASECONTEXT_INITIALIZER"])
+    ucase_h = HeaderFile(icuSource, "common/ucase.h", outDir, ignore=["UCASECONTEXT_INITIALIZER"])
     ucase_h.translate()
     ucase_h.writeFile()
 
-    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", testDir, extraCode=["def U_MASK(x): return 1<<x\n"], ignore=["U_NO_NUMERIC_VALUE"])
+    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", outDir, extraCode=["def U_MASK(x): return 1<<x\n"], ignore=["U_NO_NUMERIC_VALUE"])
     uchar_h.translate()
     uchar_h.writeFile()
 
-    uscript_h = HeaderFile(icuSource, "common/unicode/uscript.h", testDir)
+    uscript_h = HeaderFile(icuSource, "common/unicode/uscript.h", outDir)
     uscript_h.translate()
     uscript_h.writeFile()
 
@@ -237,7 +237,8 @@ def build():
     print(f"ICU version = {icuVersion}, short version = {icuVersionShort}")
 
     # copy the icu data file from the icu build directory to the test directory
-    shutil.copy(icuBuild / f"data/out/icudt{icuVersionShort}l.dat", testDir / "icudata.dat")
+    shutil.copy(icuBuild / f"data/out/icudt{icuVersionShort}l.dat", outDir / "icudata.dat")
+    shutil.copy(icuSource.parent / "LICENSE", outDir)
 
     # ppFile = open(icuSource / "data/unidata/ppucd.txt")
     # ppData = ppFile.read()
@@ -245,11 +246,11 @@ def build():
     #
     # ucdVersion = re.findall(r"ucd;([0-9.]+)", ppData)[0]
 
-    ucdReader = UCDReader(icuSource, testDir)
+    ucdReader = UCDReader(icuSource, outDir)
     ucdReader.generateDictionaries()
     ucdReader.writeFile()
 
-    ucdVersionFile = open(testDir / "UnicodeVersion.py", "w")
+    ucdVersionFile = open(outDir / "UnicodeVersion.py", "w")
     ucdVersionFile.write(f'unicodeVersion = "{ucdReader.ucdVersion}"\n')
     ucdVersionFile.close()
 
