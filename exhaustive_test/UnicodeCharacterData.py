@@ -174,21 +174,21 @@ def read():
     return ucd
 
 
-def main():
-    cd = read()
-
-    for (script, unicodeSet) in _scriptList.items():
-        ranges = unicodeSet.getRanges()
-        print(f"    '{script}': {stringFromRanges(ranges)}")
-    # print(_decompositions)
-
-    devaSet = _scriptList['Deva']
-    print(f"    devaSet.charAt(0x15) = {devaSet.charAt(0x15):04X}")
-    print(f"    devaSet.charAt(106) = {devaSet.charAt(106):04X}")
-    print(f"    devaSet.charAt(1000) = {devaSet.charAt(1000)}")
-    print(f"    devaSet.indexOf(0x0970) = {devaSet.indexOf(0x0970)}")
-    print(f"    devaSet.indexOf(0x0980) = {devaSet.indexOf(0x0980)}")
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     cd = read()
+#
+#     for (script, unicodeSet) in _scriptList.items():
+#         ranges = unicodeSet.getRanges()
+#         print(f"    '{script}': {stringFromRanges(ranges)}")
+#     # print(_decompositions)
+#
+#     devaSet = _scriptList['Deva']
+#     print(f"    devaSet.charAt(0x15) = {devaSet.charAt(0x15):04X}")
+#     print(f"    devaSet.charAt(106) = {devaSet.charAt(106):04X}")
+#     print(f"    devaSet.charAt(1000) = {devaSet.charAt(1000)}")
+#     print(f"    devaSet.indexOf(0x0970) = {devaSet.indexOf(0x0970)}")
+#     print(f"    devaSet.indexOf(0x0980) = {devaSet.indexOf(0x0980)}")
+#
+#
+# if __name__ == "__main__":
+#     main()

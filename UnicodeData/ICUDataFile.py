@@ -10,11 +10,7 @@ import struct
 import pkg_resources
 from fontTools.misc import sstruct
 
-if __package__:
-    from .Utilities import _object
-else:
-    from Utilities import _object
-
+from .Utilities import _object
 
 _dataFilePath = pkg_resources.resource_filename("UnicodeData", f"Data/icudata.dat")
 
@@ -102,20 +98,20 @@ class ICUData(object):
     def __init__(self):
         ICUData._populateData()
 
-def test():
-    id = ICUData()
-
-    for name in id._dataOffsets.keys():
-        if name.endswith(".icu") or name.endswith(".nrm"):
-            print(f'Found "{name}"')
-
-    print(f'Last name: "{name}"')
-
-    (layoutOffset, layoutHeaderData) = id.getDataOffsetAndHeader("unames.icu")
-    pass
-
-if __name__ == "__main__":
-    test()
+# def test():
+#     id = ICUData()
+#
+#     for name in id._dataOffsets.keys():
+#         if name.endswith(".icu") or name.endswith(".nrm"):
+#             print(f'Found "{name}"')
+#
+#     print(f'Last name: "{name}"')
+#
+#     (layoutOffset, layoutHeaderData) = id.getDataOffsetAndHeader("unames.icu")
+#     pass
+#
+# if __name__ == "__main__":
+#     test()
 
 
 
