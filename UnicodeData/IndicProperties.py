@@ -6,10 +6,11 @@ Indic properties.
 @author: emader
 '''
 
+from xml.etree.ElementTree import Element
 from .UCDProperties import UCDProperties
 
 class IndicProperties(UCDProperties):
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         UCDProperties.__init__(self, char, group)
 
         self.syllabicCategory = self.getCharProperty("InSC")

@@ -6,12 +6,14 @@ Bidirectional properties.
 @author: emader
 '''
 
+from xml.etree.ElementTree import Element
+
 from .UCDProperties import UCDProperties
 
 class BidiProperties(UCDProperties):
     """Bidirectional properties from the UCD file."""
 
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         UCDProperties.__init__(self, char, group)
 
         self.bidiClass = self.getCharProperty("bc")

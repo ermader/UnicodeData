@@ -9,7 +9,7 @@ A subset of usettest.cpp from ICU.
 
 from UnicodeData.UnicodeSet import UnicodeSet
 
-def _setFromBits(bits):
+def _setFromBits(bits: int):
     s = UnicodeSet()
 
     for i in range(32):
@@ -18,7 +18,7 @@ def _setFromBits(bits):
 
     return s
 
-def _bitsFromSet(s):
+def _bitsFromSet(s: UnicodeSet):
     bits = 0
 
     for i in range(32):
@@ -27,7 +27,7 @@ def _bitsFromSet(s):
 
     return bits
 
-def _getPairs(set):
+def _getPairs(set: UnicodeSet) -> str:
     pairs = ""
 
     for i in range(set.getRangeCount()):
@@ -37,7 +37,7 @@ def _getPairs(set):
 
     return pairs
 
-def _testCompliment(bits, s):
+def _testCompliment(bits: int, s: UnicodeSet):
     s = _setFromBits(bits)
     s.complement()
     c = _bitsFromSet(s)
@@ -46,7 +46,7 @@ def _testCompliment(bits, s):
     if c != e:
         print(f"  FAIL - {c:08X} != ~{bits:08X}")
 
-def _testAdd(bits1, bits2):
+def _testAdd(bits1: int, bits2: int):
     s1 = _setFromBits(bits1)
     s2 = _setFromBits(bits2)
 
@@ -55,7 +55,7 @@ def _testAdd(bits1, bits2):
 
     assert totalBits == (bits1 | bits2), f"{totalBits:08X} != {bits1|bits2:08X}"
 
-def _testRetain(bits1, bits2):
+def _testRetain(bits1: int, bits2: int):
     s1 = _setFromBits(bits1)
     s2 = _setFromBits(bits2)
 
@@ -64,7 +64,7 @@ def _testRetain(bits1, bits2):
 
     assert retainBits == (bits1 & bits2), f"{retainBits:08X} != {bits1:08X} & {bits2:08X}"
 
-def _testRemove(bits1, bits2):
+def _testRemove(bits1: int, bits2: int):
     s1 = _setFromBits(bits1)
     s2 = _setFromBits(bits2)
 
@@ -73,7 +73,7 @@ def _testRemove(bits1, bits2):
 
     assert removeBits == (bits1 & (~bits2 & 0xFFFFFFFF)), f"{removeBits:08X} != {bits1:08X} & ~{bits2:08X}"
 
-def _testXor(bits1, bits2):
+def _testXor(bits1: int, bits2: int):
     s1 = _setFromBits(bits1)
     s2 = _setFromBits(bits2)
 
@@ -82,7 +82,7 @@ def _testXor(bits1, bits2):
 
     assert complimentBits == (bits1 ^ bits2), f"{complimentBits:08X} != {bits1 ^ bits2:08X}"
 
-def _expectPairs(set, expectedPairs, expectedSize):
+def _expectPairs(set: UnicodeSet, expectedPairs: str, expectedSize: int):
     pairs = _getPairs(set)
     count = set.size()
     assert pairs == expectedPairs, f"expected {expectedPairs}, {expectedSize} = got {pairs}, {count}"
@@ -131,7 +131,10 @@ def test_indexOf():
 
     for i in range(set.size()):
         c = set.charAt(i)
-        assert set.indexOf(c) == i, f"charAt({i} = {c:c} => indexOf() = {set.indexOf(c)}"
+        if type(c) is int:
+            assert set.indexOf(c) == i, f"charAt({i} = {c:c} => indexOf() = {set.indexOf(c)}"
+        else:
+            assert False, f"index {i} is not in the set"
 
 def test_exhaustive():
     LIMIT = 128

@@ -6,10 +6,12 @@ A base class for fetching character properties from the UCD file.
 @author: emader
 '''
 
+from xml.etree.ElementTree import Element
+
 class UCDProperties(object):
     """A base class for fetching character properties from the UCD XML file."""
 
-    def getCharProperty(self, property):
+    def getCharProperty(self, property: str):
         """\
         Get the given character property. If the property
         isn't in the char element, get it from the enclosing group.
@@ -20,28 +22,31 @@ class UCDProperties(object):
         if property in self._char.attrib:
             return self._char.attrib[property]
 
-        return self._group.get(property)
+        return self._group.get(property, default="")
 
-    def getBooleanProperty(self, property):
+    def getBooleanProperty(self, property: str) -> bool:
         prop = self.getCharProperty(property)
         return prop == "Y"
 
-    def getCodePointsProperty(self, property):
+    def getCodePointsProperty(self, property: str) -> str:
         codePointString = self.getCharProperty(property)
 
-        if len(codePointString) == 0 or codePointString == "#":
-            return f"{int(self.cp, 16):c}"
+        if type(codePointString) is str:
+            if len(codePointString) == 0 or codePointString == "#":
+                return f"{int(self.cp, 16):c}"
 
-        codePoints = codePointString.split(" ")
-        chars = []
+            codePoints = codePointString.split(" ")
+            chars: list[str] = []
 
-        for codePoint in codePoints:
-            chars.append(f"{int(codePoint, 16):c}")
+            for codePoint in codePoints:
+                chars.append(chr(int(codePoint, 16)))
 
-        return "".join(chars)
+            return "".join(chars)
+
+        return ""
 
 
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         """\
         Initialize with the char and group.
 

@@ -6,7 +6,9 @@ Created on Apr 28, 2020
 @author Eric Mader
 """
 
-from .Utilities import isSurrogate, isSurrogateLead, isSurrogateTrail
+import typing
+
+from .Utilities import isSurrogate, isSurrogateLead  #, isSurrogateTrail
 
 class UTrie2(object):
     SHIFT_1 = 6 + 5
@@ -37,7 +39,7 @@ class UTrie2(object):
     BAD_UTF8_DATA_OFFSET = 0x80
     DATA_START_OFFSET = 0xC0
 
-    def __init__(self, index, indexLength, index2NullOffset, dataNullOffset, highStart, highValueIndex, initialValue=0):
+    def __init__(self, index: list[int], indexLength: int, index2NullOffset: int, dataNullOffset: int, highStart: int, highValueIndex: int, initialValue: int = 0):
         self.index = index
         self.indexLength = indexLength
         self.dataLength = len(index) - indexLength
@@ -47,7 +49,7 @@ class UTrie2(object):
         self.highValueIndex = highValueIndex
         self.initialValue = initialValue
 
-    def indexRaw(self, offset, c):
+    def indexRaw(self, offset: int, c: int) -> int:
         return ((self.index[offset + (c >> self.SHIFT_2)]) << self.INDEX_SHIFT) + (c & self.DATA_MASK)
 
     # # define _UTRIE2_INDEX_FROM_SUPP(trieIndex, c) \
@@ -58,7 +60,7 @@ class UTrie2(object):
     #   << UTRIE2_INDEX_SHIFT) + \
     #  ((c) & UTRIE2_DATA_MASK))
 
-    def indexFromSupp(self, c):
+    def indexFromSupp(self, c: int) -> int:
         index1 = (self.INDEX_1_OFFSET - self.OMITTED_BMP_INDEX_1_LENGTH) + (c >> self.SHIFT_1)
         index2 = self.index[index1] + ((c >> self.SHIFT_2) & self.INDEX_2_MASK)
 
@@ -76,7 +78,7 @@ class UTrie2(object):
     #             (c)>=(trie)->highStart ? \
     #                 (trie)->highValueIndex : \
     #                 _UTRIE2_INDEX_FROM_SUPP((trie)->index, c))
-    def indexFromCodePoint(self, asciiOffset, c):
+    def indexFromCodePoint(self, asciiOffset: int, c: int) -> int:
         if c < 0xD800:
             return self.indexRaw(0, c)
 
@@ -89,10 +91,10 @@ class UTrie2(object):
 
         return self.highValueIndex if c >= self.highStart else self.indexFromSupp(c)
 
-    def get(self, c):
+    def get(self, c: int) -> int:
         return self.index[self.indexFromCodePoint(self.indexLength, c)]
 
-    def enumerator(self, start=0, limit=0x110000, valueFunction=None, **valueFunctionArgs):
+    def enumerator(self, start: int = 0, limit: int = 0x110000, valueFunction: typing.Optional[typing.Callable[..., typing.Any]] = None, **valueFunctionArgs: typing.Any) -> typing.Iterator[tuple[range, typing.Any]]:
         if not valueFunction: valueFunction = lambda v: v
 
         # get the enumeration value that corresponds to an initial-value trie data entry
@@ -145,7 +147,7 @@ class UTrie2(object):
                 if prevValue != initialValue:
                     if prev < c: yield range(prev, c), prevValue
 
-                    prevBlock = self.nullBlock
+                    prevBlock = self.dataNullOffset
                     prev = c
                     prevValue = initialValue
 

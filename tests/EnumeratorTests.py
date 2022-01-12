@@ -6,10 +6,12 @@ Created on August 17, 2021
 @author Eric Mader
 """
 
-def testEnum(enumerator, start, limit, expectedFunction, valueMapper=None):
+import typing
+
+def testEnum(enumerator: typing.Callable[[int, int], typing.Iterator[tuple[range, typing.Any]]], start: int, limit: int, expectedFunction: typing.Callable[[int], int], valueMapper: typing.Optional[typing.Callable[[int], typing.Any]] = None):
     if not valueMapper: valueMapper = lambda v: v
 
-    results = [(range, value) for range, value in enumerator(start=start, limit=limit)]
+    results = [(range, value) for range, value in enumerator(start, limit)]
 
     firstRange, _ = results[0]
     lastRange, _ = results[-1]

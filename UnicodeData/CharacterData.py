@@ -4,6 +4,8 @@ Created on Apr 14, 2020
 @author: emader
 '''
 
+from xml.etree.ElementTree import Element
+
 from .UCDProperties import UCDProperties
 from .BidiProperties import BidiProperties
 from .DecompProperties import DecompProperties
@@ -12,7 +14,7 @@ from .IndicProperties import IndicProperties
 from .BinaryProperties import BinaryProperties
 
 class CharacterData(UCDProperties):
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         UCDProperties.__init__(self, char, group)
 
         # cp = self.getCharProperty("cp")

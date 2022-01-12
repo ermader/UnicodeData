@@ -18,29 +18,29 @@ from UCDReader import UCDReader
 
 class ModuleBuilderArgs:
     def __init__(self):
-        self._icuSourceDir = None
-        self._outputDir = None
-        self._icuBuildDir = None
+        self._icuSourceDir = ""
+        self._outputDir = ""
+        self._icuBuildDir = ""
 
     @property
-    def icuSourceDir(self):
+    def icuSourceDir(self) -> str:
         return self._icuSourceDir
 
     @property
-    def icuBuildDir(self):
+    def icuBuildDir(self) -> str:
         return self._icuBuildDir
 
     @property
-    def outputDir(self):
+    def outputDir(self) -> str:
         return self._outputDir
 
     @classmethod
-    def forArguments(cls, argumentList):
+    def forArguments(cls, argumentList: list[str]):
         args = ModuleBuilderArgs()
         args.processArguments(argumentList)
         return args
 
-    def processArguments(self, argumentList):
+    def processArguments(self, argumentList: list[str]):
         arguments = ArgumentIterator(argumentList)
         argumentsSeen = {}
 
@@ -53,7 +53,7 @@ class ModuleBuilderArgs:
 
         self.completeInit()
 
-    def processArgument(self, argument, arguments):
+    def processArgument(self, argument: str, arguments: ArgumentIterator):
         if argument == "--sourceDir":
             self._icuSourceDir = arguments.nextExtra("ICU Source Directory")
         elif argument == "--buildDir":
@@ -89,7 +89,7 @@ class ModuleBuilderArgs:
 #
 
 class ModuleBuilder(object):
-    def __init__(self, icuDirectory, cSourcePath, outDirectory, moduleName):
+    def __init__(self, icuDirectory: Path, cSourcePath: str, outDirectory: Path, moduleName: str):
         sourcePath = icuDirectory / cSourcePath
         os.makedirs(outDirectory, exist_ok=True)
         self.modulePath = outDirectory / moduleName
@@ -108,24 +108,24 @@ class ModuleBuilder(object):
         self.outputLines.append('"""\n')
 
 
-    def getScalarDeclaration(self, name):
+    def getScalarDeclaration(self, name: str) -> str:
         # pattern = name + r"=([0-9]+);"
         pattern = name + r"=(.+);"
         return re.findall(pattern, self.source)[0]
 
-    def getArrayDeclaration(self, arrayName):
+    def getArrayDeclaration(self, arrayName: str) -> str:
         pattern = arrayName + r"\[.+?\]=\{(.+?)\};"
         return re.findall(pattern, self.source, re.DOTALL)[0]
 
-    def getPropsDeclaration(self, name):
+    def getPropsDeclaration(self, name: str) -> str:
         pattern = name + r"=\{\n(.+?)\n\};"
         return re.findall(pattern, self.source, re.DOTALL)[0]
 
-    def scalarToPython(self, name):
+    def scalarToPython(self, name: str):
         declaration = self.getScalarDeclaration(name)
         self.outputLines.append(f"{name} = {declaration}\n")
 
-    def arrayToPython(self, arrayName):
+    def arrayToPython(self, arrayName: str):
         array = self.getArrayDeclaration(arrayName)
         final = "\n" if "\n" in array else ""
         if array.endswith("\n"):
@@ -135,10 +135,10 @@ class ModuleBuilder(object):
 
         self.outputLines.append(f"{arrayName} = [{array}{final}]\n")
 
-    def trieValues(self, trie, prefix):
+    def trieValues(self, trie: str, prefix: str):
         dict = {3: "index_length", 5: "index_2_null_offset", 6: "data_null_offset", 9: "high_start",
                 10: "high_value_index"}
-        values = []
+        _values = []
         trieSplits = trie.split(",\n")
 
         for index, name in dict.items():
@@ -146,12 +146,12 @@ class ModuleBuilder(object):
 
         self.outputLines.append("")
 
-    def trieValuesFromPropsDeclaration(self, propsName, prefix):
+    def trieValuesFromPropsDeclaration(self, propsName: str, prefix: str):
         propsDeclaration = self.getPropsDeclaration(propsName)
         trie = re.findall(r"\{\n(.+?)\}", propsDeclaration, re.DOTALL)[0]
         self.trieValues(trie, prefix)
 
-    def trieValuesFromTrieDeclaration(self, trieName, prefix):
+    def trieValuesFromTrieDeclaration(self, trieName: str, prefix: str):
         trie = self.getPropsDeclaration(trieName)
         self.trieValues(trie, prefix)
 
@@ -170,7 +170,7 @@ class ModuleBuilder(object):
 
 def build():
     argumentList = argv
-    args = None
+    # args = None
     programName = Path(argumentList.pop(0)).name
     if len(argumentList) == 0:
         print(__doc__, file=stderr)
@@ -221,7 +221,7 @@ def build():
     ucase_h.translate()
     ucase_h.writeFile()
 
-    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", outDir, extraCode=["def U_MASK(x): return 1<<x\n"], ignore=["U_NO_NUMERIC_VALUE"])
+    uchar_h = HeaderFile(icuSource, "common/unicode/uchar.h", outDir, extraCode=["def U_MASK(x: int) -> int: return 1<<x\n"], ignore=["U_NO_NUMERIC_VALUE"])
     uchar_h.translate()
     uchar_h.writeFile()
 

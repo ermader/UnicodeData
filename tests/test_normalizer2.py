@@ -6,10 +6,14 @@ Created on August 20, 2021
 @author Eric Mader
 """
 
+import typing
+
 import pytest
 from UnicodeData.Normalizer2 import nfcTrie, nfkcTrie, nfkc_cfTrie
 
-def stringToCharList(s):
+CharList = typing.Optional[list[str]]
+
+def stringToCharList(s: typing.Optional[str]) -> CharList:
     return [c for c in s] if s else None
 
 charList = [0x0041, 0x0061, 0x00A0, 0x00A8, 0x00AD, 0x00BE, 0x00C0, 0x00E0, 0x0178, 0x1EA6, 0x3307, 0x6569, 0xCA8D,
@@ -33,7 +37,7 @@ nfcTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedDecomp", nfcTests)
-def test_nfc(char, expectedDecomp):
+def test_nfc(char: int, expectedDecomp: CharList):
     assert stringToCharList(nfcTrie.getDecomposition(char)) == expectedDecomp
 
 nfcRawTests = [
@@ -54,7 +58,7 @@ nfcRawTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedDecomp", nfcRawTests)
-def test_nfcRaw(char, expectedDecomp):
+def test_nfcRaw(char: int, expectedDecomp: CharList):
     assert stringToCharList(nfcTrie.getRawDecomposition(char)) == expectedDecomp
 
 nfkcTests = [
@@ -75,7 +79,7 @@ nfkcTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedDecomp", nfkcTests)
-def test_nfkc(char, expectedDecomp):
+def test_nfkc(char: int, expectedDecomp: CharList):
     assert stringToCharList(nfkcTrie.getDecomposition(char)) == expectedDecomp
 
 nfkcRawTests = [
@@ -96,7 +100,7 @@ nfkcRawTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedDecomp", nfkcRawTests)
-def test_nfkcRaw(char, expectedDecomp):
+def test_nfkcRaw(char: int, expectedDecomp: CharList):
     assert stringToCharList(nfkcTrie.getRawDecomposition(char)) == expectedDecomp
 
 nfkc_cfTests = [
@@ -117,7 +121,7 @@ nfkc_cfTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedDecomp", nfkc_cfTests)
-def test_nfkc_cf(char, expectedDecomp):
+def test_nfkc_cf(char: int, expectedDecomp: CharList):
     assert stringToCharList(nfkc_cfTrie.getDecomposition(char)) == expectedDecomp
 
 nfkc_cfRawTests = [
@@ -138,6 +142,6 @@ nfkc_cfRawTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedDecomp", nfkc_cfRawTests)
-def test_nfkc_cfRaw(char, expectedDecomp):
+def test_nfkc_cfRaw(char: int, expectedDecomp: CharList):
     assert stringToCharList(nfkc_cfTrie.getRawDecomposition(char)) == expectedDecomp
 

@@ -1,3 +1,5 @@
+import typing
+
 from timeit import default_timer as timer
 
 from UnicodeCharacterData import UnicodeCharacterData
@@ -5,6 +7,8 @@ from UnicodeData import CharProps
 from UnicodeData import BidiProps
 from UnicodeData import CaseProps
 from UnicodeData import LayoutProps
+from UnicodeData.BinaryProperties import BinaryProperties
+from UnicodeData.CharacterData import CharacterData
 from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
 from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCategories
 from UnicodeData.UCDTypeDictionaries import joiningTypeNames as joiningTypes
@@ -14,10 +18,9 @@ from UnicodeData.UCDTypeDictionaries import indicSyllabicCategoryNames as inscNa
 from UnicodeData.UCDTypeDictionaries import verticalOrientationNames as voNames
 from UnicodeData.UCDTypeDictionaries import bidiClassNames, blockNames, eastAsianWidthNames, decompositionTypeNames, graphemeClusterBreakNames, lineBreakNames, sentenceBreakNames
 from  UnicodeData.CharNames import CharNames
-from  UnicodeData.Normalizer2 import Normalizer2
 from UnicodeData.Normalizer2 import nfcTrie, nfkcTrie, nfkc_cfTrie
 
-def doTest(cp, got, expected, name):
+def doTest(cp: int, got: typing.Any, expected: typing.Any, name: str):
     assert got == expected, f"Code point {cp:04X} returned {name} {got}, expected {expected}"
 
 binaryTestList = [
@@ -64,13 +67,13 @@ binaryTest2List = [
     (CharProps.UPROPS_2_EXTENDED_PICTOGRAPHIC, "extendedPictograph")
 ]
 
-def doBinaryTests(cp, binaryProps):
+def doBinaryTests(cp: int, binaryProps: BinaryProperties):
     for (propMask, field) in binaryTestList:
         got = CharProps.getBinaryProp(cp, propMask)
         expected = getattr(binaryProps, field)
         doTest(cp, got, expected, field)
 
-def doBinary2Tests(cp, charData):
+def doBinary2Tests(cp: int, charData: CharacterData):
     for (propsMask, field) in binaryTest2List:
         got = CharProps.getBinaryProp(cp, propsMask, 2)
         expected = getattr(charData, field)

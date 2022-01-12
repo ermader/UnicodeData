@@ -10,7 +10,7 @@ import struct
 
 from .ICUDataFile import ICUData
 from .CPTrie import CPTrie
-from . import LayoutTypes
+# from . import LayoutTypes
 
 # Layout indexes indices
 # Element 0 stores the length of the indexes[] array.
@@ -56,12 +56,12 @@ trieLimit = indices[ULAYOUT_IX_VO_TRIE_TOP] + baseOffset
 trieData = id.getData(trieOffset, trieLimit)
 voTrie = CPTrie.createFromData(trieData)
 
-def getInPC(c):
+def getInPC(c: int) -> int:
     return inpcTrie.get(c)
 
-def getInSC(c):
+def getInSC(c: int) -> int:
     return inscTrie.get(c)
 
-def getVO(c):
+def getVO(c: int) -> int:
     return voTrie.get(c)
 

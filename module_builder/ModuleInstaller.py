@@ -6,7 +6,7 @@ Created on June 1, 2021
 @author Eric Mader
 """
 
-from sys import argv, exit, stderr
+from sys import argv
 import shutil
 from pathlib import Path
 

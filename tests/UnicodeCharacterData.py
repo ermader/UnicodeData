@@ -8,7 +8,6 @@ import tempfile
 import zipfile
 from urllib.request import urlopen
 import xml.etree.ElementTree as ElementTree
-from pathlib import Path
 from timeit import default_timer as timer
 #import shelve
 
@@ -16,20 +15,20 @@ from UnicodeData.UnicodeVersion import unicodeVersion
 from UnicodeData.CharacterData import CharacterData
 from UnicodeData.UnicodeSet import UnicodeSet
 
-_characterData = {}
+# _characterData = {}
 
-def stringFromRanges(ranges):
-    pieces = []
+# def stringFromRanges(ranges):
+#     pieces = []
 
-    for range in ranges:
-        pieces.append(f"{range.start:04X}-{range.stop-1:04X}")
+#     for range in ranges:
+#         pieces.append(f"{range.start:04X}-{range.stop-1:04X}")
 
-    s = ", ".join(pieces)
-    return f"[{s}]"
+#     s = ", ".join(pieces)
+#     return f"[{s}]"
 
 
-def codePointsInSet(unicodeSet):
-    chars = []
+def codePointsInSet(unicodeSet: UnicodeSet) -> list[int]:
+    chars: list[int] = []
     len2 = len(unicodeSet.list) & ~1
     for i in range(0, len2, 2):
         start = unicodeSet.list[i]
@@ -39,39 +38,17 @@ def codePointsInSet(unicodeSet):
     return chars
 
 
-
-# def _populateCharacterData():
-#     if len(_characterData) > 0:
-#         return
-#
-#     source = Path("Data/ucd.all.grouped.xml")
-#     tree = ElementTree.parse(source)
-#     root = tree.getroot()
-#     nameSpaces = {"ucd": root.tag[1:-4]} # remove initial "{" and final "}ucd"
-#
-#     for group in root.findall("ucd:repertoire/ucd:group", nameSpaces):
-#         for char in group.findall("ucd:char", nameSpaces):
-#             if "cp" not in char.attrib: # some entries are <char first-cp=xxxx last-cp=yyyy.../>
-#                 continue
-#
-#             characterData = CharacterData(char, group)
-#             codePoint = characterData.codePoint
-#             _characterData[codePoint] = characterData
-#
-#
-# _dbPath = str(Path("Data/unicode_data"))
-
 class PropertyList(object):
     def __init__(self):
-        self.dict = {}
+        self.dict: dict[str, UnicodeSet] = {}
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         if key not in self.dict:
             self.dict[key] = UnicodeSet()
 
         return self.dict[key]
 
-    def addCodePointForKey(self, key, codePoint):
+    def addCodePointForKey(self, key: str, codePoint: int):
         self[key].add(codePoint)
 
     def keys(self):
@@ -85,7 +62,7 @@ class PropertyList(object):
 
 class UnicodeCharacterData(object):
 
-    characterData = {}
+    characterData: dict[int, CharacterData] = {}
 
     @classmethod
     def _populateCharacterData(cls):
@@ -138,12 +115,9 @@ _decompositions = {}
 
 # when is it safe to close dataShelf?
 def read():
-    # start = timer()
-    # dataShelf = shelve.open(_dbPath)
-    # cd = dataShelf["ucd"]
     ucd = UnicodeCharacterData()
 
-    for (cp, characterData) in ucd.characterData.items():
+    for (_cp, characterData) in ucd.characterData.items():
         codePoint = characterData.codePoint
         generalCategory = characterData.generalCategory
         bidiProps = characterData.bidiProperties
@@ -169,8 +143,6 @@ def read():
         _scriptList[script].add(codePoint)
         _blockList[block].add(codePoint)
 
-    # end = timer()
-    # print(f"Reading unicode_data.db took {end - start} seconds.")
     return ucd
 
 

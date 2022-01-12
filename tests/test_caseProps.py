@@ -17,7 +17,7 @@ toLowerTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedLower", toLowerTests)
-def test_toLower(char, expectedLower):
+def test_toLower(char: str, expectedLower: str):
     assert chr(toLower(ord(char))) == expectedLower
 
 toFullLowerTests = [
@@ -28,7 +28,7 @@ toFullLowerTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedLower", toFullLowerTests)
-def test_toFullLower(char, expectedLower):
+def test_toFullLower(char: str, expectedLower: str):
     assert toFullLower(ord(char)) == expectedLower
 
 toUpperTests = [
@@ -46,7 +46,7 @@ toUpperTests = [
 ]
 
 @pytest.mark.parametrize("char, expecdtedUpper", toUpperTests)
-def test_toUpper(char, expecdtedUpper):
+def test_toUpper(char: str, expecdtedUpper: str):
     assert chr(toUpper(ord(char))) == expecdtedUpper
 
 toFullUpperTests = [
@@ -64,7 +64,7 @@ toFullUpperTests = [
 ]
 
 @pytest.mark.parametrize("char, expecdtedUpper", toFullUpperTests)
-def test_toFullUpper(char, expecdtedUpper):
+def test_toFullUpper(char: str, expecdtedUpper: str):
     assert toFullUpper(ord(char)) == expecdtedUpper
 
 toTitleTests = [
@@ -82,7 +82,7 @@ toTitleTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedTitle", toTitleTests)
-def test_toTitle(char, expectedTitle):
+def test_toTitle(char: str, expectedTitle: str):
     assert chr(toTitle(ord(char))) == expectedTitle
 
 toFullTitleTests = [
@@ -100,5 +100,5 @@ toFullTitleTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedTitle", toFullTitleTests)
-def test_toFullUpper(char, expectedTitle):
+def test_toFullTitle(char: str, expectedTitle: str):
     assert toFullTitle(ord(char)) == expectedTitle

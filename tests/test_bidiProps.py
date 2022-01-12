@@ -40,7 +40,7 @@ charDirections = [
 ]
 
 @pytest.mark.parametrize("char, expectedDirection", charDirections)
-def test_getCharDirection(char, expectedDirection):
+def test_getCharDirection(char: str, expectedDirection: str):
     assert bidiClassNames[getCharDirection(ord(char))] == expectedDirection
 
 def test_isBidiControl():
@@ -61,7 +61,7 @@ mirroredPairs = [
 ]
 
 @pytest.mark.parametrize("left, right", mirroredPairs)
-def test_getMirror(left, right):
+def test_getMirror(left: str, right: str):
     assert getMirror(ord(left)) == ord(right)
     assert getMirror(ord(right)) == ord(left)
 
@@ -73,7 +73,7 @@ pairedBrackets = [
 ]
 
 @pytest.mark.parametrize("left, right", pairedBrackets)
-def test_getPairedBracket(left, right):
+def test_getPairedBracket(left: str, right: str):
     assert getPairedBracket(ord(left)) == ord(right)
     assert getPairedBracket(ord(right)) == ord(left)
 
@@ -92,7 +92,7 @@ joiningTypeTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedJoiningType", joiningTypeTests)
-def test_getJoiningType(char, expectedJoiningType):
+def test_getJoiningType(char: str, expectedJoiningType: str):
     assert joiningTypes[getJoiningType(ord(char))] == expectedJoiningType
 
 joiningGroupTests = [
@@ -101,6 +101,6 @@ joiningGroupTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedJoiningGroup", joiningGroupTests)
-def test_getJoiningGroup(char, expectedJoiningGroup):
+def test_getJoiningGroup(char: str, expectedJoiningGroup: str):
     assert joiningGroups[getJoiningGroup(ord(char))] == expectedJoiningGroup
 

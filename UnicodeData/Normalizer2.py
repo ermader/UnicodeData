@@ -6,6 +6,8 @@ Created on June 2, 2020
 @author Eric Mader
 """
 
+import typing
+
 import struct
 from .Norm2NFCData import *
 from .ICUDataFile import ICUData
@@ -95,7 +97,7 @@ HANGUL_COUNT = JAMO_L_COUNT * JAMO_V_COUNT * JAMO_T_COUNT
 HANGUL_LIMIT = HANGUL_BASE + HANGUL_COUNT
 
 class Normalizer2(object):
-    def __init__(self, trie, indexes, extraData):
+    def __init__(self, trie: CPTrie, indexes: typing.Sequence[int], extraData: typing.Sequence[int]):
         self.trie = trie
 
         self.minDecompNoCP = indexes[IX_MIN_DECOMP_NO_CP]
@@ -125,7 +127,7 @@ class Normalizer2(object):
         return Normalizer2(trie, norm2_nfc_data_indexes, norm2_nfc_data_extraData)
 
     @classmethod
-    def createFromFileData(cls, package):
+    def createFromFileData(cls, package: str):
         icuData = ICUData()
 
         dataOffset, dataHeader = icuData.getDataOffsetAndHeader(f"{package}.nrm")
@@ -151,40 +153,40 @@ class Normalizer2(object):
 
         return Normalizer2(trie, indices, extraData)
 
-    def getNorm16(self, c):
+    def getNorm16(self, c: int) -> int:
         return INERT if isLead(c) else self.trie.get(c)
 
-    def getRawNorm16(self, c):
+    def getRawNorm16(self, c: int) -> int:
         return self.trie.get(c)
 
-    def isMaybeOrNonZeroCC(self, norm16):
+    def isMaybeOrNonZeroCC(self, norm16: int) -> bool:
         return norm16 >= self.minMaybeYes
 
-    def isDecompNoAlgorithmic(self, norm16):
+    def isDecompNoAlgorithmic(self, norm16:int) -> bool:
         return norm16 >= self.limitNoNo
 
-    def isDecompYes(self, norm16):
+    def isDecompYes(self, norm16: int) -> bool:
         return norm16 < self.minYesNo or self.minMaybeYes <= norm16
 
-    def isInert(self, norm16) :
+    def isInert(self, norm16: int) -> bool:
         return norm16 == INERT
 
-    def isJamoL(self, norm16):
+    def isJamoL(self, norm16: int) -> bool:
         return norm16 == JAMO_L
 
-    def isJamoVT(self, norm16):
+    def isJamoVT(self, norm16: int) -> bool:
         return norm16 == JAMO_VT
 
-    def hangulLVT(self):
+    def hangulLVT(self) -> int:
         return self.minYesNoMappingsOnly | HAS_COMP_BOUNDARY_AFTER
 
-    def isHangulLV(self, norm16):
+    def isHangulLV(self, norm16: int) -> bool:
         return norm16 == self.minYesNo
 
-    def isHangulLVT(self, norm16):
+    def isHangulLVT(self, norm16: int) -> int:
             return norm16 == self.hangulLVT()
 
-    def hangulDecomposition(self, c):
+    def hangulDecomposition(self, c: int) -> str:
         decomposition = ""
         c -= HANGUL_BASE
         c2 = c % JAMO_T_COUNT
@@ -198,7 +200,7 @@ class Normalizer2(object):
 
         return decomposition
 
-    def rawHangulDecomposition(self, c):
+    def rawHangulDecomposition(self, c: int) -> str:
         decomposition = ""
         orig = c
         c -= HANGUL_BASE
@@ -214,13 +216,13 @@ class Normalizer2(object):
 
         return decomposition
 
-    def mapAlgorithmic(self, c, norm16):
+    def mapAlgorithmic(self, c: int, norm16: int) -> int:
             return c + (norm16 >> DELTA_SHIFT) - self.centerNoNoDelta
 
-    def getMappingIndex(self, norm16):
+    def getMappingIndex(self, norm16: int) -> int:
         return norm16 >> OFFSET_SHIFT
 
-    def stringFromData(self, index, length):
+    def stringFromData(self, index: int, length: int) -> str:
         s = ""
         lead = 0  # for the lead byte of a surrogate pair
         for i in range(length):
@@ -239,7 +241,7 @@ class Normalizer2(object):
         return s
 
 
-    def getDecomposition(self, c):
+    def getDecomposition(self, c: int) -> typing.Optional[str]:
         decomposition = ""
         norm16 = self.getNorm16(c)
         if c < self.minDecompNoCP or self.isMaybeOrNonZeroCC(norm16):
@@ -268,7 +270,7 @@ class Normalizer2(object):
 
         return decomposition
 
-    def getRawDecomposition(self, c):
+    def getRawDecomposition(self, c: int) -> typing.Optional[str]:
         decomposition = ""
         norm16 = self.getNorm16(c)
         if c < self.minDecompNoCP or self.isDecompYes(norm16):

@@ -6,6 +6,8 @@ Various binary properties.
 @author: Eric Mader
 '''
 
+from xml.etree.ElementTree import Element
+
 from .UCDProperties import UCDProperties
 
 propsList = [
@@ -52,7 +54,7 @@ propsList = [
 ]
 
 class BinaryProperties(UCDProperties):
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         UCDProperties.__init__(self, char, group)
 
         for (field, tag) in propsList:

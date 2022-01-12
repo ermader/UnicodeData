@@ -6,10 +6,12 @@ Case properties properties.
 @author: emader
 '''
 
+from xml.etree.ElementTree import Element
+
 from .UCDProperties import UCDProperties
 
 class CaseProperties(UCDProperties):
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         UCDProperties.__init__(self, char, group)
 
         self.upper = self.getBooleanProperty("Upper")

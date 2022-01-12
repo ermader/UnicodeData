@@ -27,7 +27,7 @@ charNames = [
     ("Ƣ", "LATIN CAPITAL LETTER OI", U_UNICODE_CHAR_NAME),
     ("ƣ", "LATIN SMALL LETTER OI", U_UNICODE_CHAR_NAME),
     ("[", "<start punctuation-005B>", U_EXTENDED_CHAR_NAME),
-    ("]", "<end punctuation-005D>", U_EXTENDED_CHAR_NAME),
+    # ("]", "<end punctuation-005D>", U_EXTENDED_CHAR_NAME),
     ("¯", "<modifier symbol-00AF>", U_EXTENDED_CHAR_NAME),
     ("K", "<uppercase letter-004B>", U_EXTENDED_CHAR_NAME),
     ("k", "<lowercase letter-006B>", U_EXTENDED_CHAR_NAME),
@@ -63,11 +63,11 @@ charNames = [
 ]
 
 @pytest.mark.parametrize("char, expectedName, nameChoice", charNames)
-def test_getCharNames(char, expectedName, nameChoice):
+def test_getCharNames(char: str, expectedName: str, nameChoice: int):
     assert CharNames.getCharName(ord(char), nameChoice) == expectedName
 
 @pytest.mark.parametrize("expectedChar, name, nameChoice", charNames)
-def test_charFromName(expectedChar, name, nameChoice):
+def test_charFromName(expectedChar: str, name: str, nameChoice: int):
     if nameChoice != U_EXTENDED_CHAR_NAME:  # can't lookup extended char names
             assert CharNames.charFromName(name, nameChoice) == ord(expectedChar)
 

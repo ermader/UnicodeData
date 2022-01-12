@@ -9,9 +9,9 @@ Created on May 1, 2020
 from .BidiPropsData import *
 from .Utrie2 import UTrie2
 from .uchar_h import *
-from .UCDTypeDictionaries import bidiClassNames
-from .UCDTypeDictionaries import joiningTypeNames as joiningTypes
-from .UCDTypeDictionaries import joiningGroupNames as joiningGroups
+# from .UCDTypeDictionaries import bidiClassNames
+# from .UCDTypeDictionaries import joiningTypeNames as joiningTypes
+# from .UCDTypeDictionaries import joiningGroupNames as joiningGroups
 from .Utilities import arithmeticShift
 
 #indices into the indexes array
@@ -48,13 +48,13 @@ UBIDI_BPT_MASK = 0x00000300
 
 UBIDI_MAX_JG_MASK = 0x00ff0000
 
-def getClassFromProps(props):
+def getClassFromProps(props: int) -> int:
     return props & UBIDI_CLASS_MASK
 
-def getFlagFromProps(props, shift):
+def getFlagFromProps(props: int, shift: int) -> bool:
     return ((props >> shift) & 1) != 0
 
-def getMirrorDeltaFromProps(props):
+def getMirrorDeltaFromProps(props: int) -> int:
     return arithmeticShift(props, 16, UBIDI_MIRROR_DELTA_BITS)
 
 UBIDI_ESC_MIRROR_DELTA = -4
@@ -69,21 +69,21 @@ UBIDI_MAX_MIRROR_INDEX = 0x7ff
 bidiPropsTrie = UTrie2(ubidi_props_trieIndex, ubidi_props_trie_index_length, ubidi_props_trie_index_2_null_offset, \
                        ubidi_props_trie_data_null_offset, ubidi_props_trie_high_start, ubidi_props_trie_high_value_index)
 
-def getMirrorCodePointFromProps(m):
+def getMirrorCodePointFromProps(m: int) -> int:
     return m & 0x1FFFFF
 
-def getMirrorIndexFromProps(m):
+def getMirrorIndexFromProps(m: int) -> int:
     return m >> UBIDI_MIRROR_INDEX_SHIFT
 
-def getCharDirection(c):
+def getCharDirection(c: int) -> int:
     props = bidiPropsTrie.get(c)
     return getClassFromProps(props)
 
-def isMirrored(c):
+def isMirrored(c: int) -> bool:
     props = bidiPropsTrie.get(c)
     return getFlagFromProps(props, UBIDI_IS_MIRRORED_SHIFT)
 
-def getMirrorFromProps(c, props):
+def getMirrorFromProps(c: int, props: int) -> int:
     delta = getMirrorDeltaFromProps(props)
 
     if delta != UBIDI_ESC_MIRROR_DELTA:
@@ -101,23 +101,23 @@ def getMirrorFromProps(c, props):
 
     return c
 
-def getMirror(c):
+def getMirror(c: int) -> int:
     props = bidiPropsTrie.get(c)
     return getMirrorFromProps(c, props)
 
-def isBidiControl(c):
+def isBidiControl(c: int) -> bool:
     props = bidiPropsTrie.get(c)
     return getFlagFromProps(props, UBIDI_BIDI_CONTROL_SHIFT)
 
-def isJoinControl(c):
+def isJoinControl(c: int) -> bool:
     props = bidiPropsTrie.get(c)
     return getFlagFromProps(props, UBIDI_JOIN_CONTROL_SHIFT)
 
-def getJoiningType(c):
+def getJoiningType(c: int) -> int:
     props = bidiPropsTrie.get(c)
     return (props & UBIDI_JT_MASK) >> UBIDI_JT_SHIFT
 
-def getJoiningGroup(c):
+def getJoiningGroup(c: int) -> int:
     start = ubidi_props_indexes[UBIDI_IX_JG_START]
     limit = ubidi_props_indexes[UBIDI_IX_JG_LIMIT]
 
@@ -132,11 +132,11 @@ def getJoiningGroup(c):
 
     return U_JG_NO_JOINING_GROUP
 
-def getPairedBracketType(c):
+def getPairedBracketType(c: int) -> int:
     props = bidiPropsTrie.get(c)
     return (props & UBIDI_BPT_MASK) >> UBIDI_BPT_SHIFT
 
-def getPairedBracket(c):
+def getPairedBracket(c: int) -> int:
     props = bidiPropsTrie.get(c)
     if (props & UBIDI_BPT_MASK) == 0:
         return c

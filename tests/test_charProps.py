@@ -7,6 +7,7 @@ Created on August 12, 2021
 """
 
 import pytest
+import typing
 
 from UnicodeData.UCDTypeDictionaries import generalCategoryNames as generalCategories
 from UnicodeData.UCDTypeDictionaries import scriptNames as scriptCodes
@@ -19,24 +20,25 @@ from UnicodeData.CharProps import getAge, getBlock, getGeneralCategory, getScrip
 
 import EnumeratorTests
 
-def unicodeSetAssertion(uset, assertion):
+def unicodeSetAssertion(uset: UnicodeSet, assertion: typing.Callable[[int], bool]):
     for ch in uset:
         assert assertion(ch), f"'{chr(ch)}' fails {assertion.__name__}."
 
-def gcEnumTest(start, limit):
-    gcEnumerator = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
+def gcEnumTest(start: int, limit: int):
+    gcEnumerator: typing.Callable[[int, int], typing.Iterator[tuple[range, typing.Any]]] = lambda start, limit: propsTrie.enumerator(start=start, limit=limit, valueFunction=generalCategoryFromProps)
     EnumeratorTests.testEnum(enumerator=gcEnumerator, start=start, limit=limit, \
                              expectedFunction=getGeneralCategory, valueMapper=lambda v: generalCategories[v])
 
-def blockEnumTest(start, limit):
-    EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=blockFromVecIndex), \
-                             start=start, limit=limit, expectedFunction=getBlock, valueMapper=lambda v: blockNames[v])
+def blockEnumTest(start: int, limit: int):
+    blockEnumerator: typing.Callable[[int, int], typing.Iterator[tuple[range, typing.Any]]] = lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=blockFromVecIndex)
+    EnumeratorTests.testEnum(blockEnumerator, start=start, limit=limit, \
+        expectedFunction=getBlock, valueMapper=lambda v: blockNames[v])
 
-def emojiEnumTest(start, limit):
+def emojiEnumTest(start: int, limit: int):
     EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=binaryPropFromVecIndex, propShift=UPROPS_2_EMOJI, column=2), \
                              start=start, limit=limit, expectedFunction=isEmoji)
 
-def scriptEnumTest(start, limit):
+def scriptEnumTest(start: int, limit: int):
     EnumeratorTests.testEnum(lambda start, limit: propsVectorTrie.enumerator(start=start, limit=limit, valueFunction=scriptFromVecIndex), \
                              start=start, limit=limit, expectedFunction=getScript, valueMapper=lambda v: scriptCodes[v])
 
@@ -54,7 +56,7 @@ gcTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedGC", gcTests)
-def test_getGeneralCatrgory(char, expectedGC):
+def test_getGeneralCatrgory(char: str, expectedGC: str):
     assert generalCategories[getGeneralCategory(ord(char))] == expectedGC
 
 scriptTests = [
@@ -69,7 +71,7 @@ scriptTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedScript", scriptTests)
-def test_getScript(char, expectedScript):
+def test_getScript(char: str, expectedScript: str):
     assert scriptCodes[getScript(ord(char))] == expectedScript
 
 numericValueTests = [
@@ -193,11 +195,11 @@ numericValueTests = [
 # The fact that we have to skip any characters past 0x4E00 makes this test
 # a bit suspicious. We should probably either drop it, or make another list...
 @pytest.mark.parametrize("char, expectedNumericValue", numericValueTests)
-def test_getNumericValue(char, expectedNumericValue):
+def test_getNumericValue(char: str, expectedNumericValue: int):
     assert getNumericValue(ord(char)) == expectedNumericValue
 
 @pytest.mark.parametrize("char, expectedValue", numericValueTests)
-def test_digitValue(char, expectedValue):
+def test_digitValue(char: str, expectedValue: int):
     charCode = ord(char)
     actualValue = digitValue(charCode)
     if charCode < 0x4E00 and expectedValue in [x for x in range(10)]:
@@ -221,7 +223,7 @@ alphaRanges = [
 ]
 
 @pytest.mark.parametrize("uset", alphaRanges)
-def test_isAlphabetic(uset):
+def test_isAlphabetic(uset: UnicodeSet):
     unicodeSetAssertion(uset, isAlphabetic)
 
 whitespaceChars = [
@@ -235,7 +237,7 @@ whitespaceChars = [
 ]
 
 @pytest.mark.parametrize("uset", whitespaceChars)
-def test_isUWhiteSpace(uset):
+def test_isUWhiteSpace(uset: UnicodeSet):
     unicodeSetAssertion(uset, isUWhiteSpace)
 
 hexDigits = [
@@ -248,7 +250,7 @@ hexDigits = [
 ]
 
 @pytest.mark.parametrize("uset", hexDigits)
-def test_isHexDigit(uset):
+def test_isHexDigit(uset: UnicodeSet):
     unicodeSetAssertion(uset, isHexDigit)
 
 ageTests = [
@@ -260,7 +262,7 @@ ageTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedAge", ageTests)
-def test_getAge(char, expectedAge):
+def test_getAge(char: str, expectedAge: list[int]):
     assert getAge(ord(char)) == expectedAge
 
 def test_isEmoji():

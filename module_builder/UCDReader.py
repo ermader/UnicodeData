@@ -6,12 +6,14 @@ Created on May 26, 2021
 @author Eric Mader
 """
 
+import typing
+
 import csv
 from datetime import datetime
 from pathlib import Path
 
 class UCDReader(object):
-    def __init__(self, icuDirectory, outDirectory):
+    def __init__(self, icuDirectory: Path, outDirectory: Path):
         self.ucdVersion = None
 
         #
@@ -105,11 +107,13 @@ class UCDReader(object):
             "Zxxx": "UNWRITTEN_LANGUAGES",
         }
 
-        lowerShortName = lambda sn: sn.lower()
-        copyShortName = lambda sn: sn
-        spacesInShortName = lambda sn: sn.replace("_", " ")
+        StringFunction = typing.Callable[[str], str]
+        
+        lowerShortName: StringFunction = lambda sn: sn.lower()
+        copyShortName: StringFunction = lambda sn: sn
+        spacesInShortName: StringFunction = lambda sn: sn.replace("_", " ")
 
-        self.prefix = {
+        self.prefix: dict[str, tuple[str, str, dict[str, str], StringFunction]] = {
             "bc": ("U", "bidiClass", self.bcMapings, spacesInShortName),
             "blk": ("UBLOCK", "block", self.blkMappings, spacesInShortName),
             "dt": ("U_DT", "decompositionType", {}, lowerShortName),
@@ -129,7 +133,7 @@ class UCDReader(object):
             "WB": ("U_WB", "wordBreak", {}, spacesInShortName)
         }
 
-        self.lines = {}
+        self.lines: dict[str, list[str]] = {}
 
         self.prefixLines = ['"""/']
 

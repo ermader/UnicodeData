@@ -6,10 +6,11 @@ Character Decomposition properties
 @author: emader
 '''
 
+from xml.etree.ElementTree import Element
 from .UCDProperties import UCDProperties
 
 class DecompProperties(UCDProperties):
-    def dmToString(self, dm, doPoundSign=False):
+    def dmToString(self, dm: str, doPoundSign: bool =False):
         # We don't care about characters that decompose to a single character -
         # they either decompose to themselves or are for compatibility.
         # We also don't care about decompositions that start w/ a space
@@ -22,13 +23,13 @@ class DecompProperties(UCDProperties):
         if not dm or dm == "#": return None
 
         codePoints = dm.split(" ")
-        chars = []
+        chars: list[str] = []
         for codePoint in codePoints:
             chars.append(chr(int(codePoint, 16)))
 
         return "".join(chars)
 
-    def __init__(self, char, group):
+    def __init__(self, char: Element, group: Element):
         UCDProperties.__init__(self, char, group)
 
         self.decompositionType = self.getCharProperty("dt")

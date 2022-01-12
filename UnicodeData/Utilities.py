@@ -7,12 +7,13 @@ Created on May 28, 2020
 """
 
 # import struct
+import typing
 
 class _object(object):
     """Useful for passing object instances to sstruct.unpack()"""
     pass
 
-def isUnicodeNoncharacter(code):
+def isUnicodeNoncharacter(code: int) -> bool:
     return code >= 0xfdd0 and \
      (code <= 0xfdef or (code & 0xfffe) == 0xfffe) and code <= 0x10ffff
 
@@ -26,30 +27,30 @@ _trailMask = 0xFFFFFFFF - _leadTrailMask
 _surrogateOffset = (_firstLead << _leadShift) + _firstTrail - _firstNonBMP
 _leadOffset = _firstLead - (_firstNonBMP >> _leadShift)
 
-def isSurrogate(code):
+def isSurrogate(code: int) -> bool:
     return (code & _surrogateMask) == _firstLead
 
-def isSurrogateLead(code):
+def isSurrogateLead(code: int) -> bool:
     return (code & 0x400) == 0
 
-def isSurrogateTrail(code):
+def isSurrogateTrail(code: int) -> bool:
     return (code & 0x400) != 0
 
-def isLead(code):
+def isLead(code: int) -> bool:
     return (code & _leadTrailMask) == _firstLead
 
-def isTrail(code):
+def isTrail(code: int) -> bool:
     return (code & _leadTrailMask) == _firstTrail
 
-def charFromSurrogates(lead, trail):
+def charFromSurrogates(lead: int, trail: int) -> int:
     return (lead << _leadShift) + trail - _surrogateOffset
 
-def surrogatesFromChar(ch):
+def surrogatesFromChar(ch: int) -> tuple[int, int]:
     lead = (ch >> _leadShift) + _leadOffset
     trail = (ch & _trailMask) + _firstTrail
     return lead, trail
 
-def arithmeticShift(value, bitsInWord, bitsInField):
+def arithmeticShift(value: int, bitsInWord: int, bitsInField: int) -> int:
     """\
     Arithmetic right shifts the top bits in a word.
 
@@ -64,7 +65,7 @@ def arithmeticShift(value, bitsInWord, bitsInField):
 
     return result - (1 << bitsInField) if (value & signBit) != 0 else result
 
-def highBit(value):
+def highBit(value: int) -> typing.Optional[int]:
     """\
     Return the bit number of the highest bit set in a value.
 
@@ -110,6 +111,6 @@ def highBit(value):
 #     arrayLimit = arrayOffset + (itemCount * itemLength)
 #     return struct.unpack(f"{itemCount}{dataFormat}", data[arrayOffset:arrayLimit])
 
-def listOfCodes(codes):
+def listOfCodes(codes: list[int]) -> str:
     codeList = [f"{code:04X}" for code in codes]
     return ", ".join(codeList)

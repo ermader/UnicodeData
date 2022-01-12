@@ -5,10 +5,11 @@ Created on May 14, 2020
 
 @author Eric Mader
 """
+
+import typing
+
 import struct
 from fontTools.misc import sstruct
-
-from .Utilities import _object
 
 UCPTRIE_SIG = 0x54726933  # "Tri3"
 
@@ -106,6 +107,16 @@ UCPTRIE_OPTIONS_VALUE_BITS_MASK = 7
 UCPTRIE_NO_INDEX3_NULL_OFFSET = 0x7fff
 UCPTRIE_NO_DATA_NULL_OFFSET = 0xfffff
 
+class TrieHeader:
+    def __init__(self) -> None:
+        self.sig = 0
+        self.options = 0
+        self.indexLength = 0
+        self.dataLength = 0
+        self.index3NullOffset = 0
+        self.dataNullOffset = 0
+        self.shiftedHighStart = 0
+
 class CPTrie(object):
     _trieHeaderFormat = """
     # "Tri3" in big-endian US-ASCII (0x54726933)
@@ -137,8 +148,8 @@ class CPTrie(object):
     """
     _trieHeaderLength = sstruct.calcsize(_trieHeaderFormat)
 
-    def __init__(self, index, data, type, valueWidth, index3NullOffset, dataNullOffset, highStart, shifted12HighStart):
-        self.type = type
+    def __init__(self, index: typing.Sequence[int], data: typing.Sequence[int], trieType: int, valueWidth: int, index3NullOffset: int, dataNullOffset: int, highStart: int, shifted12HighStart: int):
+        self.trieType = trieType
         self.valueWidth = valueWidth
         self.indexLength = index[0]
         self.dataLength = len(data)
@@ -150,13 +161,14 @@ class CPTrie(object):
         self.data = data
 
     @classmethod
-    def createFromData(cls, trieData):
-        trieHeader = sstruct.unpack(cls._trieHeaderFormat, trieData[:cls._trieHeaderLength], _object())
+    def createFromData(cls, trieData: bytes):
+        th = sstruct.unpack(cls._trieHeaderFormat, trieData[:cls._trieHeaderLength], TrieHeader())
 
-        type = (trieHeader.options >> 6) & 3  # There should be constants for these numbers...
+        trieHeader = typing.cast(TrieHeader, th)
+        trieType = (trieHeader.options >> 6) & 3  # There should be constants for these numbers...
         valueWidth = trieHeader.options & UCPTRIE_OPTIONS_VALUE_BITS_MASK
         indexLength = trieHeader.indexLength
-        dataLength = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_LENGTH_MASK) << 4) |trieHeader.dataLength
+        dataLength = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_LENGTH_MASK) << 4) | trieHeader.dataLength
         index3NullOffset = trieHeader.index3NullOffset
         dataNullOffset = ((trieHeader.options & UCPTRIE_OPTIONS_DATA_NULL_OFFSET_MASK) << 8) | trieHeader.dataNullOffset
         highStart = trieHeader.shiftedHighStart << UCPTRIE_SHIFT_2
@@ -180,15 +192,15 @@ class CPTrie(object):
         dataLimit = dataStart + struct.calcsize(dataFormat)
         data = struct.unpack(dataFormat, trieData[dataStart:dataLimit])
 
-        return CPTrie(index, data, type, valueWidth, index3NullOffset, dataNullOffset, highStart, shifted12HighStart)
+        return CPTrie(index, data, trieType, valueWidth, index3NullOffset, dataNullOffset, highStart, shifted12HighStart)
 
-    def fastIndex(self, c):
+    def fastIndex(self, c: int) -> int:
         return self.index[c >> UCPTRIE_FAST_SHIFT] + (c & UCPTRIE_FAST_DATA_MASK)
 
-    def internalSmallIndex(self, c):
+    def internalSmallIndex(self, c: int) -> int:
         i1 = c >> UCPTRIE_SHIFT_1
 
-        if self.type == UCPTRIE_TYPE_FAST:
+        if self.trieType == UCPTRIE_TYPE_FAST:
             i1 += UCPTRIE_BMP_INDEX_LENGTH - UCPTRIE_OMITTED_BMP_INDEX_1_LENGTH
         else:
             i1 += UCPTRIE_SMALL_INDEX_LENGTH
@@ -208,12 +220,12 @@ class CPTrie(object):
 
         return dataBlock + (c & UCPTRIE_SMALL_DATA_MASK)
 
-    def smallIndex(self,c ):
+    def smallIndex(self, c: int) -> int:
         if c >= self.highStart:
             return self.dataLength - UCPTRIE_HIGH_VALUE_NEG_DATA_OFFSET
         return self.internalSmallIndex(c)
 
-    def cpIndex(self, fastMax, c):
+    def cpIndex(self, fastMax: int, c: int) -> int:
         if c <= fastMax:
             return self.fastIndex(c)
 
@@ -222,16 +234,16 @@ class CPTrie(object):
 
         return self.dataLength - UCPTRIE_ERROR_VALUE_NEG_DATA_OFFSET
 
-    def get(self, c):
+    def get(self, c: int) -> int:
         if c <= 0x007F:
             dataIndex = c
         else:
-            fastMax = 0xFFFF if self.type == UCPTRIE_TYPE_FAST else UCPTRIE_SMALL_MAX
+            fastMax = 0xFFFF if self.trieType == UCPTRIE_TYPE_FAST else UCPTRIE_SMALL_MAX
             dataIndex = self.cpIndex(fastMax, c)
 
         return self.data[dataIndex]
 
-    def enumerator(self, start=0, limit=0x110000):
+    def enumerator(self, start: int = 0, limit: int = 0x110000) -> typing.Iterator[tuple[range, typing.Any]]:
         if start >= 0x110000 or start >= self.highStart:
             return
 
@@ -243,15 +255,15 @@ class CPTrie(object):
 
         c = start
         while c < limit and c < self.highStart:
-            if c <= 0xFFFF and (self.type == UCPTRIE_TYPE_FAST or c <= UCPTRIE_SMALL_MAX):
+            if c <= 0xFFFF and (self.trieType == UCPTRIE_TYPE_FAST or c <= UCPTRIE_SMALL_MAX):
                 i3Block = 0
                 i3Start = c >> UCPTRIE_FAST_SHIFT
-                i3BlockLength = UCPTRIE_BMP_INDEX_LENGTH if self.type == UCPTRIE_TYPE_FAST else UCPTRIE_SMALL_INDEX_LENGTH
+                # i3BlockLength = UCPTRIE_BMP_INDEX_LENGTH if self.trieType == UCPTRIE_TYPE_FAST else UCPTRIE_SMALL_INDEX_LENGTH
                 dataBlockLength = UCPTRIE_FAST_DATA_BLOCK_LENGTH
             else:
                 # use the multi-stage index
                 i1 = c >> UCPTRIE_SHIFT_1
-                if self.type == UCPTRIE_TYPE_FAST:
+                if self.trieType == UCPTRIE_TYPE_FAST:
                     assert 0xFFFF < c and c < self.highStart
                     i1 += UCPTRIE_BMP_INDEX_LENGTH - UCPTRIE_OMITTED_BMP_INDEX_1_LENGTH
                 else:
@@ -278,7 +290,7 @@ class CPTrie(object):
                     continue
 
                 i3Start = (c >> UCPTRIE_SHIFT_3) & UCPTRIE_INDEX_3_MASK
-                i3BlockLength = UCPTRIE_INDEX_3_BLOCK_LENGTH
+                # i3BlockLength = UCPTRIE_INDEX_3_BLOCK_LENGTH
                 dataBlockLength = UCPTRIE_SMALL_DATA_BLOCK_LENGTH
 
             # Enumerate data blocks for one index-3 block.

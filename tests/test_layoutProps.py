@@ -11,10 +11,10 @@ import EnumeratorTests
 from UnicodeData import LayoutTypes
 from UnicodeData.LayoutProps import getInPC, getInSC, inpcTrie, inscTrie
 
-def inPCEnumTest(start, limit):
+def inPCEnumTest(start: int, limit: int):
     EnumeratorTests.testEnum( inpcTrie.enumerator, start=start, limit=limit, expectedFunction=getInPC, valueMapper=lambda v: LayoutTypes.inpcNames[v])
 
-def inSCEnumTest(start, limit):
+def inSCEnumTest(start: int, limit:int):
     EnumeratorTests.testEnum( inscTrie.enumerator, start=start, limit=limit, expectedFunction=getInSC, valueMapper=lambda v: LayoutTypes.inscNames[v])
 
 inPCTests = [
@@ -32,7 +32,7 @@ inPCTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedValue", inPCTests)
-def test_getInPC(char, expectedValue):
+def test_getInPC(char: str, expectedValue: str):
     assert LayoutTypes.inpcNames[getInPC(ord(char))] == expectedValue
 
 inSCTests = [
@@ -54,7 +54,7 @@ inSCTests = [
 ]
 
 @pytest.mark.parametrize("char, expectedValue", inSCTests)
-def test_getInSC(char, expectedValue):
+def test_getInSC(char: str, expectedValue: str):
     assert LayoutTypes.inscNames[getInSC(ord(char))] == expectedValue
 
 def test_inPCEnumeration():

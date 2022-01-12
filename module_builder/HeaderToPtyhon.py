@@ -6,6 +6,8 @@ Created on May 6, 2021
 @author Eric Mader
 """
 
+import typing
+
 from datetime import datetime
 import os
 import re
@@ -20,7 +22,7 @@ endOfEnumRE = re.compile(r"\}\s*\w*\s*;")  # } name ;  with optional name
 enumEntryRE = re.compile(r"(\w+)(?:\s*=\s*([^,]+))?(?:,|\s)?")  # id = value,  with optional value and comma
 
 class HeaderFile(object):
-    def __init__(self, icuDirectory, cSourcePath, outDirectory, extraCode=[], ignore=[]):
+    def __init__(self, icuDirectory: Path, cSourcePath: str, outDirectory: Path, extraCode: list[str] = [], ignore: list[str] = []):
         sourcePath = icuDirectory / cSourcePath
         os.makedirs(outDirectory, exist_ok=True)
         self.sourceFile = open(sourcePath)
@@ -47,12 +49,12 @@ class HeaderFile(object):
         self.guardMatch = re.compile(r"\#ifndef\s+(?:__)?" + headerName.upper() + r"(?:__)?\s*$")
 
     @classmethod
-    def firstToken(cls, line):
+    def firstToken(cls, line: str) -> str:
         return firstTokenRE.findall(line)[0]
 
     @classmethod
-    def getTrailingComment(cls, line):
-        comment = None
+    def getTrailingComment(cls, line: str) -> tuple[str, str]:
+        comment = ""
         if (m := cCommentRE.search(line)) or (m := eolCommentRE.search(line)):
             comment = line[m.start(1):m.end(1)]
             line = line[:m.start()].strip()
@@ -63,6 +65,7 @@ class HeaderFile(object):
         inComment = False
         inConditional = False
         inMacro = False
+        macroLine = ""
         while (line := self.sourceFile.readline()):
             line = line.strip()
             if not line: continue  # skip over empty lines
@@ -125,8 +128,8 @@ class HeaderFile(object):
                         self.outputLines.append(f"{name} = {value}")
             elif token == "enum" or (token == "typedef" and typedefEnumRE.fullmatch(line)):
                 nextValue = 0
-                variables = {}
-                prevName = None
+                variables: dict[str, typing.Any] = {}
+                _prevName = None
                 while (elc := self.nextLine()):
                     eline, comment = elc
                     if eline.startswith("{"): continue
@@ -146,7 +149,7 @@ class HeaderFile(object):
                     variables[name] = intValue
                     nextValue = intValue + 1
 
-                    prevName = name
+                    _prevName = name
 
     def writeFile(self):
         contents = "\n".join(self.outputLines)

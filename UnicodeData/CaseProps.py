@@ -117,28 +117,28 @@ flagsOffset = [
     4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
 ]
 
-def getDeltaFromProps(props):
+def getDeltaFromProps(props: int) -> int:
     return arithmeticShift(props, UCASE_PROPS_BITS, UCASE_DELTA_BITS)
 
-def getTypeFromProps(props):
+def getTypeFromProps(props: int) -> int:
     return props & UCASE_TYPE_MASK
 
-def getTypeAndIgnorableFromProps(props):
+def getTypeAndIgnorableFromProps(props: int) -> int:
     return props & (UCASE_TYPE_MASK | UCASE_IGNORABLE)
 
-def isUpperOrTitle(props):
+def isUpperOrTitle(props: int) -> bool:
     return (props & (UCASE_UPPER & UCASE_TITLE)) != 0
 
-def hasException(props):
+def hasException(props: int) -> bool:
     return (props & UCASE_EXCEPTION) != 0
 
-def hasSlot(flags, index):
+def hasSlot(flags: int, index: int) -> bool:
     return (flags & (1 << index)) != 0
 
-def slotOffset(flags, index):
+def slotOffset(flags: int, index: int) -> int:
     return flagsOffset[flags & ((1 << index) - 1)]
 
-def getSlotValue(excWord, index, exceptionIndex):
+def getSlotValue(excWord: int, index: int, exceptionIndex: int) -> tuple[int, int]:
     slot_offset = slotOffset(excWord, index)
     if (excWord & UCASE_EXC_DOUBLE_SLOTS) == 0:
         exceptionIndex += slot_offset
@@ -147,7 +147,7 @@ def getSlotValue(excWord, index, exceptionIndex):
     exceptionIndex += 2 * slot_offset
     return ((ucase_props_exceptions[exceptionIndex]) << 16 | ucase_props_exceptions[exceptionIndex+1], (2 * slot_offset) + 1)
 
-def toLower(c):
+def toLower(c: int) -> int:
     props = casePropsTrie.get(c)
 
     if not hasException(props):
@@ -167,7 +167,7 @@ def toLower(c):
 
     return c
 
-def toUpper(c):
+def toUpper(c: int) -> int:
     props = casePropsTrie.get(c)
 
     if not hasException(props):
@@ -186,7 +186,7 @@ def toUpper(c):
 
     return c
 
-def toTitle(c):
+def toTitle(c: int) -> int:
     props = casePropsTrie.get(c)
 
     if not hasException(props):
@@ -207,7 +207,7 @@ def toTitle(c):
     return c
 
 # locale?
-def toFullLower(c):
+def toFullLower(c: int) -> str:
     result = chr(c)
     props = casePropsTrie.get(c)
 
@@ -228,7 +228,7 @@ def toFullLower(c):
             (full, offset) = getSlotValue(excWord, UCASE_EXC_FULL_MAPPINGS, exceptionIndex)
             full &= UCASE_FULL_LOWER
             if full != 0:
-                chars = []
+                chars: list[str] = []
                 exceptionIndex += offset + 1
                 for i in range(full):
                     chars.append(chr(ucase_props_exceptions[exceptionIndex + i]))
@@ -246,7 +246,7 @@ def toFullLower(c):
     return result
 
 # locale?
-def toUpperOrTitle(c, upperNotTitle):
+def toUpperOrTitle(c: int, upperNotTitle: bool) -> str:
     result = chr(c)
     props = casePropsTrie.get(c)
 
@@ -282,7 +282,7 @@ def toUpperOrTitle(c, upperNotTitle):
                 full = (full >> 4) & 0xF
 
             if full != 0:
-                chars = []
+                chars: list[str] = []
                 for i in range(full):
                     chars.append(chr(ucase_props_exceptions[exceptionIndex + i]))
 
@@ -304,10 +304,10 @@ def toUpperOrTitle(c, upperNotTitle):
 
     return result
 
-def toFullUpper(c):
+def toFullUpper(c: int) -> str:
     return toUpperOrTitle(c, True)
 
-def toFullTitle(c):
+def toFullTitle(c: int) -> str:
     return toUpperOrTitle(c, False)
 
 casePropsTrie = UTrie2(ucase_props_trieIndex, ucase_props_trie_index_length, ucase_props_trie_index_2_null_offset, \

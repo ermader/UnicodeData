@@ -6,7 +6,12 @@ A simplified version of the UnicodeSet class from ICU.
 @author: emader
 '''
 
-from .Utilities import listOfCodes
+from __future__ import annotations
+
+
+import typing
+
+# from .Utilities import listOfCodes
 
 UNICODE_SET_HIGH = 0x0110000
 """A value greater than all Unicode code points."""
@@ -15,7 +20,7 @@ UNICODE_SET_LOW = 0x0000000
 """The lowest valid Unicode code point."""
 
 
-def _pinCodePoint(cp):
+def _pinCodePoint(cp: int) -> int:
     """\
     Modify the given code point so that it is in the range [UNICODE_SET_LOW - UNICODE_SET_HIGH].
     Values less that UNICODE_SET_LOW will be set to UNICODE_SET_LOW and values greater than
@@ -32,7 +37,7 @@ def _pinCodePoint(cp):
     return cp
 
 
-class UnicodeSet:
+class UnicodeSet(object):
     """\
     A mutable set of Unicode characters.
 
@@ -55,7 +60,7 @@ class UnicodeSet:
     range [UNICODE_SET_LOW - UNICODE_SET_HIGH].
     """
 
-    def _findCodePoint(self, cp):
+    def _findCodePoint(self, cp: int) -> int:
         """\
         Returns the smallest value i such that cp < self.list[i]. Caller
         must insure that cp is a legal value or this function will enter
@@ -68,8 +73,8 @@ class UnicodeSet:
             return 0
 
         length = len(self.list)
-        lo = 0
-        hi = length - 1
+        lo: int = 0
+        hi: int = length - 1
 
         # High runner test. cp is often after the last range
         # so this test pays off
@@ -92,7 +97,7 @@ class UnicodeSet:
 
         return hi
 
-    def _retainList(self, other, polarity = 0):
+    def _retainList(self, other:list[int], polarity: int = 0):
         """\
         Intersect with the list other, as controlled by polarity.
 
@@ -105,10 +110,10 @@ class UnicodeSet:
         :param polarity: the type of intersection, as described above. (default is 0)
         :return: self, to support chaining.
         """
-        if other is None or len(other) == 0:
-            return
+        # if other is None or len(other) == 0:
+        #     return
 
-        buffer = []
+        buffer: list[int] = []
 
         # C++ code has:
         # int32_t i = 0, j = 0, k = 0
@@ -206,7 +211,7 @@ class UnicodeSet:
         self.list = buffer
         return self
 
-    def _addList(self, other, polarity = 0):
+    def _addList(self, other: list[int], polarity: int = 0):
         """\n
         Union the set with the list other, as controlled by polarity.
 
@@ -219,10 +224,10 @@ class UnicodeSet:
         :param polarity: the type of union, as described above. (default is 0)
         :return: self, to support chaining.
         """
-        if other is None or len(other) == 0:
-            return
+        # if other is None or len(other) == 0:
+        #     return
 
-        buffer = []
+        buffer: list[int] = []
 
         # C++ code has:
         # int32_t i = 0, j = 0, k = 0
@@ -331,7 +336,7 @@ class UnicodeSet:
         self.list = buffer
         return self
 
-    def _exclusiveOrList(self, other, polarity = 0):
+    def _exclusiveOrList(self, other: list[int], polarity: int = 0):
         """\
         Xor the set with the list other, as controlled by polarity.
 
@@ -342,10 +347,10 @@ class UnicodeSet:
         :param polarity: the type of xor, as described above. (default is 0)
         :return: self, to support chaining.
         """
-        if other is None or len(other) == 0:
-            return
+        # if other is None or len(other) == 0:
+        #     return
 
-        buffer = []
+        buffer: list[int] = []
 
         # C++ code has:
         # int32_t i = 0, j = 0, k = 0
@@ -385,7 +390,7 @@ class UnicodeSet:
         self.list = buffer
         return self
 
-    def add(self, cp):
+    def add(self, cp: int):
         """\n
         Add the given code point to this set.
 
@@ -413,7 +418,7 @@ class UnicodeSet:
 
         return self
 
-    def addRange(self, start, end):
+    def addRange(self, start: int, end: int):
         """\
         Add the code points in the range start - end inclusive to this set.
 
@@ -450,7 +455,7 @@ class UnicodeSet:
 
         return self
 
-    def addAll(self, other):
+    def addAll(self, other: UnicodeSet):
         """\n
         Add the code points in the set other to this set.
 
@@ -459,7 +464,7 @@ class UnicodeSet:
         """
         return self._addList(other.list)
 
-    def removeRange(self, start, end):
+    def removeRange(self, start: int, end: int):
         """\n
         Remove the code points in the range start - end inclusive from this set.
 
@@ -473,7 +478,7 @@ class UnicodeSet:
 
         return self
 
-    def remove(self, cp):
+    def remove(self, cp: int) -> UnicodeSet:
         """\n
         Remove the given code point from this set.
 
@@ -482,7 +487,7 @@ class UnicodeSet:
         """
         return self.removeRange(cp, cp)
 
-    def removeAll(self, other):
+    def removeAll(self, other: UnicodeSet) -> UnicodeSet:
         """\n
         Remove all the code points in the set other from this set.
 
@@ -491,7 +496,7 @@ class UnicodeSet:
         """
         return self._retainList(other.list, 2) # polarity == 2 means set minus
 
-    def retainRange(self, start, end):
+    def retainRange(self, start: int, end: int):
         """\n
         Interset the code points in the range start - end inclusive with this set.
 
@@ -505,7 +510,7 @@ class UnicodeSet:
 
         return self
 
-    def retain(self, cp):
+    def retain(self, cp: int):
         """\n
         Intersect the given code point with this set.
 
@@ -514,7 +519,7 @@ class UnicodeSet:
         """
         return self.retainRange(cp, cp)
 
-    def retainAll(self, other):
+    def retainAll(self, other: UnicodeSet):
         """\n
         Interset the given set with this set.
 
@@ -523,7 +528,7 @@ class UnicodeSet:
         """
         return self._retainList(other.list, 0) # polarity == 0 means intersect
 
-    def complementRange(self, start, end):
+    def complementRange(self, start: int, end: int):
         """\n
         Complements the specified range of code points in this set. Any
         code point in the range will be removed if it is in the set, or will
@@ -540,7 +545,7 @@ class UnicodeSet:
 
         return self
 
-    def complement(self, arg = None):
+    def complement(self, arg: typing.Union[int, range, None] = None):
         """\n
         Complement this set, based on the type of arg.
 
@@ -556,16 +561,16 @@ class UnicodeSet:
                 self.list = self.list[1:]
             else:
                 self.list[0:0] = [UNICODE_SET_LOW]
-        elif type(arg) == type(0):
+        elif type(arg) is int:
             self.complementRange(arg, arg)
-        elif type(arg) == type(range(0)):
+        elif type(arg) is range:
             self.complementRange(arg.start, arg.stop - 1)
         else:
             raise(TypeError("Argument type must be int or range."))
 
         return self
 
-    def complementAll(self, other):
+    def complementAll(self, other: UnicodeSet):
         """\n
         Complement all the code points in the set other in this set.
 
@@ -579,7 +584,7 @@ class UnicodeSet:
         self.list = [UNICODE_SET_HIGH]
         return self
 
-    def contains(self, arg):
+    def contains(self, arg: typing.Union[int, range]):
         """\n
         Check if this set contains the code points specified by arg.
 
@@ -589,10 +594,10 @@ class UnicodeSet:
         :param arg: the code point, or range of code points, as described above.
         :return: True if the set contans the code point(s), False otherwise.
         """
-        if type(arg) == type(0): # i.e. int
+        if type(arg) is int:
             i = self._findCodePoint(arg)
             return (i & 1) != 0
-        elif type(arg) == type(range(0)):
+        elif type(arg) is range:
             start = arg.start
             end = arg.stop - 1
             i = self._findCodePoint(start)
@@ -601,7 +606,7 @@ class UnicodeSet:
             raise(TypeError("Argument type must be int or range."))
 
     # these match operations for Python's set type.
-    def union(self, other):
+    def union(self, other: UnicodeSet):
         """\n
         Return the union of this set and other.
 
@@ -611,7 +616,7 @@ class UnicodeSet:
         result = UnicodeSet(self)
         return result.addAll(other)
 
-    def intersection(self, other):
+    def intersection(self, other: UnicodeSet):
         """\n
         Return the intersection of this set and other.
 
@@ -621,7 +626,7 @@ class UnicodeSet:
         result = UnicodeSet(self)
         return result.retainAll(other)
 
-    def difference(self, other):
+    def difference(self, other: UnicodeSet):
         """\n
         Return the difference of this set and other.
 
@@ -631,7 +636,7 @@ class UnicodeSet:
         result = UnicodeSet(self)
         return result.removeAll(other)
 
-    def symmetric_difference(self, other):
+    def symmetric_difference(self, other: UnicodeSet):
         """\n
         Return the xor of this set and other.
 
@@ -641,45 +646,47 @@ class UnicodeSet:
         result = UnicodeSet(self)
         return result.complementAll(other)
 
-    def __eq__(self, other):
-        return self.list == other.list
+    def __eq__(self, other: object):
+        otherSet = typing.cast(UnicodeSet, other)
+        return self.list == otherSet.list
 
-    def __ne__(self, other):
+    def __ne__(self, other: object):
         return not self == other
 
-    def __or__(self, other):
+    def __or__(self, other: UnicodeSet):
         """Operator overload: | is union."""
         return self.union(other)
 
-    def __and__(self, other):
+    def __and__(self, other: UnicodeSet):
         """Operator overload: & is intersection."""
         return self.intersection(other)
 
-    def __sub__(self, other):
+    def __sub__(self, other: UnicodeSet):
         """Operator overload: - is set difference."""
         return self.difference(other)
 
-    def __xor__(self, other):
+    def __xor__(self, other: UnicodeSet):
         """Operator overload: ^ is set xor."""
         return self.symmetric_difference(other)
 
-    def __isub__(self, other):
+    def __isub__(self, other: UnicodeSet) -> UnicodeSet:
         return self.removeAll(other)
 
-    def __iand__(self, other):
+    def __iand__(self, other: UnicodeSet):
         return self.retainAll(other)
 
-    def __ior__(self, other):
+    def __ior__(self, other: UnicodeSet):
         return self.addAll(other)
 
-    def __ixor__(self, other):
+    def __ixor__(self, other: UnicodeSet):
         return self.complementAll(other)
 
-    def __contains__(self, arg):
+    def __contains__(self, arg: typing.Union[int, range]):
         """Operator overload: in is contains."""
         return self.contains(arg)
 
-    def __init__(self, arg = None):
+    # T = typing.TypeVar("T", 'UnicodeSet', int, range)
+    def __init__(self, arg: typing.Union[range, int, UnicodeSet, None] = None):
         """/
         Initialize a set, based on the type of arg:\n
         arg == None: make an empty set\n
@@ -690,12 +697,12 @@ class UnicodeSet:
         :param arg: the argument (default = None)
         """
         if arg is None:
-            self.list = [UNICODE_SET_HIGH]
-        elif type(arg) == type(self):
+            self.list: list[int] = [UNICODE_SET_HIGH]
+        elif type(arg) is UnicodeSet:
             self.list = arg.list.copy()
-        elif type(arg) == type(0):
+        elif type(arg) is int:
             self.list = [arg, arg + 1, UNICODE_SET_HIGH]
-        elif type(arg) == type(range(0)):
+        elif type(arg) is range:
             self.list = [arg.start, arg.stop, UNICODE_SET_HIGH]
         else:
             raise(TypeError("Argument type must be UnicodeSet, int or range."))
@@ -711,11 +718,11 @@ class UnicodeSet:
 
         return s
 
-    def getRangeCount(self):
+    def getRangeCount(self) -> int:
         """Return the number of code point ranges in this set."""
         return len(self.list) // 2
 
-    def getRangeStart(self, index):
+    def getRangeStart(self, index: int) -> int:
         """\n
         Get the starting code point of the given range.
 
@@ -724,7 +731,7 @@ class UnicodeSet:
         """
         return self.list[index * 2]
 
-    def getRangeEnd(self, index):
+    def getRangeEnd(self, index: int) -> int:
         """\n
         Get the ending code point of the given range.
 
@@ -733,7 +740,7 @@ class UnicodeSet:
         """
         return self.list[index * 2 + 1] - 1
 
-    def indexOf(self, cp):
+    def indexOf(self, cp: int) -> typing.Optional[int]:
         """\
         Return the index of the given code point within the set,
         where the set is ordered by ascending code point.
@@ -764,7 +771,7 @@ class UnicodeSet:
 
         return None
 
-    def charAt(self, index):
+    def charAt(self, index: int) -> typing.Optional[int]:
         """\
         Return the code point at the given index within the set,
         where the set is ordered by ascending code point.
@@ -785,10 +792,10 @@ class UnicodeSet:
 
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the code point list as a string."""
 
-        pieces = []
+        pieces: list[str] = []
 
         for cp in self.list:
             pieces.append(f"0x{cp:04X}")
@@ -803,7 +810,7 @@ class UnicodeSet:
 
     def getRanges(self):
         """Return the list of code point ranges in the set."""
-        ranges = []
+        ranges: list[range] = []
         for i in range(0, len(self.list) - 1, 2):
             ranges.append(range(self.list[i], self.list[i+1]))
 

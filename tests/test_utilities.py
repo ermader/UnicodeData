@@ -34,7 +34,7 @@ highBitTests = [
 ]
 
 @pytest.mark.parametrize("value, expectedHighBit", highBitTests)
-def test_highBit(value, expectedHighBit):
+def test_highBit(value: int, expectedHighBit: int):
     assert highBit(value) == expectedHighBit
 
 surrogateTests = [
@@ -45,10 +45,10 @@ surrogateTests = [
 ]
 
 @pytest.mark.parametrize("lead, trail, char", surrogateTests)
-def test_charFromSurrogates(lead, trail, char):
+def test_charFromSurrogates(lead: int, trail: int, char: int):
     assert charFromSurrogates(lead, trail) == char
 
 
 @pytest.mark.parametrize("lead, trail, char", surrogateTests)
-def test_surrogatesFromChar(lead, trail, char):
+def test_surrogatesFromChar(lead: int, trail: int, char: int):
     assert surrogatesFromChar(char) == (lead, trail)
