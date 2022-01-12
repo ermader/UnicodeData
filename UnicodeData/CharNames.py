@@ -81,8 +81,8 @@ GROUP_LENGTH = 3
 
 CP_SEMICOLON = ord(';')
 
-class NameDataHeader:
-    __slots__ = ["tokenStringOffset", "groupsOffset", "groupStringOffset", "algNamesOffset"]
+class NameDataHeader(object):
+    # __slots__ = ["tokenStringOffset", "groupsOffset", "groupStringOffset", "algNamesOffset"]
 
     def __init__(self) -> None:
         self.tokenStringOffset = 0
@@ -93,8 +93,8 @@ class NameDataHeader:
 _nameDataHeaderFormat = "tokenStringOffset: I; groupsOffset: I; groupStringOffset: I; algNamesOffset: I"
 _nameDataHeaderLength = sstruct.calcsize(_nameDataHeaderFormat)
 
-class AlgRange:
-    __slots__ = ["start", "end", "type", "variant", "size"]
+class AlgRange(object):
+    # __slots__ = ["start", "end", "type", "variant", "size"]
 
     def __init__(self) -> None:
         self.start = 0
@@ -168,8 +168,8 @@ class Group(object):
     _groupFormat = "msb: H; offsetHigh: H; offsetLow: H"
     _groupLength = sstruct.calcsize(_groupFormat)
 
-    class _GroupObject:
-        __slots__ = ["msb", "offsetHigh", "offsetLow"]
+    class _GroupObject(object):
+        # __slots__ = ["msb", "offsetHigh", "offsetLow"]
 
         def __init__(self) -> None:
             self.msb = 0
@@ -373,7 +373,7 @@ class CharNames(object):
         namesDataHeaderStart = baseOffset
         namesDataHeaderLimit = namesDataHeaderStart + _nameDataHeaderLength
         namesDataHeaderData = cls._icuData.getData(namesDataHeaderStart, namesDataHeaderLimit)
-        ndh = sstruct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength], NameDataHeader)
+        ndh = sstruct.unpack(_nameDataHeaderFormat, namesDataHeaderData[:_nameDataHeaderLength], NameDataHeader())
         nameDataHeader = typing.cast(NameDataHeader, ndh)
 
         tokensStart = namesDataHeaderLimit
