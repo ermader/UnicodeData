@@ -11,8 +11,8 @@
         "-p",
         "test_*.py"
     ],
-    "python.analysis.stubPath": "/Users/emader/VSCode/TypeStubs/typings",
+    "python.analysis.stubPath": "${env:HOME}/VSCode/TypeStubs/typings",
     "terminal.integrated.env.osx": {
-        "PYTHONPATH": "/Users/emader/VSCode/UnicodeData"
+        "PYTHONPATH": "${env:HOME}/VSCode/UnicodeData"
     }
 }
