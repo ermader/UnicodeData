@@ -1,8 +1,8 @@
 # UnicodeData
-This package is a Pytyon port of some parts of the [ICU library](http://site.icu-project.org). It provides
+This package is a Python port of some parts of the [ICU library](http://site.icu-project.org). It provides
 a basic `UnicodeSet` class, getting character properties and normalization.
 
-This package includes data extracted from ICU sourcd files, and a copy of the ICU data file.
+This package includes data extracted from ICU source files, and a copy of the ICU data file.
 
 ### Licenses and copyrights
 This package is Copyright © 2020-2021 By Eric Mader. All rights reserved. It is released under [THE MIT LICENSE](https://opensource.org/licenses/MIT).
