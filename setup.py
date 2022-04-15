@@ -5,7 +5,7 @@ with open("README.md", "r") as file:
 
 setup(
     name="UnicodeData",
-    version="0.1",
+    version="0.2",
     packages=find_packages(),
     package_data={
         "":  ["Data/*.dat"],
